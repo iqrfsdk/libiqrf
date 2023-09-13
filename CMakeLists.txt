@@ -1,0 +1,26 @@
+cmake_minimum_required(VERSION 3.26)
+
+project(libiqrf VERSION 0.0.1 DESCRIPTION "IQRF C/C++ library" LANGUAGES C CXX)
+
+include(GNUInstallDirs)
+
+set(CMAKE_C_STANDARD 11)
+set(CMAKE_C_EXTENSIONS OFF)
+
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_EXTENSIONS OFF)
+
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
+
+include(${CMAKE_CURRENT_LIST_DIR}/cmake/ccache.cmake)
+include(${CMAKE_CURRENT_LIST_DIR}/cmake/hardening.cmake)
+
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_LIST_DIR}/cmake" CACHE STRING "Modules for CMake" FORCE)
+
+set_property(GLOBAL PROPERTY USE_FOLDERS ON)
+
+option(BUILD_STATIC "Build static library" OFF)
+
+add_subdirectory(src)

@@ -1,0 +1,52 @@
+Source: libiqrf
+Section: libs
+Priority: optional
+Maintainer: Roman Ondráček <roman.ondracek@iqrf.com>
+Build-Depends: debhelper (>= 12), debhelper-compat (= 12), cmake (>= 3.0),
+ libgtest-dev
+Standards-Version: 4.5.1
+Homepage: https://gitlab.iqrf.org/open-source/iqrf-sdk/libiqrf
+Vcs-Git: https://gitlab.iqrf.org/open-source/iqrf-sdk/libiqrf.git
+Vcs-Browser: https://gitlab.iqrf.org/open-source/iqrf-sdk/libiqrf
+
+Package: libiqrf-dev
+Section: libdevel
+Architecture: any
+Multi-Arch: same
+Depends:
+ libiqrf-common-dev (= ${binary:Version}),
+ libiqrf-gpio-dev (= ${binary:Version}),
+ libiqrf-log-dev (= ${binary:Version}),
+Description: IQRF C/C++ libraries - development files
+ IQRF libraries for C and C++.
+
+Package: libiqrf-common-dev
+Section: libdevel
+Architecture: any
+Multi-Arch: same
+Depends: ${misc:Depends}
+Description: IQRF C/C++ common library - development files
+ IQRF common library for C and C++.
+
+Package: libiqrf-log-dev
+Section: libdevel
+Architecture: any
+Multi-Arch: same
+Depends: ${misc:Depends}
+Description: IQRF C/C++ logging library - development files
+ IQRF logging library for C and C++.
+
+Package: libiqrf-gpio-dev
+Section: libdevel
+Architecture: any
+Multi-Arch: same
+Depends: libiqrf-gpio0.0 (= ${binary:Version}), ${misc:Depends}
+Description: IQRF C/C++ GPIO library - development files
+ IQRF GPIO library for C and C++.
+
+Package: libiqrf-gpio0.0
+Architecture: any
+Multi-Arch: same
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Description: IQRF C/C++ GPIO library - shared libraries
+ IQRF GPIO library for C and C++.

@@ -1,4 +1,4 @@
-set(LIB_NAME common)
+set(LIB_NAME log)
 file(GLOB LIB_HEADERS "${libiqrf_SOURCE_DIR}/include/${LIB_NAME}/*.h" "${libiqrf_SOURCE_DIR}/include/${LIB_NAME}/*.hpp")
 file(GLOB LIB_SOURCES "*.c" "*.cpp")
 

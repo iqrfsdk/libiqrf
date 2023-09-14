@@ -1,9 +1,13 @@
 #pragma once
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include <gpiod.h>
 
-#include "iqrf/debug/iqrf_debug.h"
 #include "iqrf/gpio/iqrf_gpio_common.h"
+#include "iqrf/log/iqrf_log.h"
 
 /**
  * Initializes the GPIO pin
@@ -12,4 +16,8 @@
  * @param initialValue Output pin initial value
  * @return Execution status
  */
-iqrf_gpio_error_t iqrf_gpio_libgpiod_init(iqrf_gpio_t *gpio, iqrf_gpio_direction_t direction, bool initialValue);
+iqrf_gpio_error_t iqrf_gpio_libgpiod_init(const iqrf_gpio_t *gpio, iqrf_gpio_direction_t direction, bool initialValue);
+
+#ifdef __cplusplus
+}
+#endif

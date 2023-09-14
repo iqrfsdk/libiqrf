@@ -1,0 +1,7 @@
+libiqrf (0.0.1~1.gbp8645e5) stable; urgency=medium
+
+  ** SNAPSHOT build @8645e5fe7372e32361e13b1743e7bc27ef8076be **
+
+  * Initial commit
+
+ -- Roman Ondráček <mail@romanondracek.cz>  Thu, 14 Sep 2023 22:16:21 +0200

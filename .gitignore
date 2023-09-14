@@ -1,0 +1,5 @@
+# CLion IDE
+.idea/
+cmake-build-debug/
+# Compiled Object files, Static and Dynamic libs (Shared Objects)
+build/

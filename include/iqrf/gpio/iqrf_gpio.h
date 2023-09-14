@@ -1,5 +1,9 @@
 #pragma once
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include <errno.h>
 #include <inttypes.h>
 #include <stdbool.h>
@@ -8,7 +12,7 @@
 #include <string.h>
 
 #include "iqrf/common/iqrf_sleep.h"
-#include "iqrf/debug/iqrf_debug.h"
+#include "iqrf/log/iqrf_log.h"
 
 #include "iqrf/gpio/iqrf_gpio_common.h"
 #include "iqrf/gpio/iqrf_gpio_libgpiod.h"
@@ -21,14 +25,21 @@
  * @param initialValue Output pin initial value
  * @return Execution status
  */
-iqrf_gpio_error_t iqrf_gpio_init(iqrf_gpio_t *gpio, iqrf_gpio_direction_t direction, bool initialValue);
+iqrf_gpio_error_t iqrf_gpio_init(const iqrf_gpio_t *gpio, iqrf_gpio_direction_t direction, bool initialValue);
+
+/**
+ * Destroys a GPIO pin
+ * @param pin GPIO pin number
+ * @return Execution status
+ */
+iqrf_gpio_error_t iqrf_gpio_destroy(const iqrf_gpio_t *gpio);
 
 /**
  * Initializes the GPIO pin as an input
  * @param gpio GPIO pin to initialize
  * @return Execution status
  */
-iqrf_gpio_error_t iqrf_gpio_init_input(iqrf_gpio_t *gpio);
+iqrf_gpio_error_t iqrf_gpio_init_input(const iqrf_gpio_t *gpio);
 
 /**
  * Initializes the GPIO pin as an output
@@ -36,21 +47,40 @@ iqrf_gpio_error_t iqrf_gpio_init_input(iqrf_gpio_t *gpio);
  * @param initialValue Output pin initial value
  * @return Execution status
  */
-iqrf_gpio_error_t iqrf_gpio_init_output(iqrf_gpio_t *gpio, bool initialValue);
+iqrf_gpio_error_t iqrf_gpio_init_output(const iqrf_gpio_t *gpio, bool initialValue);
 
 /**
- * Returns GPIO pin direction
- * @param gpio GPIO pin
- * @param[out] direction GPIO pin direction
+ * Retrieves the direction for GPIO pin
+ * @param pin GPIO pin
+ * @param direction GPIO pin direction
  * @return Execution status
  */
-iqrf_gpio_error_t iqrf_gpio_get_direction(iqrf_gpio_t *gpio, iqrf_gpio_direction_t *direction);
+iqrf_gpio_error_t iqrf_gpio_get_direction(const iqrf_gpio_t *gpio, iqrf_gpio_direction_t *direction);
 
 /**
- * Sets GPIO pin direction
- * @param gpio GPIO pin
- * @param[in] direction GPIO pin direction to set
+ * Sets the direction for GPIO pin
+ * @param pin GPIO pin
+ * @param direction GPIO pin direction
  * @return Execution status
  */
-iqrf_gpio_error_t iqrf_gpio_set_direction(iqrf_gpio_t *gpio, iqrf_gpio_direction_t direction);
+iqrf_gpio_error_t iqrf_gpio_set_direction(const iqrf_gpio_t *gpio, iqrf_gpio_direction_t direction);
 
+/**
+ * Retrieves the direction for GPIO pin
+ * @param pin GPIO pin
+ * @param value GPIO pin output value
+ * @return Execution status
+ */
+iqrf_gpio_error_t iqrf_gpio_get_value(const iqrf_gpio_t *gpio, bool *value);
+
+/**
+ * Sets the direction for GPIO pin
+ * @param pin GPIO pin
+ * @param value GPIO pin output value
+ * @return Execution status
+ */
+iqrf_gpio_error_t iqrf_gpio_set_value(const iqrf_gpio_t *gpio, bool value);
+
+#ifdef __cplusplus
+}
+#endif

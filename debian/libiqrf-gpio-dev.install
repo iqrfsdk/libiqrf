@@ -1,0 +1,3 @@
+usr/include/iqrf/gpio/
+usr/lib/*/libiqrf_gpio.so
+

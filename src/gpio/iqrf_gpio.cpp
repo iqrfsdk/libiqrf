@@ -40,17 +40,17 @@ namespace iqrf {
 		}
 	}
 
-	iqrf_gpio_direction_t Gpio::getDirection() {
+    iqrf::GpioDirection Gpio::getDirection() {
 		iqrf_gpio_direction_t direction;
 		iqrf_gpio_error_t result = iqrf_gpio_get_direction(this->gpio, &direction);
 		if (result != IQRF_GPIO_ERROR_OK) {
 			throw std::runtime_error("Failed to retrieve GPIO pin direction");
 		}
-		return direction;
+		return static_cast<iqrf::GpioDirection>(direction);
 	}
 
-	void Gpio::setDirection(iqrf_gpio_direction_t direction) {
-		iqrf_gpio_error_t result = iqrf_gpio_set_direction(this->gpio, direction);
+	void Gpio::setDirection(iqrf::GpioDirection direction) {
+		iqrf_gpio_error_t result = iqrf_gpio_set_direction(this->gpio, static_cast<iqrf_gpio_direction_t>(direction));
 		if (result != IQRF_GPIO_ERROR_OK) {
 			throw std::runtime_error("Failed to set GPIO pin direction");
 		}

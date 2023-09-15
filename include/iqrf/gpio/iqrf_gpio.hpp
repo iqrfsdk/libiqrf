@@ -10,6 +10,16 @@
 namespace iqrf {
 
 	/**
+	 * GPIO pin direction
+	 */
+	enum class GpioDirection {
+		/// GPIO pin direction is input
+		Input = iqrf_gpio_direction_t::IQRF_GPIO_DIRECTION_IN,
+		/// GPIO pin direction is output
+		Output = iqrf_gpio_direction_t::IQRF_GPIO_DIRECTION_OUT,
+	};
+
+	/**
 	 * GPIO pin
 	 */
 	class Gpio {
@@ -26,7 +36,7 @@ namespace iqrf {
 		 * @param direction GPIO pin direction
 		 * @param initialValue Initial output value
 		 */
-		explicit Gpio(const int64_t pin);
+		explicit Gpio(int64_t pin);
 
 		/**
 		 * Construct GPIO pin via libgpiod interface
@@ -56,13 +66,13 @@ namespace iqrf {
 		 * Retrieves the direction for GPIO pin
 		 * @return GPIO pin direction
 		 */
-		iqrf_gpio_direction_t getDirection();
+		iqrf::GpioDirection getDirection();
 
 		/**
 		 * Sets the direction for GPIO pin
 		 * @param direction GPIO pin direction
 		 */
-		void setDirection(iqrf_gpio_direction_t direction);
+		void setDirection(iqrf::GpioDirection direction);
 
 		/**
 		 * Retrieves the value of GPIO pin

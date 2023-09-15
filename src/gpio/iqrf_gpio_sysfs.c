@@ -42,12 +42,19 @@ void iqrf_gpio_sysfs_create_path(const iqrf_gpio_t *gpio,  iqrf_gpio_sysfs_actio
 }
 
 iqrf_gpio_error_t iqrf_gpio_sysfs_export(const iqrf_gpio_t *gpio) {
-#ifdef WIN32
-	return IQRF_GPIO_ERROR_OK;
-#else
 	iqrf_gpio_error_t error = iqrf_gpio_sysfs_sanity_check(gpio);
 	if (error != IQRF_GPIO_ERROR_OK) {
 		return error;
+	}
+	IQRF_LOG_PRINTF(IQRF_LOG_LEVEL_DEBUG, "Exporting GPIO pin #%"PRId64" via sysfs", gpio->sysfs.pin);
+#ifdef WIN32
+	return IQRF_GPIO_ERROR_OK;
+#else
+	bool isAlreadyExported;
+	error = iqrf_gpio_sysfs_is_exported(gpio, &isAlreadyExported);
+	if (error == IQRF_GPIO_ERROR_OK && isAlreadyExported) {
+		IQRF_LOG_PRINTF(IQRF_LOG_LEVEL_INFO, "GPIO pin #%"PRId64" is already exported", gpio->sysfs.pin);
+		return IQRF_GPIO_ERROR_OK;
 	}
 	char *path = IQRF_GPIO_SYSFS_BASE_PATH"export";
 	int fd = open(path, O_WRONLY);
@@ -64,17 +71,25 @@ iqrf_gpio_error_t iqrf_gpio_sysfs_export(const iqrf_gpio_t *gpio) {
 		return IQRF_GPIO_ERROR_WRITE_FAILED;
 	}
 	close(fd);
+	IQRF_LOG_PRINTF(IQRF_LOG_LEVEL_INFO, "GPIO pin #%"PRId64" is successfully exported via sysfs", gpio->sysfs.pin);
 	return IQRF_GPIO_ERROR_OK;
 #endif
 }
 
 iqrf_gpio_error_t iqrf_gpio_sysfs_unexport(const iqrf_gpio_t *gpio) {
-#ifdef WIN32
-	return IQRF_GPIO_ERROR_OK;
-#else
 	iqrf_gpio_error_t error = iqrf_gpio_sysfs_sanity_check(gpio);
 	if (error != IQRF_GPIO_ERROR_OK) {
 		return error;
+	}
+	IQRF_LOG_PRINTF(IQRF_LOG_LEVEL_DEBUG, "Unexporting GPIO pin #%"PRId64" via sysfs", gpio->sysfs.pin);
+#ifdef WIN32
+	return IQRF_GPIO_ERROR_OK;
+#else
+	bool isAlreadyExported;
+	error = iqrf_gpio_sysfs_is_exported(gpio, &isAlreadyExported);
+	if (error == IQRF_GPIO_ERROR_OK && !isAlreadyExported) {
+		IQRF_LOG_PRINTF(IQRF_LOG_LEVEL_INFO, "GPIO pin #%"PRId64" is already unexported", gpio->sysfs.pin);
+		return IQRF_GPIO_ERROR_OK;
 	}
 	char *path = IQRF_GPIO_SYSFS_BASE_PATH"unexport";
 	int fd = open(path, O_WRONLY);
@@ -91,22 +106,44 @@ iqrf_gpio_error_t iqrf_gpio_sysfs_unexport(const iqrf_gpio_t *gpio) {
 		return IQRF_GPIO_ERROR_WRITE_FAILED;
 	}
 	close(fd);
+	IQRF_LOG_PRINTF(IQRF_LOG_LEVEL_INFO, "GPIO pin #%"PRId64" is successfully unexported via sysfs", gpio->sysfs.pin);
+	return IQRF_GPIO_ERROR_OK;
+#endif
+}
+
+iqrf_gpio_error_t iqrf_gpio_sysfs_is_exported(const iqrf_gpio_t *gpio, bool *isExported) {
+	iqrf_gpio_error_t error = iqrf_gpio_sysfs_sanity_check(gpio);
+	if (error != IQRF_GPIO_ERROR_OK) {
+		return error;
+	}
+	IQRF_LOG_PRINTF(IQRF_LOG_LEVEL_DEBUG, "Checking if GPIO pin #%"PRId64" is exported via sysfs", gpio->sysfs.pin);
+#ifdef WIN32
+	return IQRF_GPIO_ERROR_OK;
+#else
+	char path[IQRF_GPIO_SYSFS_BUFFER_SIZE] = "";
+	snprintf(path, IQRF_GPIO_SYSFS_BUFFER_SIZE, IQRF_GPIO_SYSFS_BASE_PATH"gpio%"PRId64, gpio->sysfs.pin);
+	if (access(path, F_OK) == 0) {
+		*isExported = true;
+		return IQRF_GPIO_ERROR_OK;
+	}
+	*isExported = false;
 	return IQRF_GPIO_ERROR_OK;
 #endif
 }
 
 iqrf_gpio_error_t iqrf_gpio_sysfs_get_direction(const iqrf_gpio_t *gpio, iqrf_gpio_direction_t *direction) {
-#ifdef WIN32
-	return IQRF_GPIO_ERROR_OK;
-#else
 	iqrf_gpio_error_t error = iqrf_gpio_sysfs_sanity_check(gpio);
 	if (error != IQRF_GPIO_ERROR_OK) {
 		return error;
 	}
+	IQRF_LOG_PRINTF(IQRF_LOG_LEVEL_DEBUG, "Retrieving direction for GPIO pin #%"PRId64" via sysfs", gpio->sysfs.pin);
 	if (direction == NULL) {
 		IQRF_LOG_PRINT(IQRF_LOG_LEVEL_ERROR, "GPIO direction is NULL");
 		return IQRF_GPIO_ERROR_NULL_POINTER;
 	}
+#ifdef WIN32
+	return IQRF_GPIO_ERROR_OK;
+#else
 	char path[IQRF_GPIO_SYSFS_BUFFER_SIZE] = "";
 	iqrf_gpio_sysfs_create_path(gpio, IQRF_GPIO_SYSFS_ACTION_DIRECTION, path);
 	int fd = open(path, O_RDONLY);
@@ -134,13 +171,14 @@ iqrf_gpio_error_t iqrf_gpio_sysfs_get_direction(const iqrf_gpio_t *gpio, iqrf_gp
 }
 
 iqrf_gpio_error_t iqrf_gpio_sysfs_set_direction(const iqrf_gpio_t *gpio, iqrf_gpio_direction_t direction) {
-#ifdef WIN32
-	return IQRF_GPIO_ERROR_OK;
-#else
 	iqrf_gpio_error_t error = iqrf_gpio_sysfs_sanity_check(gpio);
 	if (error != IQRF_GPIO_ERROR_OK) {
 		return error;
 	}
+	IQRF_LOG_PRINTF(IQRF_LOG_LEVEL_DEBUG, "Setting direction for GPIO pin #%"PRId64" via sysfs", gpio->sysfs.pin);
+#ifdef WIN32
+	return IQRF_GPIO_ERROR_OK;
+#else
 	char path[IQRF_GPIO_SYSFS_BUFFER_SIZE] = "";
 	iqrf_gpio_sysfs_create_path(gpio, IQRF_GPIO_SYSFS_ACTION_DIRECTION, path);
 	int fd = open(path, O_WRONLY);
@@ -161,17 +199,18 @@ iqrf_gpio_error_t iqrf_gpio_sysfs_set_direction(const iqrf_gpio_t *gpio, iqrf_gp
 }
 
 iqrf_gpio_error_t iqrf_gpio_sysfs_get_value(const iqrf_gpio_t *gpio, bool *value) {
-#ifdef WIN32
-	return IQRF_GPIO_ERROR_OK;
-#else
 	iqrf_gpio_error_t error = iqrf_gpio_sysfs_sanity_check(gpio);
 	if (error != IQRF_GPIO_ERROR_OK) {
 		return error;
 	}
+	IQRF_LOG_PRINTF(IQRF_LOG_LEVEL_DEBUG, "Retrieving value for GPIO pin #%"PRId64" via sysfs", gpio->sysfs.pin);
 	if (value == NULL) {
 		IQRF_LOG_PRINT(IQRF_LOG_LEVEL_ERROR, "GPIO value is NULL");
 		return IQRF_GPIO_ERROR_NULL_POINTER;
 	}
+#ifdef WIN32
+	return IQRF_GPIO_ERROR_OK;
+#else
 	char path[IQRF_GPIO_SYSFS_BUFFER_SIZE] = "";
 	iqrf_gpio_sysfs_create_path(gpio, IQRF_GPIO_SYSFS_ACTION_VALUE, path);
 	int fd = open(path, O_RDONLY);
@@ -193,13 +232,14 @@ iqrf_gpio_error_t iqrf_gpio_sysfs_get_value(const iqrf_gpio_t *gpio, bool *value
 }
 
 iqrf_gpio_error_t iqrf_gpio_sysfs_set_value(const iqrf_gpio_t *gpio, bool value) {
-#ifdef WIN32
-	return IQRF_GPIO_ERROR_OK;
-#else
 	iqrf_gpio_error_t error = iqrf_gpio_sysfs_sanity_check(gpio);
 	if (error != IQRF_GPIO_ERROR_OK) {
 		return error;
 	}
+	IQRF_LOG_PRINTF(IQRF_LOG_LEVEL_DEBUG, "Setting value for GPIO pin #%"PRId64" via sysfs", gpio->sysfs.pin);
+#ifdef WIN32
+	return IQRF_GPIO_ERROR_OK;
+#else
 	char path[IQRF_GPIO_SYSFS_BUFFER_SIZE] = "";
 	iqrf_gpio_sysfs_create_path(gpio, IQRF_GPIO_SYSFS_ACTION_VALUE, path);
 	int fd = open(path, O_WRONLY);
@@ -220,13 +260,14 @@ iqrf_gpio_error_t iqrf_gpio_sysfs_set_value(const iqrf_gpio_t *gpio, bool value)
 }
 
 iqrf_gpio_error_t iqrf_gpio_sysfs_init(const iqrf_gpio_t *gpio, iqrf_gpio_direction_t direction, bool initialValue) {
-#ifdef WIN32
-	return IQRF_GPIO_ERROR_OK;
-#else
 	iqrf_gpio_error_t error = iqrf_gpio_sysfs_sanity_check(gpio);
 	if (error != IQRF_GPIO_ERROR_OK) {
 		return error;
 	}
+	IQRF_LOG_PRINTF(IQRF_LOG_LEVEL_DEBUG, "Initializing GPIO pin #%"PRId64" via sysfs", gpio->sysfs.pin);
+#ifdef WIN32
+	return IQRF_GPIO_ERROR_OK;
+#else
 	error = iqrf_gpio_sysfs_export(gpio);
 	if (error != IQRF_GPIO_ERROR_OK) {
 		return error;
@@ -259,6 +300,11 @@ iqrf_gpio_error_t iqrf_gpio_sysfs_init(const iqrf_gpio_t *gpio, iqrf_gpio_direct
 }
 
 iqrf_gpio_error_t iqrf_gpio_sysfs_destroy(const iqrf_gpio_t *gpio) {
+	iqrf_gpio_error_t error = iqrf_gpio_sysfs_sanity_check(gpio);
+	if (error != IQRF_GPIO_ERROR_OK) {
+		return error;
+	}
+	IQRF_LOG_PRINTF(IQRF_LOG_LEVEL_DEBUG, "Destroying GPIO pin #%"PRId64" via sysfs", gpio->sysfs.pin);
 #ifdef WIN32
 	return IQRF_GPIO_ERROR_OK;
 #else

@@ -31,12 +31,6 @@ typedef enum iqrf_gpio_sysfs_actions {
 	IQRF_GPIO_SYSFS_ACTION_VALUE,
 } iqrf_gpio_sysfs_action_t;
 
-#define IQRF_GPIO_SYSFS_BASE_PATH "/sys/class/gpio/"
-#define IQRF_GPIO_SYSFS_BUFFER_SIZE 64
-#define IQRF_GPIO_SYSFS_DIRECTION_BUFFER_SIZE 4
-#define IQRF_GPIO_SYSFS_PIN_BUFFER_SIZE 20
-#define IQRF_GPIO_SYSFS_VALUE_BUFFER_SIZE 2
-
 static const int64_t IQRF_GPIO_SYSFS_PIN_UNKNOWN = -1;
 
 /**
@@ -52,6 +46,14 @@ iqrf_gpio_error_t iqrf_gpio_sysfs_export(const iqrf_gpio_t *gpio);
  * @return Execution status
  */
 iqrf_gpio_error_t iqrf_gpio_sysfs_unexport(const iqrf_gpio_t *gpio);
+
+/**
+ * Checks if the GPIO pin is exported
+ * @param gpio GPIO pin to check
+ * @param isExported Is GPIO pin exported
+ * @return Execution status
+ */
+iqrf_gpio_error_t iqrf_gpio_sysfs_is_exported(const iqrf_gpio_t *gpio, bool *isExported);
 
 /**
  * Retrieves the direction for GPIO pin

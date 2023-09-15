@@ -1,1 +1,3 @@
 usr/include/iqrf/log/
+usr/lib/*/libiqrf_log.a
+usr/lib/*/libiqrf_log.so

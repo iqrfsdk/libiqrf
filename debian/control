@@ -28,6 +28,14 @@ Depends: ${misc:Depends}
 Description: IQRF C/C++ common library - development files
  IQRF common library for C and C++.
 
+Package: libiqrf-log0.0
+Section: libdevel
+Architecture: any
+Multi-Arch: same
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Description: IQRF C/C++ logging library - shared libraries
+ IQRF logging library for C and C++.
+
 Package: libiqrf-log-dev
 Section: libdevel
 Architecture: any

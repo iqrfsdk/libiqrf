@@ -3,7 +3,7 @@
 namespace iqrf {
 
 	Gpio::Gpio(const iqrf_gpio_t *gpio) {
-		this->gpio = new iqrf_gpio_t();
+		this->gpio = new iqrf_gpio_t;
 		std::copy(gpio, gpio + sizeof(iqrf_gpio_t), this->gpio);
 	}
 

@@ -35,6 +35,11 @@ include(${libiqrf_SOURCE_DIR}/cmake/hardening.cmake)
 
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
+option(BUILD_EXAMPLES "Build examples" ON)
 option(BUILD_STATIC "Build static library" OFF)
 
 add_subdirectory(src)
+
+if (BUILD_EXAMPLES)
+	add_subdirectory(examples)
+endif()

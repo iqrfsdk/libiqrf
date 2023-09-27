@@ -16,18 +16,25 @@
 
 #pragma once
 
-#ifdef __cplusplus
-extern "C" {
+#include <cstdint>
+
+namespace iqrf::gpio::driver {
+
+	/**
+	 * GPIO driver - base interface
+	 */
+	class Base;
+
+#if defined(LINUX) || defined(__linux__)
+	/**
+	 * GPIO driver configuration - sysfs
+	 */
+	struct SysfsConfig;
+
+	/**
+	 * GPIO driver - sysfs
+	 */
+	class Sysfs;
 #endif
 
-#ifndef WIN32
-#include <unistd.h>
-#define IQRF_SLEEP(ms) usleep(1000*ms)
-#else
-#include "Windows.h"
-#define IQRF_SLEEP(ms) Sleep(ms)
-#endif
-
-#ifdef __cplusplus
 }
-#endif

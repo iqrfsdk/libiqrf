@@ -13,21 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 #pragma once
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+namespace iqrf::gpio {
 
-#ifndef WIN32
-#include <unistd.h>
-#define IQRF_SLEEP(ms) usleep(1000*ms)
-#else
-#include "Windows.h"
-#define IQRF_SLEEP(ms) Sleep(ms)
-#endif
+	enum class GpioDirection;
 
-#ifdef __cplusplus
+	enum class GpioDriver;
+
+	struct GpioConfig;
+
+	class Gpio;
+
 }
-#endif

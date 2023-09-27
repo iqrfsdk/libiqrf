@@ -16,18 +16,29 @@
 
 #pragma once
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+#include "iqrf/gpio/driver/Sysfs.h"
 
-#ifndef WIN32
-#include <unistd.h>
-#define IQRF_SLEEP(ms) usleep(1000*ms)
-#else
-#include "Windows.h"
-#define IQRF_SLEEP(ms) Sleep(ms)
-#endif
+namespace iqrf::gpio {
 
-#ifdef __cplusplus
+	/**
+	 * GPIO pin direction
+	 */
+	enum class GpioDirection {
+		/// Input
+		Input,
+		/// Output
+		Output
+	};
+
+	/**
+	 * GPIO pin driver
+	 */
+	enum class GpioDriver {
+		/// libgpiod driver
+		libgpiod,
+		/// Linux kernel sysfs driver
+		sysfs,
+	};
+
 }
-#endif
+

@@ -109,12 +109,12 @@ static iqrf_log_printf_t iqrf_log_printf = &iqrf_log_printf_default;
  * Log level names
  */
 static const char *iqrf_log_level_names[] = {
-    "FATAL",
-    "ERROR",
-    "WARNING",
-    "INFO",
-    "DEBUG",
-    "TRACE",
+	"FATAL",
+	"ERROR",
+	"WARNING",
+	"INFO",
+	"DEBUG",
+	"TRACE",
 };
 
 #ifdef NDEBUG
@@ -131,21 +131,21 @@ static const char *iqrf_log_level_names[] = {
 
 #ifndef IQRF_LOG_PRINT
 #define IQRF_LOG_PRINT(level, str) do { \
-    if (iqrf_log_print == NULL) { \
-        fprintf(stderr, "Undefined iqrf_log_print function implementation."); \
-        break; \
-    } \
-    iqrf_log_print(level, __FILE__, __LINE__, __func__, str); \
+	if (iqrf_log_print == NULL) { \
+		fprintf(stderr, "Undefined iqrf_log_print function implementation."); \
+		break; \
+	} \
+	iqrf_log_print(level, __FILE__, __LINE__, __func__, str); \
 } while (0)
 #endif
 
 #ifndef IQRF_LOG_PRINTF
 #define IQRF_LOG_PRINTF(level, fmt, ...) do { \
-    if (iqrf_log_printf == NULL) { \
-        fprintf(stderr, "Undefined iqrf_log_printf function implementation."); \
-        break; \
-    } \
-    iqrf_log_printf(level, __FILE__, __LINE__, __func__, fmt, __VA_ARGS__); \
+	if (iqrf_log_printf == NULL) { \
+		fprintf(stderr, "Undefined iqrf_log_printf function implementation."); \
+		break; \
+	} \
+	iqrf_log_printf(level, __FILE__, __LINE__, __func__, fmt, __VA_ARGS__); \
 } while (0)
 #endif
 

@@ -43,6 +43,9 @@ namespace iqrf::gpio::driver {
 				break;
 			case SysfsActions::CheckExport:
 				path << "gpio" << this->config.pin;
+				break;
+			default:
+				throw std::runtime_error("Unknown sysfs action.");
 		}
 		return {path.str()};
 	}
@@ -54,23 +57,31 @@ namespace iqrf::gpio::driver {
 	}
 
 	void Sysfs::initInput() {
+		if (boost::filesystem::exists(this->createSysfsPath(SysfsActions::CheckExport)) &&
+			this->getDirection() != GpioDirection::Input) {
+			throw std::runtime_error("GPIO pin " + std::to_string(this->config.pin) + " is already initialized as output.");
+		}
 		this->exportPin();
 		this->setDirection(GpioDirection::Input);
 	}
 
 	void Sysfs::initOutput(bool initialValue) {
+		if (boost::filesystem::exists(this->createSysfsPath(SysfsActions::CheckExport)) &&
+			this->getDirection() != GpioDirection::Output) {
+			throw std::runtime_error("GPIO pin " + std::to_string(this->config.pin) + " is already initialized as input.");
+		}
 		this->exportPin();
 		this->setDirection(GpioDirection::Output);
 		this->setValue(initialValue);
 	}
 
-    void Sysfs::destroy() {
-        this->unexportPin();
-    }
+	void Sysfs::destroy() {
+		this->unexportPin();
+	}
 
 	void Sysfs::exportPin() {
 		if (boost::filesystem::exists(this->createSysfsPath(SysfsActions::CheckExport))) {
-			throw std::runtime_error("GPIO pin " + std::to_string(this->config.pin) + " is already exported.");
+			return;
 		}
 		boost::filesystem::path path = this->createSysfsPath(SysfsActions::Export);
 		boost::filesystem::ofstream file(path, std::ios::out);
@@ -82,8 +93,10 @@ namespace iqrf::gpio::driver {
 	}
 
 	void Sysfs::unexportPin() {
+		if (!boost::filesystem::exists(this->createSysfsPath(SysfsActions::CheckExport))) {
+			return;
+		}
 		boost::filesystem::path path = this->createSysfsPath(SysfsActions::Direction);
-		this->checkExport();
 		boost::filesystem::ofstream file(path, std::ios::out);
 		if (!file.is_open()) {
 			throw std::runtime_error("Cannot unexport GPIO pin " + std::to_string(this->config.pin) + ". Reason: " + std::to_string(errno) + " (" + strerror(errno) + ").");

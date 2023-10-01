@@ -40,10 +40,10 @@ namespace iqrf::gpio::driver {
 		 */
 		virtual void initOutput(bool initialValue) = 0;
 
-        /**
-         * Destroys GPIO pin
-         */
-        virtual void destroy() = 0;
+		/**
+		 * Destroys GPIO pin
+		 */
+		virtual void destroy() = 0;
 
 		/**
 		 * Sets GPIO pin direction

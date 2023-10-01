@@ -35,10 +35,29 @@ include(${libiqrf_SOURCE_DIR}/cmake/hardening.cmake)
 
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
+option(BUILD_TESTS "Build tests" ON)
 option(BUILD_EXAMPLES "Build examples" ON)
 option(BUILD_STATIC "Build static library" OFF)
+option(CODE_COVERAGE "Enable coverage reporting" OFF)
+
+if (BUILD_TESTS)
+    add_compile_definitions(BUILD_TESTS=1)
+else ()
+    add_compile_definitions(BUILD_TESTS=0)
+endif()
+
+if (CODE_COVERAGE)
+    set(COVERAGE_FLAGS "--coverage -fprofile-arcs -ftest-coverage")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${COVERAGE_FLAGS}")
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${COVERAGE_FLAGS}")
+    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${COVERAGE_FLAGS}")
+endif()
 
 add_subdirectory(src)
+
+if (BUILD_TESTS)
+    add_subdirectory(tests)
+endif()
 
 if (BUILD_EXAMPLES)
 	add_subdirectory(examples)

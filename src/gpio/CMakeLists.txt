@@ -30,7 +30,6 @@ if (BUILD_STATIC)
 endif ()
 
 add_library(iqrf_${LIB_NAME} SHARED ${LIB_SOURCES} ${LIB_HEADERS})
-add_library(iqrf::${LIB_NAME} ALIAS iqrf_${LIB_NAME})
 set_target_properties(iqrf_${LIB_NAME} PROPERTIES VERSION "${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}")
 target_link_libraries(iqrf_${LIB_NAME} ${LIB_LIBGPIOD} ${Boost_LIBRARIES} iqrf_common iqrf_log)
 target_include_directories(iqrf_${LIB_NAME} PUBLIC ${libiqrf_SOURCE_DIR}/include)

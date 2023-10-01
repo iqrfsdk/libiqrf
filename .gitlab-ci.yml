@@ -34,13 +34,26 @@ stages:
     paths:
       - .ccache/
 
-build:
+test:
   stage: test
   script:
     - git checkout -B "$CI_COMMIT_REF_NAME" "$CI_COMMIT_SHA"
-    - cmake -Bbuild -H. -DCMAKE_BUILD_TYPE=Debug -DUSE_CCACHE=TRUE
+    - cmake -Bbuild -H. -DCMAKE_BUILD_TYPE=Debug -DCODE_COVERAGE=ON -DUSE_CCACHE=TRUE
     - cmake --build build
+    - mkdir -p coverage
+    - cd build/tests/
+    - ctest -V --output-junit ../../ctest.xml
+    - gcovr --xml-pretty --exclude-unreachable-branches --print-summary -o ../../coverage.xml --filter ../../src/ --root ../../
   <<: *ccache-template
+  coverage: /^\s*lines:\s*\d+.\d+\%/
+  artifacts:
+    name: ${CI_JOB_NAME}-${CI_COMMIT_REF_NAME}-${CI_COMMIT_SHA}
+    expire_in: 14 days
+    reports:
+      coverage_report:
+        coverage_format: cobertura
+        path: coverage.xml
+      junit: ctest.xml
 
 # Jsonnet
 jsonnet-build:

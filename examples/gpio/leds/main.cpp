@@ -49,23 +49,23 @@ auto *redLed = new iqrf::gpio::Gpio(buttonConfig);
  * @param signal Signal number
  */
 void signalHandler(int signal) {
-    std::cout << "Signal " << signal << " received. Exiting..." << std::endl;
+	std::cout << "Signal " << signal << " received. Exiting..." << std::endl;
 
-    greenLed->setValue(false);
-    redLed->setValue(false);
+	greenLed->setValue(false);
+	redLed->setValue(false);
 
-    greenLed->destroy();
-    redLed->destroy();
+	greenLed->destroy();
+	redLed->destroy();
 
-    delete greenLed;
-    delete redLed;
+	delete greenLed;
+	delete redLed;
 
-    exit(signal);
+	exit(signal);
 }
 
 int main() {
-    signal(SIGINT, signalHandler);
-    signal(SIGTERM, signalHandler);
+	signal(SIGINT, signalHandler);
+	signal(SIGTERM, signalHandler);
 
 	bool greenLedState = false;
 	bool redLedState = true;
@@ -76,8 +76,8 @@ int main() {
 	while (true) {
 		greenLedState = !greenLedState;
 		redLedState = !redLedState;
-        greenLed->setValue(greenLedState);
-        redLed->setValue(redLedState);
+		greenLed->setValue(greenLedState);
+		redLed->setValue(redLedState);
 		sleep(1);
 	}
 

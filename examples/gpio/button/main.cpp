@@ -37,17 +37,17 @@ auto *button = new iqrf::gpio::Gpio(buttonConfig);
  * @param signal Signal number
  */
 void signalHandler(int signal) {
-    std::cout << "Signal " << signal << " received. Exiting..." << std::endl;
+	std::cout << "Signal " << signal << " received. Exiting..." << std::endl;
 
-    button->destroy();
-    delete button;
+	button->destroy();
+	delete button;
 
-    exit(signal);
+	exit(signal);
 }
 
 int main() {
-    signal(SIGINT, signalHandler);
-    signal(SIGTERM, signalHandler);
+	signal(SIGINT, signalHandler);
+	signal(SIGTERM, signalHandler);
 	button->initInput();
 	bool buttonState;
 	uint64_t counter = 0;
@@ -56,9 +56,9 @@ int main() {
 		buttonState = button->getValue();
 
 		if (buttonState) {
-            if (counter > 0) {
-                std::cout << "Button has been released. Button was pressed for " << std::to_string(static_cast<double>(counter) / 10.0) << " s." << std::endl;
-            }
+			if (counter > 0) {
+				std::cout << "Button has been released. Button was pressed for " << std::to_string(static_cast<double>(counter) / 10.0) << " s." << std::endl;
+			}
 			counter = 0;
 		} else {
 			if (counter == 0) {
@@ -70,5 +70,5 @@ int main() {
 		std::this_thread::sleep_for(std::chrono::milliseconds(100));
 	}
 
-    return 0;
+	return 0;
 }

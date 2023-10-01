@@ -60,10 +60,10 @@ namespace iqrf::gpio {
 		  */
 		 void initOutput(bool initialValue);
 
-         /**
-          * Destroys GPIO pin
-          */
-         void destroy();
+		 /**
+		  * Destroys GPIO pin
+		  */
+		 void destroy();
 
 		 /**
 		  * Sets GPIO pin direction

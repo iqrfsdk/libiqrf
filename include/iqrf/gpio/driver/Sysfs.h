@@ -24,6 +24,10 @@
 
 #include <boost/filesystem.hpp>
 
+#if BUILD_TESTS
+#include <gtest/gtest_prod.h>
+#endif
+
 #include "iqrf/gpio/Common.h"
 #include "iqrf/gpio/driver/Base.h"
 
@@ -80,10 +84,10 @@ namespace iqrf::gpio::driver {
 		 */
 		void initOutput(bool initialValue) override;
 
-        /**
-         * Destroys GPIO pin
-         */
-        void destroy() override;
+		/**
+		 * Destroys GPIO pin
+		 */
+		void destroy() override;
 
 		/**
 		 * Sets GPIO pin direction
@@ -109,6 +113,10 @@ namespace iqrf::gpio::driver {
 		 */
 		bool getValue() override;
 	private:
+#if BUILD_TESTS
+		friend class SysfsTest;
+		FRIEND_TEST(SysfsTest, createSysfsPath);
+#endif
 		/// GPIO pin configuration
 		SysfsConfig config;
 

@@ -35,6 +35,11 @@ namespace iqrf::gpio::driver {
 	 * GPIO driver - sysfs
 	 */
 	class Sysfs;
+
+	/**
+	 * GPIO driver test - sysfs
+	 */
+	class SysfsTest;
 #endif
 
 }

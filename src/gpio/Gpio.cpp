@@ -40,9 +40,9 @@ namespace iqrf::gpio {
 		this->driver->initOutput(initialValue);
 	}
 
-    void Gpio::destroy() {
-        this->driver->destroy();
-    }
+	void Gpio::destroy() {
+		this->driver->destroy();
+	}
 
 	void Gpio::setDirection(iqrf::gpio::GpioDirection direction) {
 		this->driver->setDirection(direction);

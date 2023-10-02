@@ -15,7 +15,11 @@ This repository contains the IQRF libraries for C/C++.
 ## Dependencies
 
 - [CMake](https://cmake.org/) >= 3.5
+- [Boost Filesystem](https://www.boost.org/doc/libs/1_74_0/libs/filesystem/doc/index.htm) >= 1.74.0
 - [Ccache](https://ccache.dev/) >= 3.7 (optional)
+
+### Testing
+- [GTest](https://google.github.io/googletest/)
 
 ## Build
 
@@ -26,3 +30,11 @@ mkdir build
 cmake -Bbuild -H. -DCMAKE_BUILD_TYPE=Debug -DBUILD_STATIC=TRUE -DUSE_CCACHE=TRUE
 cmake --build build
 ```
+
+## Test
+
+```bash
+cd build/test/
+ctest
+```
+

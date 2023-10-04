@@ -7,6 +7,8 @@
 
 This repository contains the IQRF libraries for C/C++.
 
+![Library schematics](images/libiqrf.drawio.png "Library schematics")
+
 ### Libraries
 
 - [`libiqrf-gpio`](src/gpio) - GPIO library

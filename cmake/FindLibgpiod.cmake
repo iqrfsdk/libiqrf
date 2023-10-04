@@ -13,16 +13,29 @@
 # limitations under the License.
 
 if (BUILD_STATIC)
-	set(LIBGPIOD_LIB libgpiod.a gpiod)
-else ()
-	set(LIBGPIOD_LIB gpiod)
-endif ()
+	find_library(FOUND_LIBGPIOD_C NAMES libgpiod.a)
+	find_library(FOUND_LIBGPIOD_CXX NAMES libgpiodcxx.a)
 
-find_library(HAVE_LIBGPIOD NAMES ${LIBGPIOD_LIB})
-if (HAVE_LIBGPIOD)
-	set(LIB_LIBGPIOD ${HAVE_LIBGPIOD})
-	message(STATUS "libgpiod found: ${LIB_LIBGPIOD}")
-	set(CMAKE_REQUIRED_LIBRARIES ${LIB_LIBGPIOD})
+	if (NOT FOUND_LIBGPIOD_C)
+		message(FATAL_ERROR "Libgpiod C library missing")
+	endif()
+
+	if (NOT FOUND_LIBGPIOD_CXX)
+		message(FATAL_ERROR "Libgpiod C++ library missing")
+	endif()
+
+	message(STATUS "Found Libgpiod C: ${FOUND_LIBGPIOD_C}")
+	message(STATUS "Found Libgpiod CXX: ${FOUND_LIBGPIOD_CXX}")
+	set(LIBGPIOD_LIB ${FOUND_LIBGPIOD_C} ${FOUND_LIBGPIOD_CXX})
+	set(CMAKE_REQUIRED_LIBRARIES ${CMAKE_REQUIRED_LIBRARIES} ${FOUND_LIBGPIOD_C} ${FOUND_LIBGPIOD_CXX})
 else ()
-	message(FATAL_ERROR "libgpiod not found")
+	find_library(FOUND_LIBGPIOD_CXX NAMES libgpiodcxx.so)
+
+	if (NOT FOUND_LIBGPIOD_CXX)
+		message(FATAL_ERROR "Libgpiod CXX library missing")
+	endif()
+
+	message(STATUS "Found Libgpiod CXX: ${FOUND_LIBGPIOD_CXX}")
+	set(LIBGPIOD_LIB ${FOUND_LIBGPIOD_CXX})
+	set(CMAKE_REQUIRED_LIBRARIES ${CMAKE_REQUIRED_LIBRARIES} ${FOUND_LIBGPIOD_CXX})
 endif ()

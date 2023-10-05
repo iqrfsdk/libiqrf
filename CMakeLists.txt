@@ -38,6 +38,7 @@ set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 option(BUILD_TESTS "Build tests" ON)
 option(BUILD_EXAMPLES "Build examples" ON)
 option(BUILD_STATIC "Build static library" OFF)
+option(BUILD_SHARED "Build shared library" ON)
 option(CODE_COVERAGE "Enable coverage reporting" OFF)
 
 if (BUILD_TESTS)

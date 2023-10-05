@@ -30,19 +30,37 @@
 
 #include "iqrf/gpio/Common.h"
 #include "iqrf/gpio/driver/Base.h"
+#include "iqrf/gpio/driver/Config.h"
 
 namespace iqrf::gpio::driver {
 
 	/**
-	 * GPIOD configuration
+	 * GPIOD driver configuration
 	 */
-	struct GpiodConfig {
+	class GpiodConfig: public Config {
+	public:
 		/// GPIO chip name 
 		::std::string chip;
 		/// GPIO line offset
 		unsigned int line;
 		/// TODO: Lines can be named, allow for declaring the line by ::std::string
+
+		/**
+		 * Empty constructor for filling up the data later
+		 */
+		GpiodConfig();
+
+		/**
+		 * Constructor
+		 */
+		GpiodConfig( ::std::string chip, unsigned int line );
+
+		/**
+		 * Returns textual representation of the configuration.
+		 */
+		const ::std::string to_string() const override;
 	};
+
 
 	/**
 	 * GPIO driver - gpiod

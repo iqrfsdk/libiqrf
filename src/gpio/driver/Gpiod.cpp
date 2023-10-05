@@ -18,7 +18,20 @@
 
 namespace iqrf::gpio::driver {
 
-	Gpiod::Gpiod(iqrf::gpio::driver::GpiodConfig config) {
+	GpiodConfig::GpiodConfig(): chip(""), line(0) {
+	}
+	
+	GpiodConfig::GpiodConfig( ::std::string chip, unsigned int line ): chip(chip), line(line) {
+	}
+	
+	const ::std::string GpiodConfig::to_string() const {
+		::std::ostringstream ss;
+		ss << "Gpiod driver configuration: chip=" << chip << ", line=" << line;
+		return ss.str();
+	};
+
+
+	Gpiod::Gpiod(GpiodConfig config) {
 		chip = ::gpiod::chip(config.chip);
 		line = chip.get_line(config.line);
 	}

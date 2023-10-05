@@ -19,14 +19,13 @@
 
 #include "iqrf/gpio/driver/Gpiod.h"
 
-/// Button configuration
-const iqrf::gpio::driver::GpiodConfig buttonConfig = {
-	.chip = "gpiochip0",
-	.line = 2
-};
+const iqrf::gpio::driver::GpiodConfig conf = iqrf::gpio::driver::GpiodConfig(
+	"gpiochip0",
+	2
+);
 
 /// Button GPIO instance
-auto *button = new iqrf::gpio::driver::Gpiod(buttonConfig);
+auto *button = new iqrf::gpio::driver::Gpiod(conf);
 
 /**
  * Signal handler
@@ -42,6 +41,9 @@ void signalHandler(int signal) {
 }
 
 int main() {
+
+	std::cout << conf.to_string() << std::endl;
+
 	signal(SIGINT, signalHandler);
 	signal(SIGTERM, signalHandler);
 	button->initInput();

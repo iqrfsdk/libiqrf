@@ -20,6 +20,7 @@
 #include "iqrf/gpio/driver/namespace.h"
 #include "iqrf/gpio/driver/Base.h"
 #include "iqrf/gpio/driver/Sysfs.h"
+#include "iqrf/gpio/driver/Gpiod.h"
 
 namespace iqrf::gpio {
 

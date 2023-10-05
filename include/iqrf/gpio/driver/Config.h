@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-2024 MICRORISC s.r.o.
+ * Copyright 2023 MICRORISC s.r.o.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,36 +16,27 @@
 
 #pragma once
 
-#include <cstdint>
+#include "iqrf/gpio/namespace.h"
+#include <string>
+#include <sstream>
+#include <iostream>
 
 namespace iqrf::gpio::driver {
 
 	/**
-	 * GPIO driver - base interface
-	 */
-	class Base;
-
-	/**
-   * GPIO driver - config base interface
+	 *
    */
-  class Config;
-
-
-#if defined(LINUX) || defined(__linux__)
-	/**
-	 * GPIO driver configuration - sysfs
-	 */
-	struct SysfsConfig;
-
-	/**
-	 * GPIO driver - sysfs
-	 */
-	class Sysfs;
-
-	/**
-	 * GPIO driver test - sysfs
-	 */
-	class SysfsTest;
-#endif
-
+	class Config {
+		
+		/**
+		 * Returns textual representation of the configuration.
+		 * 
+		 * Additionally, as an only always present virtual class used for safe downcasting.
+		 */
+		virtual const ::std::string to_string() const {
+			::std::ostringstream ss;
+			ss << "Base driver configuration";
+			return ss.str();
+		};
+	};
 }

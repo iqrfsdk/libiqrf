@@ -45,7 +45,7 @@ namespace iqrf::gpio::driver {
 		Sysfs *driver = nullptr;
 
 		/// GPIO driver config
-		SysfsConfig config = {
+		SysfsConfigStruct config = {
 				.pin = 1,
 		};
 	};

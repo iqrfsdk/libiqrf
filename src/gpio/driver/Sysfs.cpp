@@ -18,7 +18,23 @@
 
 namespace iqrf::gpio::driver {
 
-	Sysfs::Sysfs(iqrf::gpio::driver::SysfsConfig config): config(config) {
+	SysfsConfig::SysfsConfig(): pin(0) {
+	}
+
+	SysfsConfig::SysfsConfig( int64_t pin ): pin(pin) {
+	}
+
+	const ::std::string SysfsConfig::to_string() const {
+		::std::ostringstream ss;
+		ss << "Sysfs driver configuration: pin=" << pin;
+		return ss.str();
+	};
+
+
+	Sysfs::Sysfs(iqrf::gpio::driver::SysfsConfigStruct config): pin(config.pin) {
+	}
+
+	Sysfs::Sysfs(SysfsConfig config): pin(config.pin) {
 	}
 
 	Sysfs::~Sysfs() {
@@ -36,13 +52,13 @@ namespace iqrf::gpio::driver {
 				path << "unexport";
 				break;
 			case SysfsActions::Direction:
-				path << "gpio" << this->config.pin << "/direction";
+				path << "gpio" << pin << "/direction";
 				break;
 			case SysfsActions::Value:
-				path << "gpio" << this->config.pin << "/value";
+				path << "gpio" << pin << "/value";
 				break;
 			case SysfsActions::CheckExport:
-				path << "gpio" << this->config.pin;
+				path << "gpio" << pin;
 				break;
 			default:
 				throw std::runtime_error("Unknown sysfs action.");
@@ -52,14 +68,14 @@ namespace iqrf::gpio::driver {
 
 	void Sysfs::checkExport() {
 		if (!boost::filesystem::exists(this->createSysfsPath(SysfsActions::CheckExport))) {
-			throw std::runtime_error("GPIO pin " + std::to_string(this->config.pin) + " is not exported. Reason: " + std::to_string(errno) + " (" + strerror(errno) + ").");
+			throw std::runtime_error("GPIO pin " + std::to_string(pin) + " is not exported. Reason: " + std::to_string(errno) + " (" + strerror(errno) + ").");
 		}
 	}
 
 	void Sysfs::initInput() {
 		if (boost::filesystem::exists(this->createSysfsPath(SysfsActions::CheckExport)) &&
 			this->getDirection() != GpioDirection::Input) {
-			throw std::runtime_error("GPIO pin " + std::to_string(this->config.pin) + " is already initialized as output.");
+			throw std::runtime_error("GPIO pin " + std::to_string(pin) + " is already initialized as output.");
 		}
 		this->exportPin();
 		this->setDirection(GpioDirection::Input);
@@ -68,7 +84,7 @@ namespace iqrf::gpio::driver {
 	void Sysfs::initOutput(bool initialValue) {
 		if (boost::filesystem::exists(this->createSysfsPath(SysfsActions::CheckExport)) &&
 			this->getDirection() != GpioDirection::Output) {
-			throw std::runtime_error("GPIO pin " + std::to_string(this->config.pin) + " is already initialized as input.");
+			throw std::runtime_error("GPIO pin " + std::to_string(pin) + " is already initialized as input.");
 		}
 		this->exportPin();
 		this->setDirection(GpioDirection::Output);
@@ -86,9 +102,9 @@ namespace iqrf::gpio::driver {
 		boost::filesystem::path path = this->createSysfsPath(SysfsActions::Export);
 		boost::filesystem::ofstream file(path, std::ios::out);
 		if (!file.is_open()) {
-			throw std::runtime_error("Cannot export GPIO pin " + std::to_string(this->config.pin) + ". Reason: " + std::to_string(errno) + " (" + strerror(errno) + ").");
+			throw std::runtime_error("Cannot export GPIO pin " + std::to_string(pin) + ". Reason: " + std::to_string(errno) + " (" + strerror(errno) + ").");
 		}
-		file << this->config.pin;
+		file << pin;
 		file.close();
 	}
 
@@ -99,9 +115,9 @@ namespace iqrf::gpio::driver {
 		boost::filesystem::path path = this->createSysfsPath(SysfsActions::Direction);
 		boost::filesystem::ofstream file(path, std::ios::out);
 		if (!file.is_open()) {
-			throw std::runtime_error("Cannot unexport GPIO pin " + std::to_string(this->config.pin) + ". Reason: " + std::to_string(errno) + " (" + strerror(errno) + ").");
+			throw std::runtime_error("Cannot unexport GPIO pin " + std::to_string(pin) + ". Reason: " + std::to_string(errno) + " (" + strerror(errno) + ").");
 		}
-		file << this->config.pin;
+		file << pin;
 		file.close();
 	}
 
@@ -110,7 +126,7 @@ namespace iqrf::gpio::driver {
 		this->checkExport();
 		boost::filesystem::ifstream file(path, std::ios::in);
 		if (!file.is_open()) {
-			throw std::runtime_error("Cannot open GPIO pin " + std::to_string(this->config.pin) + " direction file. Reason: " + std::to_string(errno) + " (" + strerror(errno) + ").");
+			throw std::runtime_error("Cannot open GPIO pin " + std::to_string(pin) + " direction file. Reason: " + std::to_string(errno) + " (" + strerror(errno) + ").");
 		}
 		std::string direction;
 		file >> direction;
@@ -120,7 +136,7 @@ namespace iqrf::gpio::driver {
 		} else if (direction == "out") {
 			return GpioDirection::Output;
 		} else {
-			throw std::runtime_error("Unknown GPIO pin " + std::to_string(this->config.pin) + " direction: " + direction + ".");
+			throw std::runtime_error("Unknown GPIO pin " + std::to_string(pin) + " direction: " + direction + ".");
 		}
 	}
 
@@ -129,7 +145,7 @@ namespace iqrf::gpio::driver {
 		this->checkExport();
 		boost::filesystem::ofstream file(path, std::ios::out);
 		if (!file.is_open()) {
-			throw std::runtime_error("Cannot open GPIO pin " + std::to_string(this->config.pin) + " direction file. Reason: " + std::to_string(errno) + " (" + strerror(errno) + ").");
+			throw std::runtime_error("Cannot open GPIO pin " + std::to_string(pin) + " direction file. Reason: " + std::to_string(errno) + " (" + strerror(errno) + ").");
 		}
 		file << (direction == GpioDirection::Input ? "in" : "out");
 		file.close();
@@ -140,7 +156,7 @@ namespace iqrf::gpio::driver {
 		this->checkExport();
 		boost::filesystem::ifstream file(path, std::ios::in);
 		if (!file.is_open()) {
-			throw std::runtime_error("Cannot open GPIO pin " + std::to_string(this->config.pin) + " value file. Reason: " + std::to_string(errno) + " (" + strerror(errno) + ").");
+			throw std::runtime_error("Cannot open GPIO pin " + std::to_string(pin) + " value file. Reason: " + std::to_string(errno) + " (" + strerror(errno) + ").");
 		}
 		std::string value;
 		file >> value;
@@ -150,7 +166,7 @@ namespace iqrf::gpio::driver {
 		} else if (value == "1") {
 			return true;
 		} else {
-			throw std::runtime_error("Unknown GPIO pin " + std::to_string(this->config.pin) + " value: " + value + ".");
+			throw std::runtime_error("Unknown GPIO pin " + std::to_string(pin) + " value: " + value + ".");
 		}
 	}
 
@@ -159,7 +175,7 @@ namespace iqrf::gpio::driver {
 		this->checkExport();
 		boost::filesystem::ofstream file(path, std::ios::out);
 		if (!file.is_open()) {
-			throw std::runtime_error("Cannot open GPIO pin " + std::to_string(this->config.pin) + " value file. Reason: " + std::to_string(errno) + " (" + strerror(errno) + ").");
+			throw std::runtime_error("Cannot open GPIO pin " + std::to_string(pin) + " value file. Reason: " + std::to_string(errno) + " (" + strerror(errno) + ").");
 		}
 		file << (value ? "1" : "0");
 		file.close();

@@ -30,7 +30,7 @@ namespace iqrf::gpio {
 	struct GpioConfig {
 		GpioDriver driver;
 		union {
-			iqrf::gpio::driver::SysfsConfig sysfs;
+			iqrf::gpio::driver::SysfsConfigStruct sysfs;
 		} config;
 	};
 

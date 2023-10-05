@@ -30,6 +30,7 @@
 
 #include "iqrf/gpio/Common.h"
 #include "iqrf/gpio/driver/Base.h"
+#include "iqrf/gpio/driver/Config.h"
 
 namespace iqrf::gpio::driver {
 
@@ -52,9 +53,32 @@ namespace iqrf::gpio::driver {
 	/**
 	 * sysfs GPIO pin configuration
 	 */
-	struct SysfsConfig {
+	struct SysfsConfigStruct {
 		/// GPIO pin number
 		int64_t pin;
+	};
+	/**
+	 * Sysfs driver configuration
+	 */
+	class SysfsConfig: public Config {
+	public:
+		/// GPIO pin number
+		int64_t pin;
+
+		/**
+		 * Empty constructor for filling up the data later
+		 */
+		SysfsConfig();
+
+		/**
+		 * Constructor
+		 */
+		SysfsConfig( int64_t pin );
+
+		/**
+		 * Returns textual representation of the configuration.
+		 */
+		const ::std::string to_string() const override;
 	};
 
 	/**
@@ -66,8 +90,14 @@ namespace iqrf::gpio::driver {
 		 * Constructor
 		 * @param config
 		 */
-		explicit Sysfs(SysfsConfig config);
+		explicit Sysfs(SysfsConfigStruct config);
 
+		/**
+		 * Constructor
+		 * @param config
+		 */
+		explicit Sysfs(SysfsConfig config);
+		
 		/**
 		 * Destructor
 		 */
@@ -117,8 +147,9 @@ namespace iqrf::gpio::driver {
 		friend class SysfsTest;
 		FRIEND_TEST(SysfsTest, createSysfsPath);
 #endif
-		/// GPIO pin configuration
-		SysfsConfig config;
+		
+		/// GPIO pin number
+		int64_t pin;
 
 		/**
 		 * Returns sysfs path for given action

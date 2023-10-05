@@ -1,6 +1,8 @@
 # CLion IDE
 .idea/
 cmake-build-debug/
+# VIM swapfiles
+*.swp
 # Compiled Object files, Static and Dynamic libs (Shared Objects)
 build/
 # Tests

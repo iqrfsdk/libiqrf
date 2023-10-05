@@ -17,6 +17,7 @@
 #pragma once
 
 #include "iqrf/gpio/driver/Sysfs.h"
+#include "iqrf/gpio/driver/Gpiod.h"
 
 namespace iqrf::gpio {
 
@@ -34,8 +35,8 @@ namespace iqrf::gpio {
 	 * GPIO pin driver
 	 */
 	enum class GpioDriver {
-		/// libgpiod driver
-		libgpiod,
+		/// Linux kernel GPIO driver (libgpiod)
+		gpiod,
 		/// Linux kernel sysfs driver
 		sysfs,
 	};

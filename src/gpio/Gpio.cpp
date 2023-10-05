@@ -20,7 +20,7 @@ namespace iqrf::gpio {
 
 	Gpio::Gpio(iqrf::gpio::GpioConfig config): config(config) {
 		switch (this->config.driver) {
-			case GpioDriver::libgpiod:
+			case GpioDriver::gpiod:
 				throw std::runtime_error("libgpiod driver is not implemented yet.");
 			case GpioDriver::sysfs:
 				this->driver = new iqrf::gpio::driver::Sysfs(this->config.config.sysfs);

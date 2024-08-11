@@ -4,7 +4,7 @@ Upstream-Contact: Roman Ondráček <roman.ondracek@iqrf.com>
 Source: https://gitlab.iqrf.org/open-source/iqrf-sdk/libiqrf.git
 
 Files: *
-Copyright: 2023 MICRORISC s.r.o.
+Copyright: 2023-2024 MICRORISC s.r.o.
 License: Apache-2.0
 
 License: Apache-2.0

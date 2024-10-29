@@ -14,30 +14,18 @@
  * limitations under the License.
  */
 
-#include "iqrf/gpio/driver/Gpiod.h"
+#include "iqrf/gpio/GpiodV1.h"
 
-namespace iqrf::gpio::driver {
+namespace iqrf::gpio {
 
-	GpiodConfig::GpiodConfig(): chip(""), line(0) {
-	}
-	
-	GpiodConfig::GpiodConfig( ::std::string chip, unsigned int line ): chip(chip), line(line) {
-	}
-	
-	const ::std::string GpiodConfig::to_string() const {
-		::std::ostringstream ss;
-		ss << "Gpiod driver configuration: chip=" << chip << ", line=" << line;
-		return ss.str();
-	};
-
-
-	Gpiod::Gpiod(GpiodConfig config) {
+	Gpiod::Gpiod(GpioConfig config) {
 		chip = ::gpiod::chip(config.chip);
 		line = chip.get_line(config.line);
 	}
 
 	Gpiod::~Gpiod() {
-		this->destroy();
+		if (line.is_requested())
+			line.release();
 	}
 
 	void Gpiod::initInput() {
@@ -45,13 +33,9 @@ namespace iqrf::gpio::driver {
 		if (line.is_requested())
 			line.release();
 
-		// Create a consumer name out of the chip and line
-		::std::stringstream ss;
-		ss << chip.name() << "-" << line.offset();
-
 		// Request the access to the line
 		::gpiod::line_request req_conf;
-		req_conf.consumer = ss.str();
+		req_conf.consumer = this->generateConsumerName();
 		req_conf.request_type = ::gpiod::line_request::DIRECTION_INPUT;
 		line.request(req_conf);
 
@@ -64,13 +48,9 @@ namespace iqrf::gpio::driver {
 		if (line.is_requested())
 			line.release();
 
-		// Create a consumer name out of the chip and line
-		::std::stringstream ss;
-		ss << chip.name() << "-" << line.offset();
-
 		// Request the access to the line
 		::gpiod::line_request req_conf;
-		req_conf.consumer = ss.str();
+		req_conf.consumer = this->generateConsumerName();
 		req_conf.request_type = ::gpiod::line_request::DIRECTION_OUTPUT;
 		line.request(req_conf);
 
@@ -78,11 +58,6 @@ namespace iqrf::gpio::driver {
 		this->setDirection(GpioDirection::Output);
 		
 		this->setValue(initialValue);
-	}
-
-	void Gpiod::destroy() {
-		if (line.is_requested())
-			line.release();
 	}
 
 	void Gpiod::setDirection(iqrf::gpio::GpioDirection direction) {
@@ -104,13 +79,10 @@ namespace iqrf::gpio::driver {
 		switch (direction) {
 			case ::gpiod::line::DIRECTION_OUTPUT:
 				return iqrf::gpio::GpioDirection::Output;
-				break;
 			case ::gpiod::line::DIRECTION_INPUT:
-				return iqrf::gpio::GpioDirection::Output;
-				break;
+				return iqrf::gpio::GpioDirection::Input;
 			default:
 				throw ::std::out_of_range("Unknown direction");
-				break;
 		}
 	}
 
@@ -120,5 +92,12 @@ namespace iqrf::gpio::driver {
 
 	bool Gpiod::getValue() {
 		return line.get_value();
+	}
+
+	std::string Gpiod::generateConsumerName() {
+		::std::stringstream ss;
+		ss << chip.name() << "-" << line.offset();
+		
+		return ss.str();
 	}
 }

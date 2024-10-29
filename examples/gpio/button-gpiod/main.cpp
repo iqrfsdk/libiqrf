@@ -17,15 +17,12 @@
 #include <csignal>
 #include <thread>
 
-#include "iqrf/gpio/driver/Gpiod.h"
+#include "iqrf/gpio/Gpio.h"
 
-const iqrf::gpio::driver::GpiodConfig conf = iqrf::gpio::driver::GpiodConfig(
-	"gpiochip0",
-	2
-);
+const iqrf::gpio::GpioConfig conf("gpiochip0", 2);
 
 /// Button GPIO instance
-auto *button = new iqrf::gpio::driver::Gpiod(conf);
+auto *button = new iqrf::gpio::Gpio(conf);
 
 /**
  * Signal handler
@@ -34,7 +31,6 @@ auto *button = new iqrf::gpio::driver::Gpiod(conf);
 void signalHandler(int signal) {
 	std::cout << "Signal " << signal << " received. Exiting..." << std::endl;
 
-	button->destroy();
 	delete button;
 
 	exit(signal);

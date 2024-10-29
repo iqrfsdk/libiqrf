@@ -16,27 +16,45 @@
 
 #pragma once
 
-#include "iqrf/gpio/namespace.h"
 #include <string>
 #include <sstream>
 #include <iostream>
 
-namespace iqrf::gpio::driver {
+#include "GpioResolver.h"
+
+namespace iqrf::gpio {
 
 	/**
-	 *
-   */
-	class Config {
-		
+	 * GPIO chip config
+	 */
+	class GpioConfig {
+	public:
+		/// GPIO chip name 
+		::std::string chip;
+		/// GPIO line offset
+		unsigned int line;
+		/// TODO: Lines can be named, allow for declaring the line by ::std::string
+		/// GPIO pin number (sysfs compatibility)
+		int64_t pin;
+
+		/**
+		 * Empty constructor for filling up the data later
+		 */
+		GpioConfig();
+
+		/**
+		 * Constructor
+		 */
+		GpioConfig( ::std::string chip, unsigned int line );
+
+		/**
+		 * Compatibility constructor for sysfs
+		 */
+		GpioConfig( int64_t pin );
+
 		/**
 		 * Returns textual representation of the configuration.
-		 * 
-		 * Additionally, as an only always present virtual class used for safe downcasting.
 		 */
-		virtual const ::std::string to_string() const {
-			::std::ostringstream ss;
-			ss << "Base driver configuration";
-			return ss.str();
-		};
+		const ::std::string to_string() const;
 	};
 }

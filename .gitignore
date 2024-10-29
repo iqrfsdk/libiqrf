@@ -1,5 +1,6 @@
-# CLion IDE
+# IDES
 .idea/
+.vscode/
 cmake-build-debug/
 # VIM swapfiles
 *.swp

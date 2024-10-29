@@ -1,4 +1,4 @@
-# Copyright 2023-2024 MICRORISC s.r.o.
+# Copyright 2023 MICRORISC s.r.o.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,15 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-set(EXAMPLE_NAME iqrf-gpio-button-example)
-
-set(THREADS_PREFER_PTHREAD_FLAG ON)
-find_package(Threads REQUIRED)
+set(EXAMPLE_NAME iqrf-gpio-gpiodump-example)
 
 include_directories(${PROJECT_SOURCE_DIR}/include)
 
 add_executable(${EXAMPLE_NAME} main.cpp)
-target_link_libraries(${EXAMPLE_NAME} PUBLIC iqrf_gpio)
-target_link_libraries(${EXAMPLE_NAME} PRIVATE Threads::Threads)
-
+target_link_libraries(${EXAMPLE_NAME} iqrf_gpio gpiod)
 install(TARGETS ${EXAMPLE_NAME} RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})

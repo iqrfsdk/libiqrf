@@ -16,85 +16,72 @@
 
 #pragma once
 
+#include "gpiod.h"
 #include "iqrf/gpio/Common.h"
-#include "iqrf/gpio/driver/namespace.h"
-#include "iqrf/gpio/driver/Base.h"
-#include "iqrf/gpio/driver/Sysfs.h"
-#include "iqrf/gpio/driver/Gpiod.h"
+#include "iqrf/gpio/Base.h"
+
+#if LIBGPIOD_VERSION_MAJOR == 2
+#include "iqrf/gpio/GpiodV2.h"
+#else
+#include "iqrf/gpio/GpiodV1.h"
+#endif
 
 namespace iqrf::gpio {
 
 	/**
 	 * GPIO pin
 	 */
-	struct GpioConfig {
-		GpioDriver driver;
-		union {
-			iqrf::gpio::driver::SysfsConfigStruct sysfs;
-		} config;
-	};
-
-	/**
-	 * GPIO pin
-	 */
-	 class Gpio {
-	 public:
+	class Gpio {
+	public:
 		 /**
 		  * Constructor
 		  * @param config GPIO pin configuration
 		  */
-		 explicit Gpio(GpioConfig config);
+		explicit Gpio(GpioConfig config);
 
 		 /**
 		  * Destructor
 		  */
-		 ~Gpio();
+		~Gpio();
 
 		 /**
 		  * Initializes GPIO pin as an input
 		  */
-		 void initInput();
+		void initInput();
 
 		 /**
 		  * Initializes GPIO pin as an output
 		  * @param initialValue Initial output value
 		  */
-		 void initOutput(bool initialValue);
-
-		 /**
-		  * Destroys GPIO pin
-		  */
-		 void destroy();
+		void initOutput(bool initialValue);
 
 		 /**
 		  * Sets GPIO pin direction
 		  * @param direction GPIO pin direction
 		  */
-		 void setDirection(iqrf::gpio::GpioDirection direction);
+		void setDirection(iqrf::gpio::GpioDirection direction);
 
 		 /**
 		  * Retrieves GPIO pin direction
 		  * @return GPIO pin direction
 		  */
-		 iqrf::gpio::GpioDirection getDirection();
+		iqrf::gpio::GpioDirection getDirection();
 
 		 /**
 		  * Sets GPIO pin output value
 		  * @param value GPIO pin output value
 		  */
-		 void setValue(bool value);
+		void setValue(bool value);
 
 		 /**
 		  * Retrieves GPIO pin output value
 		  * @return GPIO pin output value
 		  */
-		 bool getValue();
-	 private:
+		bool getValue();
+	private:
 		 /// GPIO driver instance
-		 iqrf::gpio::driver::Base *driver;
-		 /// GPIO pin configuration
-		 GpioConfig config;
-	 };
+		iqrf::gpio::Base *impl;
+	};
 
 }
 

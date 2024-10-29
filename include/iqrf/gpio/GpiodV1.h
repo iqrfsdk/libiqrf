@@ -29,38 +29,10 @@
 #endif
 
 #include "iqrf/gpio/Common.h"
-#include "iqrf/gpio/driver/Base.h"
-#include "iqrf/gpio/driver/Config.h"
+#include "iqrf/gpio/Base.h"
+#include "iqrf/gpio/Config.h"
 
-namespace iqrf::gpio::driver {
-
-	/**
-	 * GPIOD driver configuration
-	 */
-	class GpiodConfig: public Config {
-	public:
-		/// GPIO chip name 
-		::std::string chip;
-		/// GPIO line offset
-		unsigned int line;
-		/// TODO: Lines can be named, allow for declaring the line by ::std::string
-
-		/**
-		 * Empty constructor for filling up the data later
-		 */
-		GpiodConfig();
-
-		/**
-		 * Constructor
-		 */
-		GpiodConfig( ::std::string chip, unsigned int line );
-
-		/**
-		 * Returns textual representation of the configuration.
-		 */
-		const ::std::string to_string() const override;
-	};
-
+namespace iqrf::gpio {
 
 	/**
 	 * GPIO driver - gpiod
@@ -73,7 +45,7 @@ namespace iqrf::gpio::driver {
 		 * @throws std::system_error for invalid chip name or busy GPIO line
 		 * @throws std::out_of_range for line offset out of bands
 		 */
-		Gpiod(GpiodConfig config);
+		Gpiod(GpioConfig config);
 
 		/**
 		 * Constructor
@@ -99,11 +71,6 @@ namespace iqrf::gpio::driver {
 		void initOutput(bool initialValue) override;
 
 		/**
-		 * Releases the GPIO line
-		 */
-		void destroy() override;
-
-		/**
 		 * Sets GPIO line direction
 		 * @param direction GPIO line direction
 		 */
@@ -127,6 +94,12 @@ namespace iqrf::gpio::driver {
 		 */
 		bool getValue() override;
 	private:
+		/**
+		 * Generate consumer name
+		 * @return Consumer name
+		 */
+		std::string generateConsumerName();
+
 		/// GPIO chip
 		::gpiod::chip chip;
 		/// GPIO line

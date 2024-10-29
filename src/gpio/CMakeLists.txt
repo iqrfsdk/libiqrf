@@ -13,31 +13,55 @@
 # limitations under the License.
 
 set(LIB_NAME gpio)
-file(GLOB LIB_HEADERS "${libiqrf_SOURCE_DIR}/include/${LIB_NAME}/*.h" "${libiqrf_SOURCE_DIR}/include/${LIB_NAME}/driver/*.h")
-file(GLOB LIB_SOURCES "*.cpp" "driver/*.cpp")
 
 include(${libiqrf_SOURCE_DIR}/cmake/FindLibgpiod.cmake)
 
-find_package(Boost REQUIRED COMPONENTS filesystem)
+configure_file(version.h.in ${libiqrf_SOURCE_DIR}/include/iqrf/gpio/version.h @ONLY)
+file(GLOB LIB_HEADERS_BASE
+	"${libiqrf_SOURCE_DIR}/include/${LIB_NAME}/Base.h"
+	"${libiqrf_SOURCE_DIR}/include/${LIB_NAME}/Common.h"
+	"${libiqrf_SOURCE_DIR}/include/${LIB_NAME}/Config.h"
+	"${libiqrf_SOURCE_DIR}/include/${LIB_NAME}/Gpio.h"
+	"${libiqrf_SOURCE_DIR}/include/${LIB_NAME}/GpioMap.h"
+	"${libiqrf_SOURCE_DIR}/include/${LIB_NAME}/GpioResolver.h"
+	"${libiqrf_SOURCE_DIR}/include/${LIB_NAME}/namespace.h"
+	"${libiqrf_SOURCE_DIR}/include/${LIB_NAME}/version.h"
+)
+file(GLOB LIB_SOURCES_BASE
+	"Config.cpp"
+	"Gpio.cpp"
+	"GpioMap.cpp"
+	"GpioResolver.cpp"
+)
+if (LIBGPIOD_VERSION_MAJOR EQUAL "2")
+	file(GLOB LIB_HEADERS_EXTRA "${libiqrf_SOURCE_DIR}/include/${LIB_NAME}/GpiodV2.h")
+	file(GLOB LIB_SOURCES_EXTRA "GpiodV2.cpp")
+else()
+	file(GLOB LIB_HEADERS_EXTRA "${libiqrf_SOURCE_DIR}/include/${LIB_NAME}/GpiodV1.h")
+	file(GLOB LIB_SOURCES_EXTRA "GpiodV1.cpp")
+endif()
+
+set(LIB_HEADERS ${LIB_HEADERS_BASE} ${LIB_HEADERS_EXTRA})
+set(LIB_SOURCES ${LIB_SOURCES_BASE} ${LIB_SOURCES_EXTRA})
 
 if (BUILD_STATIC)
-	add_library(iqrf_${LIB_NAME}_static STATIC ${LIB_SOURCES} ${LIB_HEADERS})
-	set_target_properties(iqrf_${LIB_NAME}_static PROPERTIES VERSION "${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}")
-	target_include_directories(iqrf_${LIB_NAME}_static PUBLIC ${libiqrf_SOURCE_DIR}/include)
-	target_link_libraries(iqrf_${LIB_NAME}_static ${LIBGPIOD_LIB_STATIC} ${Boost_LIBRARIES} iqrf_common iqrf_log)
-	set_target_properties(iqrf_${LIB_NAME}_static PROPERTIES OUTPUT_NAME iqrf_${LIB_NAME})
-	set_target_properties(iqrf_${LIB_NAME}_static PROPERTIES PREFIX "lib")
+    add_library(iqrf_${LIB_NAME}_static STATIC ${LIB_SOURCES} ${LIB_HEADERS})
+    set_target_properties(iqrf_${LIB_NAME}_static PROPERTIES VERSION "${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}")
+    target_include_directories(iqrf_${LIB_NAME}_static PUBLIC ${libiqrf_SOURCE_DIR}/include)
+    target_link_libraries(iqrf_${LIB_NAME}_static ${LIBGPIOD_STATIC_LIBRARIES} iqrf_common iqrf_log)
+    set_target_properties(iqrf_${LIB_NAME}_static PROPERTIES OUTPUT_NAME iqrf_${LIB_NAME})
+    set_target_properties(iqrf_${LIB_NAME}_static PROPERTIES PREFIX "lib")
 endif ()
 
 if (BUILD_SHARED)
-	add_library(iqrf_${LIB_NAME} SHARED ${LIB_SOURCES} ${LIB_HEADERS})
-	set_target_properties(iqrf_${LIB_NAME} PROPERTIES VERSION "${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}")
-	target_link_libraries(iqrf_${LIB_NAME} ${LIBGPIOD_LIB} ${Boost_LIBRARIES} iqrf_common iqrf_log)
-	target_include_directories(iqrf_${LIB_NAME} PUBLIC ${libiqrf_SOURCE_DIR}/include)
+    add_library(iqrf_${LIB_NAME} SHARED ${LIB_SOURCES} ${LIB_HEADERS})
+    set_target_properties(iqrf_${LIB_NAME} PROPERTIES VERSION "${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}")
+    target_link_libraries(iqrf_${LIB_NAME} ${LIBGPIOD_LIBRARIES} iqrf_common iqrf_log)
+    target_include_directories(iqrf_${LIB_NAME} PUBLIC ${libiqrf_SOURCE_DIR}/include)
 endif ()
 
 install(TARGETS iqrf_${LIB_NAME} LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR} PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/${LIB_NAME})
 if (BUILD_STATIC)
-	install(TARGETS iqrf_${LIB_NAME}_static ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR} PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/${LIB_NAME})
+    install(TARGETS iqrf_${LIB_NAME}_static ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR} PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/${LIB_NAME})
 endif ()
 install(DIRECTORY ${libiqrf_SOURCE_DIR}/include/iqrf/${LIB_NAME} DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}/iqrf")

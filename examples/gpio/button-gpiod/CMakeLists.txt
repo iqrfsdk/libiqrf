@@ -14,9 +14,13 @@
 
 set(EXAMPLE_NAME iqrf-gpio-button-gpiod-example)
 
+set(THREADS_PREFER_PTHREAD_FLAG ON)
+find_package(Threads REQUIRED)
+
 include_directories(${PROJECT_SOURCE_DIR}/include)
 
 add_executable(${EXAMPLE_NAME} main.cpp)
-target_link_libraries(${EXAMPLE_NAME} iqrf_gpio)
+target_link_libraries(${EXAMPLE_NAME} PUBLIC iqrf_gpio)
+target_link_libraries(${EXAMPLE_NAME} PRIVATE Threads::Threads)
 
 install(TARGETS ${EXAMPLE_NAME} RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})

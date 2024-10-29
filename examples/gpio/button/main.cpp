@@ -20,14 +20,7 @@
 #include "iqrf/gpio/Gpio.h"
 
 /// Button configuration
-const iqrf::gpio::GpioConfig buttonConfig = {
-		.driver = iqrf::gpio::GpioDriver::sysfs,
-		.config = {
-				.sysfs = {
-						.pin = 2,
-				},
-		},
-};
+const iqrf::gpio::GpioConfig buttonConfig(2);
 
 /// Button GPIO pin instance
 auto *button = new iqrf::gpio::Gpio(buttonConfig);
@@ -39,13 +32,14 @@ auto *button = new iqrf::gpio::Gpio(buttonConfig);
 void signalHandler(int signal) {
 	std::cout << "Signal " << signal << " received. Exiting..." << std::endl;
 
-	button->destroy();
 	delete button;
 
 	exit(signal);
 }
 
 int main() {
+	std::cout << buttonConfig.to_string() << std::endl;
+
 	signal(SIGINT, signalHandler);
 	signal(SIGTERM, signalHandler);
 	button->initInput();

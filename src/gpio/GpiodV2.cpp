@@ -71,7 +71,7 @@ namespace iqrf::gpio {
 					::gpiod::line_settings()
 						.set_direction(dir)
 				)
-		);		
+		);
 	}
 		
 	iqrf::gpio::GpioDirection Gpiod::getDirection() {

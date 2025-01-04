@@ -73,10 +73,10 @@ namespace iqrf::gpio {
 		  */
 		void setValue(bool value);
 
-		 /**
-		  * Retrieves GPIO pin output value
-		  * @return GPIO pin output value
-		  */
+		/**
+		 * Retrieves GPIO line input value
+		 * @return GPIO line input value
+		 */
 		bool getValue();
 	private:
 		 /// GPIO driver instance

@@ -89,8 +89,8 @@ namespace iqrf::gpio {
 		void setValue(bool value) override;
 
 		/**
-		 * Retrieves GPIO line output value
-		 * @return GPIO line output value
+		 * Retrieves GPIO line input value
+		 * @return GPIO line input value
 		 */
 		bool getValue() override;
 	private:

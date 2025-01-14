@@ -18,10 +18,6 @@
 
 namespace iqrf::gpio {
 
-    class BaseConfig {
-
-    }
-
 	/**
 	 * GPIO driver - base interface
 	 */

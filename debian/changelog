@@ -1,3 +1,36 @@
+libiqrf (0.0.2~1.gbpb60bc3) UNRELEASED; urgency=medium
+
+  ** SNAPSHOT build @b60bc3384484906f9467b416154cd4705dff1cb7 **
+
+  [ Roman Ondráček ]
+  * Add Debian package build, GitLab CI
+  * Add enum class for GPIO directions for C++ wrapper
+  * GPIO: add debug messages in sysfs driver
+  * Log: rework library
+  * Add Read me
+  * Rework GPIO library
+  * Add tests, fix coding style
+  * GitLab CI: build package for Ubuntu 24.04 Noble Numbat
+  * .mailmap: add missing e-mail address mappings
+  * Update copyright notices
+  * GitLab CI: drop build packages for Debian 10 buster and Ubuntu 18.04 Bionic Beaver
+
+  [ Ondřej Hujňák ]
+  * Updated dependencies in README.
+  * Added library schematics
+  * Modified CMAKE - included libgpiodcxx + include deduplication
+  * CMake: Separate shared/static library generation
+  * Added first gpiod driver (using libgpiod C++ API)
+  * Switched Gpiod driver to Config class
+  * Added class config to Sysfs driver
+
+  [ Karel Hanák ]
+  * WIP: support for libgpiod 1.x and 2.x
+  * updated gpio setValue doc
+  * gpio: removed empty base config class
+
+ -- Karel Hanák <karel.hanak@iqrf.org>  Tue, 14 Jan 2025 21:11:55 +0100
+
 libiqrf (0.0.1~1.gbp8645e5) stable; urgency=medium
 
   ** SNAPSHOT build @8645e5fe7372e32361e13b1743e7bc27ef8076be **

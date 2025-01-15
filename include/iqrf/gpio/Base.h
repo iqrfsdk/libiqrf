@@ -16,13 +16,7 @@
 
 #pragma once
 
-#include "iqrf/gpio/namespace.h"
-
-namespace iqrf::gpio::driver {
-
-    class BaseConfig {
-
-    }
+namespace iqrf::gpio {
 
 	/**
 	 * GPIO driver - base interface
@@ -33,6 +27,7 @@ namespace iqrf::gpio::driver {
 		 * Destructor
 		 */
 		virtual ~Base() = default;
+
 		/**
 		 * Initializes GPIO as an input
 		 */
@@ -43,11 +38,6 @@ namespace iqrf::gpio::driver {
 		 * @param initialValue
 		 */
 		virtual void initOutput(bool initialValue) = 0;
-
-		/**
-		 * Destroys GPIO pin
-		 */
-		virtual void destroy() = 0;
 
 		/**
 		 * Sets GPIO pin direction
@@ -72,7 +62,6 @@ namespace iqrf::gpio::driver {
 		 * @return GPIO pin output value
 		 */
 		virtual bool getValue() = 0;
-
 	};
 
 }

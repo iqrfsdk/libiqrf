@@ -18,46 +18,36 @@
 
 namespace iqrf::gpio {
 
-	Gpio::Gpio(iqrf::gpio::GpioConfig config): config(config) {
-		switch (this->config.driver) {
-			case GpioDriver::libgpiod:
-				throw std::runtime_error("libgpiod driver is not implemented yet.");
-			case GpioDriver::sysfs:
-				this->driver = new iqrf::gpio::driver::Sysfs(this->config.config.sysfs);
-				break;
-		}
+	Gpio::Gpio(GpioConfig config) {
+		this->impl = new iqrf::gpio::Gpiod(config);		
 	}
 
 	Gpio::~Gpio() {
-		delete this->driver;
+		delete this->impl;
 	}
 
 	void Gpio::initInput() {
-		this->driver->initInput();
+		this->impl->initInput();
 	}
 
 	void Gpio::initOutput(bool initialValue) {
-		this->driver->initOutput(initialValue);
-	}
-
-	void Gpio::destroy() {
-		this->driver->destroy();
+		this->impl->initOutput(initialValue);
 	}
 
 	void Gpio::setDirection(iqrf::gpio::GpioDirection direction) {
-		this->driver->setDirection(direction);
+		this->impl->setDirection(direction);
 	}
 
 	iqrf::gpio::GpioDirection Gpio::getDirection() {
-		return this->driver->getDirection();
+		return this->impl->getDirection();
 	}
 
 	void Gpio::setValue(bool value) {
-		this->driver->setValue(value);
+		this->impl->setValue(value);
 	}
 
 	bool Gpio::getValue() {
-		return this->driver->getValue();
+		return this->impl->getValue();
 	}
 
 }

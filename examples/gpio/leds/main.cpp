@@ -18,31 +18,18 @@
 
 #include <csignal>
 #include <iostream>
+#include <thread>
 
 /// Green LED configuration
-const iqrf::gpio::GpioConfig greenLedConfig = {
-	.driver = iqrf::gpio::GpioDriver::sysfs,
-	.config = {
-			.sysfs = {
-					.pin = 0,
-			},
-	},
-};
+const iqrf::gpio::GpioConfig greenLedConfig(0);
 
 /// Red LED configuration
-const iqrf::gpio::GpioConfig buttonConfig = {
-		.driver = iqrf::gpio::GpioDriver::sysfs,
-		.config = {
-				.sysfs = {
-						.pin = 1,
-				},
-		},
-};
+const iqrf::gpio::GpioConfig redLedConfig(1);
 
 /// Green LED GPIO pin instance
 auto *greenLed = new iqrf::gpio::Gpio(greenLedConfig);
 /// Red LED GPIO pin instance
-auto *redLed = new iqrf::gpio::Gpio(buttonConfig);
+auto *redLed = new iqrf::gpio::Gpio(redLedConfig);
 
 /**
  * Signal handler
@@ -53,9 +40,6 @@ void signalHandler(int signal) {
 
 	greenLed->setValue(false);
 	redLed->setValue(false);
-
-	greenLed->destroy();
-	redLed->destroy();
 
 	delete greenLed;
 	delete redLed;
@@ -78,7 +62,7 @@ int main() {
 		redLedState = !redLedState;
 		greenLed->setValue(greenLedState);
 		redLed->setValue(redLedState);
-		sleep(1);
+		std::this_thread::sleep_for(std::chrono::seconds(1));
 	}
 
 	return 0;

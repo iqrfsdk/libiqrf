@@ -1,5 +1,5 @@
 /**
- * Copyright 2023-2024 MICRORISC s.r.o.
+ * Copyright 2023 MICRORISC s.r.o.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,11 +19,10 @@
 
 #include "iqrf/gpio/Gpio.h"
 
-/// Button configuration
-const iqrf::gpio::GpioConfig buttonConfig(2);
+const iqrf::gpio::GpioConfig conf("gpiochip0", 2);
 
-/// Button GPIO pin instance
-auto *button = new iqrf::gpio::Gpio(buttonConfig);
+/// Button GPIO instance
+auto *button = new iqrf::gpio::Gpio(conf);
 
 /**
  * Signal handler
@@ -38,7 +37,8 @@ void signalHandler(int signal) {
 }
 
 int main() {
-	std::cout << buttonConfig.to_string() << std::endl;
+
+	std::cout << conf.to_string() << std::endl;
 
 	signal(SIGINT, signalHandler);
 	signal(SIGTERM, signalHandler);

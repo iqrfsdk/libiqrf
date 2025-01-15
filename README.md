@@ -7,6 +7,8 @@
 
 This repository contains the IQRF libraries for C/C++.
 
+![Library schematics](images/libiqrf.drawio.png "Library schematics")
+
 ### Libraries
 
 - [`libiqrf-gpio`](src/gpio) - GPIO library
@@ -15,7 +17,11 @@ This repository contains the IQRF libraries for C/C++.
 ## Dependencies
 
 - [CMake](https://cmake.org/) >= 3.5
+- [Libgpiod](https://libgpiod.readthedocs.io/en/latest/index.html) >= 1.6.2
 - [Ccache](https://ccache.dev/) >= 3.7 (optional)
+
+### Testing
+- [GTest](https://google.github.io/googletest/)
 
 ## Build
 
@@ -26,3 +32,11 @@ mkdir build
 cmake -Bbuild -H. -DCMAKE_BUILD_TYPE=Debug -DBUILD_STATIC=TRUE -DUSE_CCACHE=TRUE
 cmake --build build
 ```
+
+## Test
+
+```bash
+cd build/test/
+ctest
+```
+

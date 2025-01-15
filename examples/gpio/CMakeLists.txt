@@ -13,4 +13,6 @@
 # limitations under the License.
 
 add_subdirectory(button)
+add_subdirectory(button-gpiod)
+add_subdirectory(gpiodump)
 add_subdirectory(leds)

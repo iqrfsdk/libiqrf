@@ -4,8 +4,17 @@ Upstream-Contact: Roman Ondráček <roman.ondracek@iqrf.com>
 Source: https://gitlab.iqrf.org/open-source/iqrf-sdk/libiqrf.git
 
 Files: *
-Copyright: 2023-2025 MICRORISC s.r.o.
+       debian/*
+Copyright: 2023-2025, MICRORISC s.r.o.
 License: Apache-2.0
+
+Files: cmake/AuxFunctions.cmake
+Copyright: 2020, Google, Inc.
+License: Apache-2.0
+
+Files: cmake/FindLibgpiod.cmake
+Copyright: 2020-2024, Juergen Mang <mail@jcgames.de>
+License: GPL-3.0-or-later
 
 License: Apache-2.0
  Grant of Copyright License. Subject to the terms and conditions of
@@ -18,3 +27,21 @@ License: Apache-2.0
  On Debian systems, the full text of Apache-2.0 License can be found
  in the file
  `/usr/share/common-licenses/Apache-2.0'.
+
+License: GPL-3.0-or-later
+ This package is free software; you can redistribute it and/or modify
+ it under the terms of the GNU General Public License as published by
+ the Free Software Foundation; either version 3 of the License, or
+ any later version.
+ .
+ This package is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU General Public License for more details.
+ .
+ You should have received a copy of the GNU General Public License
+ along with this package; if not, write to the Free Software
+ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301 USA
+ .
+ On Debian systems, the complete text of the GNU General
+ Public License can be found in `/usr/share/common-licenses/GPL-3'.

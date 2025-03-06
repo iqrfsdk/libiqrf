@@ -39,10 +39,27 @@ namespace iqrf::gpio {
 		  */
 		explicit Gpio(GpioConfig config);
 
+		/**
+		 * Copy Constructor
+		 * @param other Gpio object to copy
+		 */
+		Gpio(const Gpio &other);
+
+		/**
+		 * Move Constructor
+		 * @param other Gpio object to move
+		 */
+		Gpio(Gpio &&other);
+
 		 /**
 		  * Destructor
 		  */
 		~Gpio();
+		
+		/**
+		 * Assignment Operator
+		 */
+		Gpio& operator=(Gpio other);
 
 		 /**
 		  * Initializes GPIO pin as an input
@@ -78,9 +95,14 @@ namespace iqrf::gpio {
 		 * @return GPIO line input value
 		 */
 		bool getValue();
+
+		 /**
+		  * Swap function
+		  */
+		friend void swap(Gpio &first, Gpio &second);
 	private:
 		 /// GPIO driver instance
-		iqrf::gpio::Base *impl;
+		std::shared_ptr<iqrf::gpio::Base> impl;
 	};
 
 }

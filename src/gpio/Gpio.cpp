@@ -19,11 +19,25 @@
 namespace iqrf::gpio {
 
 	Gpio::Gpio(GpioConfig config) {
-		this->impl = new iqrf::gpio::Gpiod(config);		
+		impl = std::make_shared<iqrf::gpio::Gpiod>(config);		
+	}
+
+	Gpio::Gpio(const Gpio &other) {
+		impl = other.impl;
+	}
+
+	Gpio::Gpio(Gpio &&other) {
+		impl = std::move(other.impl);
 	}
 
 	Gpio::~Gpio() {
-		delete this->impl;
+		impl.reset();
+	}
+
+	Gpio& Gpio::operator=(Gpio other) {
+		// copy-and-swap idiom
+		swap(*this, other);
+		return *this;
 	}
 
 	void Gpio::initInput() {
@@ -50,4 +64,8 @@ namespace iqrf::gpio {
 		return this->impl->getValue();
 	}
 
+	void swap(Gpio &first, Gpio &second) {
+		using std::swap;  // Enable ADL
+		swap(first.impl, second.impl);
+	}
 }

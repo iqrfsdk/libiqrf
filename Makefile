@@ -18,5 +18,8 @@ build: clean
 	cmake -Bbuild -H. -DCMAKE_BUILD_TYPE=Debug -DCMAKE_VERBOSE_MAKEFILE:BOOL=ON
 	cmake --build build
 
+test:
+	ctest --test-dir build/tests
+
 clean:
 	rm -rf build

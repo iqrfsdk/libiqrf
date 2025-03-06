@@ -31,7 +31,7 @@ namespace iqrf::gpio {
 		// Initialize line request
 		request = std::make_unique<::gpiod::line_request>(
 			chip->prepare_request()
-				.set_consumer(this->generateConsumerName())
+				.set_consumer(name)
 				.add_line_settings(
 					line,
 					::gpiod::line_settings()
@@ -47,7 +47,7 @@ namespace iqrf::gpio {
 		// Initialize line request
 		request = std::make_unique<::gpiod::line_request>(
 			chip->prepare_request()
-				.set_consumer(this->generateConsumerName())
+				.set_consumer(name)
 				.add_line_settings(
 					line,
 					::gpiod::line_settings()
@@ -94,12 +94,5 @@ namespace iqrf::gpio {
 
 	bool Gpiod::getValue() {
 		return request->get_value(line) == ::gpiod::line::value::ACTIVE;
-	}
-
-	std::string Gpiod::generateConsumerName() {
-		::std::stringstream ss;
-		ss << chip->get_info().name() << "-" << line;
-		
-		return ss.str();
 	}
 }

@@ -21,6 +21,7 @@ namespace iqrf::gpio {
 	Gpiod::Gpiod(GpioConfig config) {
 		chip = ::gpiod::chip(config.chip);
 		line = chip.get_line(config.line);
+		name = config.consumer_name;
 	}
 
 	Gpiod::~Gpiod() {
@@ -35,7 +36,7 @@ namespace iqrf::gpio {
 
 		// Request the access to the line
 		::gpiod::line_request req_conf;
-		req_conf.consumer = this->generateConsumerName();
+		req_conf.consumer = name;
 		req_conf.request_type = ::gpiod::line_request::DIRECTION_INPUT;
 		line.request(req_conf);
 
@@ -50,7 +51,7 @@ namespace iqrf::gpio {
 
 		// Request the access to the line
 		::gpiod::line_request req_conf;
-		req_conf.consumer = this->generateConsumerName();
+		req_conf.consumer = name;
 		req_conf.request_type = ::gpiod::line_request::DIRECTION_OUTPUT;
 		line.request(req_conf);
 
@@ -92,12 +93,5 @@ namespace iqrf::gpio {
 
 	bool Gpiod::getValue() {
 		return line.get_value();
-	}
-
-	std::string Gpiod::generateConsumerName() {
-		::std::stringstream ss;
-		ss << chip.name() << "-" << line.offset();
-		
-		return ss.str();
 	}
 }

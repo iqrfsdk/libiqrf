@@ -95,18 +95,14 @@ namespace iqrf::gpio {
 		 */
 		bool getValue() override;
 	private:
-		/**
-		 * Generate consumer name
-		 * @return Consumer name
-		 */
-		std::string generateConsumerName();
-
 		/// GPIO chip
 		std::unique_ptr<::gpiod::chip> chip;
 		/// GPIO line
 		::gpiod::line::offset line;
 		/// Request
 		std::unique_ptr<::gpiod::line_request> request;
+		/// Name
+		::std::string name;
 	};
 
 }

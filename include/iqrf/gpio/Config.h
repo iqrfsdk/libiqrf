@@ -37,6 +37,9 @@ namespace iqrf::gpio {
 		/// GPIO pin number (sysfs compatibility)
 		int64_t pin;
 
+		/// Consumer name for better identification
+		::std::string consumer_name;
+
 		/**
 		 * Empty constructor for filling up the data later
 		 */
@@ -45,12 +48,12 @@ namespace iqrf::gpio {
 		/**
 		 * Constructor
 		 */
-		GpioConfig( ::std::string chip, unsigned int line );
+		GpioConfig( ::std::string chip, unsigned int line, ::std::string consumer_name = "libiqrf" );
 
 		/**
 		 * Compatibility constructor for sysfs
 		 */
-		GpioConfig( int64_t pin );
+		GpioConfig( int64_t pin, ::std::string consumer_name = "libiqrf" );
 
 		/**
 		 * Returns textual representation of the configuration.

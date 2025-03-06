@@ -22,11 +22,11 @@ namespace iqrf::gpio {
 		impl = std::make_shared<iqrf::gpio::Gpiod>(config);		
 	}
 
-	Gpio::Gpio(const Gpio &other) {
+	Gpio::Gpio(const Gpio &other) noexcept {
 		impl = other.impl;
 	}
 
-	Gpio::Gpio(Gpio &&other) {
+	Gpio::Gpio(Gpio &&other) noexcept {
 		impl = std::move(other.impl);
 	}
 
@@ -34,7 +34,7 @@ namespace iqrf::gpio {
 		impl.reset();
 	}
 
-	Gpio& Gpio::operator=(Gpio other) {
+	Gpio& Gpio::operator=(Gpio other) noexcept {
 		// copy-and-swap idiom
 		swap(*this, other);
 		return *this;

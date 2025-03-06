@@ -43,13 +43,13 @@ namespace iqrf::gpio {
 		 * Copy Constructor
 		 * @param other Gpio object to copy
 		 */
-		Gpio(const Gpio &other);
+		Gpio(const Gpio &other) noexcept;
 
 		/**
 		 * Move Constructor
 		 * @param other Gpio object to move
 		 */
-		Gpio(Gpio &&other);
+		Gpio(Gpio &&other) noexcept;
 
 		 /**
 		  * Destructor
@@ -59,7 +59,7 @@ namespace iqrf::gpio {
 		/**
 		 * Assignment Operator
 		 */
-		Gpio& operator=(Gpio other);
+		Gpio& operator=(Gpio other) noexcept;
 
 		 /**
 		  * Initializes GPIO pin as an input

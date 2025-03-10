@@ -20,7 +20,19 @@ namespace iqrf::gpio {
 
 	Gpiod::Gpiod(GpioConfig config) {
 		chip = std::make_unique<::gpiod::chip>(::std::filesystem::path("/dev/" + config.chip));
-		line = config.line;
+		if (!chip) {
+			throw std::runtime_error("No GPIO chip '/dev/" + config.chip + "' found");
+		}
+
+		if (config.line_name.empty()) {
+			line = config.line;
+		} else {
+			line = chip.get_line_offset_from_name(config.line_name);
+			if (line == -1) {
+				throw std::runtime_error("No line '" + config.line_name + "' found at chip '" + config.chip + "'");
+			}
+		}
+		name = config.consumer_name;
 	}
 
 	Gpiod::~Gpiod() {

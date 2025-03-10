@@ -32,7 +32,7 @@ namespace iqrf::gpio {
 		return gpioResolverInstance;
 	}
 
-	void GpioResolver::resolveGpioPin(int64_t pin, ::std::string &chip, unsigned int &line) {
+	void GpioResolver::resolveGpioPin(int64_t pin, ::std::string &chip, ::std::size_t &line) {
 		auto record = gpioMap.find(pin);
 		if (record == gpioMap.end()) {
 			throw std::runtime_error("No chip and line found for pin no. " + std::to_string(pin));

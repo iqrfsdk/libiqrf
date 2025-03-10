@@ -41,27 +41,27 @@ namespace iqrf::gpio {
 	}
 
 	void Gpio::initInput() {
-		this->impl->initInput();
+		impl->initInput();
 	}
 
 	void Gpio::initOutput(bool initialValue) {
-		this->impl->initOutput(initialValue);
+		impl->initOutput(initialValue);
 	}
 
 	void Gpio::setDirection(iqrf::gpio::GpioDirection direction) {
-		this->impl->setDirection(direction);
+		impl->setDirection(direction);
 	}
 
 	iqrf::gpio::GpioDirection Gpio::getDirection() {
-		return this->impl->getDirection();
+		return impl->getDirection();
 	}
 
 	void Gpio::setValue(bool value) {
-		this->impl->setValue(value);
+		impl->setValue(value);
 	}
 
 	bool Gpio::getValue() {
-		return this->impl->getValue();
+		return impl->getValue();
 	}
 
 	void swap(Gpio &first, Gpio &second) {

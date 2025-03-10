@@ -24,16 +24,19 @@
 
 namespace iqrf::gpio {
 
+	inline const std::string default_consumer_name = "libiqrf";
+
 	/**
 	 * GPIO chip config
 	 */
 	class GpioConfig {
 	public:
-		/// GPIO chip name 
+		/// GPIO chip name
 		::std::string chip;
 		/// GPIO line offset
-		unsigned int line;
-		/// TODO: Lines can be named, allow for declaring the line by ::std::string
+		::std::size_t line;
+		/// GPIO line name
+		::std::string line_name;
 		/// GPIO pin number (sysfs compatibility)
 		int64_t pin;
 
@@ -47,13 +50,26 @@ namespace iqrf::gpio {
 
 		/**
 		 * Constructor
+		 * @param chip GPIO chip name
+		 * @param line GPIO line offset
+		 * @param consumer_name Name of the GPIO line consumer
 		 */
-		GpioConfig( ::std::string chip, unsigned int line, ::std::string consumer_name = "libiqrf" );
+		GpioConfig(::std::string chip, ::std::size_t line, ::std::string consumer_name = default_consumer_name);
+
+		/**
+		 * Constructor with named line
+		 * @param chip GPIO chip name
+		 * @param line GPIO line name
+		 * @param consumer_name Name of the GPIO line consumer
+		 */
+		GpioConfig(::std::string chip, ::std::string line_name, ::std::string consumer_name = default_consumer_name);
 
 		/**
 		 * Compatibility constructor for sysfs
+		 * @param pin GPIO pin number
+		 * @param consumer_name Name of the GPIO pin consumer
 		 */
-		GpioConfig( int64_t pin, ::std::string consumer_name = "libiqrf" );
+		GpioConfig(int64_t pin, ::std::string consumer_name = default_consumer_name);
 
 		/**
 		 * Returns textual representation of the configuration.

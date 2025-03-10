@@ -20,7 +20,21 @@ namespace iqrf::gpio {
 
 	Gpiod::Gpiod(GpioConfig config) {
 		chip = ::gpiod::chip(config.chip);
-		line = chip.get_line(config.line);
+		if (!chip) {
+			throw std::runtime_error("No GPIO chip '" + config.chip + "' found");
+		}
+
+		if (config.line_name.empty()) {
+			line = chip.get_line(config.line);
+		} else {
+			line = chip.find_line(config.line_name);
+		}
+		if (!line) {
+			throw std::runtime_error("No line '" 
+				+ (config.line_name.empty() ? std::to_string(config.line) : config.line_name) 
+				+ "' found at chip '" + config.chip + "'");
+		}
+
 		name = config.consumer_name;
 	}
 

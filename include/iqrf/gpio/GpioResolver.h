@@ -62,7 +62,7 @@ namespace iqrf::gpio {
 		 * @param chip GPIO chip name (contains resolved chip name)
 		 * @param line Line offset (contains resolved line offset)
 		 */
-		void resolveGpioPin(int64_t pin, ::std::string &chip, unsigned int &line);
+		void resolveGpioPin(int64_t pin, ::std::string &chip, ::std::size_t &line);
 
 		/**
 		 * Dumps map of pin numbers and gpio chips / line numbers

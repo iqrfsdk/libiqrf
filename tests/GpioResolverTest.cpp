@@ -41,7 +41,7 @@ namespace iqrf::gpio {
 
 	TEST_F(GpioResolverTest, ResolveExistingPins) {
 		std::string chip_name;
-		unsigned int line_offset;
+		size_t line_offset;
 
 		// GPIO pin 0
 		this->resolver->resolveGpioPin(0, chip_name, line_offset);
@@ -71,7 +71,7 @@ namespace iqrf::gpio {
 
 	TEST_F(GpioResolverTest, ResolveNonexistentPins) {
 		std::string chip_name;
-		unsigned int line_offset;
+		size_t line_offset;
 
 		ASSERT_THROW(this->resolver->resolveGpioPin(50, chip_name, line_offset), std::runtime_error);
 	}

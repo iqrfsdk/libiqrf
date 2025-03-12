@@ -9,11 +9,7 @@
 
 namespace iqrf::gpio {
 
-#if LIBGPIOD_VERSION_MAJOR == 2
-	typedef std::map<int64_t, std::pair<std::shared_ptr<std::string>, size_t>> GpioMap;
-#else
-	typedef std::map<int64_t, std::pair<std::shared_ptr<std::string>, unsigned int>> GpioMap;
-#endif
+	typedef std::map<std::size_t, std::pair<std::shared_ptr<std::string>, size_t>> GpioMap;
 
 	/**
 	 * Get map of GPIO pins and chips names / line offsets

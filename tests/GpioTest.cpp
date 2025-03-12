@@ -1,21 +1,25 @@
 #include <gtest/gtest.h>
-#include <gmock/gmock.h>
+// #include <gmock/gmock.h>
 
 #include "iqrf/gpio/Gpio.h"
 #include "iqrf/gpio/Config.h"
 
 // Mock `gpiod::chip` class
+/*
 class MockChip : public ::gpiod::chip {
 public:
     MOCK_METHOD(::gpiod::line, get_line, (int line_num), ());
 };
+*/
 
 // Mock `gpiod::line` class
+/*
 class MockLine : public ::gpiod::line {
 public:
     MOCK_METHOD(void, is_requested, (), ());
     MOCK_METHOD(int, release, (), ());
 };
+*/
 
 namespace iqrf::gpio {
 

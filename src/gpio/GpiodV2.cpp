@@ -27,8 +27,11 @@ namespace iqrf::gpio {
 		if (config.line_name.empty()) {
 			line = config.line;
 		} else {
-			line = chip.get_line_offset_from_name(config.line_name);
-			if (line == -1) {
+			int offset;
+			offset = chip->get_line_offset_from_name(config.line_name);
+			if (offset >= 0) {
+				line = offset;
+			} else {
 				throw std::runtime_error("No line '" + config.line_name + "' found at chip '" + config.chip + "'");
 			}
 		}

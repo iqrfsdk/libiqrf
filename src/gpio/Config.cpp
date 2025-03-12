@@ -3,7 +3,7 @@
 namespace iqrf::gpio {
 
 
-	GpioConfig::GpioConfig(): chip(""), line(0), pin(-1), line_name(""), consumer_name(default_consumer_name) {
+	GpioConfig::GpioConfig(): chip(""), line(0), line_name(""), pin(-1), consumer_name(default_consumer_name) {
 		// Caution: Line is 0, which is a valid line number
 	}
 

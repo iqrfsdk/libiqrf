@@ -16,6 +16,8 @@
 
 #pragma once
 
+#include <gtest/gtest.h>
+
 #include "gpiod.h"
 #include "iqrf/gpio/Common.h"
 #include "iqrf/gpio/Base.h"
@@ -103,6 +105,11 @@ namespace iqrf::gpio {
 	private:
 		 /// GPIO driver instance
 		std::shared_ptr<iqrf::gpio::Base> impl;
+
+		 /// Testing friends
+		FRIEND_TEST(GpioTest, VerifyCopyConstructor_GPIO);
+		FRIEND_TEST(GpioTest, VerifyMoveConstructor_GPIO);
+		FRIEND_TEST(GpioTest, VerifyAssignmentOperator_GPIO);
 	};
 
 }

@@ -1,25 +1,7 @@
 #include <gtest/gtest.h>
-// #include <gmock/gmock.h>
 
 #include "iqrf/gpio/Gpio.h"
 #include "iqrf/gpio/Config.h"
-
-// Mock `gpiod::chip` class
-/*
-class MockChip : public ::gpiod::chip {
-public:
-    MOCK_METHOD(::gpiod::line, get_line, (int line_num), ());
-};
-*/
-
-// Mock `gpiod::line` class
-/*
-class MockLine : public ::gpiod::line {
-public:
-    MOCK_METHOD(void, is_requested, (), ());
-    MOCK_METHOD(int, release, (), ());
-};
-*/
 
 namespace iqrf::gpio {
 
@@ -29,22 +11,39 @@ namespace iqrf::gpio {
     TEST_F(GpioTest, VerifyCopyConstructor_GPIO) {
         // Create Gpio instance
         const GpioConfig config("gpiochip0", 1);
-        // auto *orig = new Gpio(config);
+        auto orig = Gpio(config);
 
         // Create copy of the Gpio instance
-        // auto *copy = new Gpio(orig);
+        auto copy = Gpio(orig);
         
-        // ASSERT_EQ(orig.impl, copy.impl);
+        EXPECT_NE(&copy, &orig);
+        EXPECT_EQ(orig.impl, copy.impl);
+    }
+
+    TEST_F(GpioTest, VerifyMoveConstructor_GPIO) {
+        // Create Gpio instance
+        const GpioConfig config("gpiochip0", 1);
+        auto orig = Gpio(config);
+
+        // Store the original pointer for later checking
+        auto orig_impl = orig.impl;
+
+        // Move the Gpio instance
+        auto other = std::move(orig);
+        
+        EXPECT_NE(&other, &orig);
+        EXPECT_EQ(orig_impl, other.impl);
+        EXPECT_EQ(orig.impl, nullptr);
     }
 
     TEST_F(GpioTest, VerifyAssignmentOperator_GPIO) {
         // Create Gpio instance
         const GpioConfig config("gpiochip0", 1);
-        // auto *orig = new Gpio(config);
+        auto orig = Gpio(config);
 
         // Assign the Gpio instance
-        // auto *other = orig;
+        auto other = orig;
 
-        // ASSERT_EQ(orig.impl, other.impl)
+        EXPECT_EQ(orig.impl, other.impl);
     }
 }

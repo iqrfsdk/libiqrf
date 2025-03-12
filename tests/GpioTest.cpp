@@ -26,7 +26,7 @@ namespace iqrf::gpio {
     class GpioTest : public ::testing::Test {
     };
 
-    TEST_F(GpioTest, VerifyCopyConstructor) {
+    TEST_F(GpioTest, VerifyCopyConstructor_GPIO) {
         // Create Gpio instance
         const GpioConfig config("gpiochip0", 1);
         // auto *orig = new Gpio(config);
@@ -37,7 +37,7 @@ namespace iqrf::gpio {
         // ASSERT_EQ(orig.impl, copy.impl);
     }
 
-    TEST_F(GpioTest, VerifyAssignmentOperator) {
+    TEST_F(GpioTest, VerifyAssignmentOperator_GPIO) {
         // Create Gpio instance
         const GpioConfig config("gpiochip0", 1);
         // auto *orig = new Gpio(config);

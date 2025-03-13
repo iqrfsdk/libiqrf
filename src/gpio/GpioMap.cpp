@@ -27,11 +27,12 @@ namespace iqrf::gpio {
 
 		// Load all GPIO chips
 		for (auto const &entry: std::filesystem::directory_iterator{GPIO_DIRECTORY}) {
-			if (entry.path().filename().string().find(GPIO_CHIP_PREFIX) == 0) {  // We care only about /dev/gpiochip* entries
+			auto const &path_str = entry.path().filename().string();
+			if (path_str.find(GPIO_CHIP_PREFIX) == 0) {  // We care only about /dev/gpiochip* entries
 				if (gpiod::is_gpiochip_device(entry.path())) {  // Make sure it is GPIO
 					try {
 						chips.emplace_back(
-							std::strtoul(entry.path().filename().string().substr(GPIO_CHIP_PREFIX_LEN)),
+							std::stoul(path_str.substr(GPIO_CHIP_PREFIX_LEN)),
 							entry.path()
 						);
 					} catch (const std::exception &e) {}  // Ignore invalid chip names
@@ -40,10 +41,10 @@ namespace iqrf::gpio {
 		}
 
 		// Sort the chips in numerical order by their ordinal number
-		std::sort(chips.begin(), chips.end(), [](const auto &a, const auto &b) { return a.first < b.first });
+		std::sort(chips.begin(), chips.end(), [](const auto &a, const auto &b) { return a.first < b.first; });
 
 		// Create the mapping according to the sorted chips
-		for (auto const &chip_path: chips) {
+		for (auto const &[_, chip_path]: chips) {
 			try {
 				auto chip_info = ::gpiod::chip(chip_path).get_info();
 				std::shared_ptr<std::string> chip_name = std::make_shared<std::string>(chip_info.name());

@@ -6,7 +6,7 @@
 
 #define GPIO_DIRECTORY "/dev"
 #define GPIO_CHIP_PREFIX "gpiochip"
-#define GPIO_CHIP_PREFIX_LEN 8
+#define GPIO_CHIP_PREFIX_LEN (sizeof(GPIO_CHIP_PREFIX) - 1)  // Excluding the null terminator
 
 namespace iqrf::gpio {
 

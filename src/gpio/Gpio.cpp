@@ -18,16 +18,13 @@
 
 namespace iqrf::gpio {
 
-	Gpio::Gpio(GpioConfig config) {
-		impl = std::make_shared<iqrf::gpio::Gpiod>(config);		
+	Gpio::Gpio(const GpioConfig& config) : impl(std::make_shared<iqrf::gpio::Gpiod>(config)) {
 	}
 
-	Gpio::Gpio(const Gpio &other) noexcept {
-		impl = other.impl;
+	Gpio::Gpio(const Gpio& other) noexcept : impl(other.impl) {
 	}
 
-	Gpio::Gpio(Gpio &&other) noexcept {
-		impl = std::move(other.impl);
+	Gpio::Gpio(Gpio&& other) noexcept : impl(std::move(other.impl)) {
 	}
 
 	Gpio::~Gpio() {
@@ -64,7 +61,7 @@ namespace iqrf::gpio {
 		return impl->getValue();
 	}
 
-	void swap(Gpio &first, Gpio &second) {
+	void swap(Gpio& first, Gpio& second) {
 		using std::swap;  // Enable ADL
 		swap(first.impl, second.impl);
 	}

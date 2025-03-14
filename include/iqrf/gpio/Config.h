@@ -17,8 +17,6 @@
 #pragma once
 
 #include <string>
-#include <sstream>
-#include <iostream>
 
 #include "GpioResolver.h"
 
@@ -54,7 +52,7 @@ namespace iqrf::gpio {
 		 * @param line GPIO line offset
 		 * @param consumer_name Name of the GPIO line consumer
 		 */
-		GpioConfig(::std::string chip, ::std::size_t line, ::std::string consumer_name = default_consumer_name);
+		GpioConfig(const ::std::string& chip, ::std::size_t line, const ::std::string& consumer_name = default_consumer_name);
 
 		/**
 		 * Constructor with named line
@@ -62,14 +60,14 @@ namespace iqrf::gpio {
 		 * @param line GPIO line name
 		 * @param consumer_name Name of the GPIO line consumer
 		 */
-		GpioConfig(::std::string chip, ::std::string line_name, ::std::string consumer_name = default_consumer_name);
+		GpioConfig(const ::std::string& chip, const ::std::string& line_name, const ::std::string& consumer_name = default_consumer_name);
 
 		/**
 		 * Compatibility constructor for sysfs
 		 * @param pin GPIO pin number
 		 * @param consumer_name Name of the GPIO pin consumer
 		 */
-		GpioConfig(int64_t pin, ::std::string consumer_name = default_consumer_name);
+		explicit GpioConfig(int64_t pin, const ::std::string& consumer_name = default_consumer_name);
 
 		/**
 		 * Returns textual representation of the configuration.

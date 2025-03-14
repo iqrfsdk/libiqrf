@@ -1,3 +1,6 @@
+#include <sstream>
+#include <iostream>
+
 #include "iqrf/gpio/Config.h"
 
 namespace iqrf::gpio {
@@ -6,15 +9,15 @@ namespace iqrf::gpio {
 		// Caution: Line is 0, which is a valid line number
 	}
 
-	GpioConfig::GpioConfig( ::std::string chip, ::std::size_t line, ::std::string consumer_name )
+	GpioConfig::GpioConfig( const ::std::string& chip, ::std::size_t line, const ::std::string& consumer_name )
 		: chip(chip), line(line), line_name(""), pin(-1), consumer_name(consumer_name) {
 	}
 
-	GpioConfig::GpioConfig(::std::string chip, ::std::string line_name, ::std::string consumer_name)
+	GpioConfig::GpioConfig( const ::std::string& chip, const ::std::string& line_name, const ::std::string& consumer_name)
 		: chip(chip), line(0), line_name(line_name), pin(-1), consumer_name(consumer_name) {
 	}
 
-	GpioConfig::GpioConfig( int64_t pin, ::std::string consumer_name )
+	GpioConfig::GpioConfig( int64_t pin, const ::std::string& consumer_name )
 		: chip(""), line(0), line_name(""), pin(pin), consumer_name(consumer_name) {
 
 		auto gpioResolver = GpioResolver::GetResolver();

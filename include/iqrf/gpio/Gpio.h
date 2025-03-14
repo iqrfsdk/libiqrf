@@ -16,16 +16,18 @@
 
 #pragma once
 
-#include <gtest/gtest.h>
+#include <gpiod.hpp>
+#if BUILD_TESTS
+#include <gtest/gtest_prod.h>
+#endif
 
-#include "gpiod.h"
 #include "iqrf/gpio/Common.h"
 #include "iqrf/gpio/Base.h"
 
-#if LIBGPIOD_VERSION_MAJOR == 2
-#include "iqrf/gpio/GpiodV2.h"
-#else
+#if LIBGPIOD_VERSION_MAJOR == 1
 #include "iqrf/gpio/GpiodV1.h"
+#else
+#include "iqrf/gpio/GpiodV2.h"
 #endif
 
 namespace iqrf::gpio {
@@ -39,19 +41,19 @@ namespace iqrf::gpio {
 		  * Constructor
 		  * @param config GPIO pin configuration
 		  */
-		explicit Gpio(GpioConfig config);
+		explicit Gpio(const GpioConfig& config);
 
 		/**
 		 * Copy Constructor
 		 * @param other Gpio object to copy
 		 */
-		Gpio(const Gpio &other) noexcept;
+		Gpio(const Gpio& other) noexcept;
 
 		/**
 		 * Move Constructor
 		 * @param other Gpio object to move
 		 */
-		Gpio(Gpio &&other) noexcept;
+		Gpio(Gpio&& other) noexcept;
 
 		 /**
 		  * Destructor
@@ -101,7 +103,7 @@ namespace iqrf::gpio {
 		 /**
 		  * Swap function
 		  */
-		friend void swap(Gpio &first, Gpio &second);
+		friend void swap(Gpio& first, Gpio& second);
 	private:
 		 /// GPIO driver instance
 		std::shared_ptr<iqrf::gpio::Base> impl;

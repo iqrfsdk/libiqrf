@@ -18,8 +18,7 @@
 
 namespace iqrf::gpio {
 
-	Gpiod::Gpiod(GpioConfig config) {
-		chip = ::gpiod::chip(config.chip);
+	Gpiod::Gpiod(GpioConfig config) : chip(::gpiod::chip(config.chip)) {
 		if (!chip) {
 			throw std::runtime_error("No GPIO chip '" + config.chip + "' found");
 		}

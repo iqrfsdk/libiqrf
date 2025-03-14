@@ -11,7 +11,7 @@ namespace iqrf::gpio {
 	class GpioResolver {
 	private:
 		/// GPIO resolver instance carrier
-		static GpioResolver * gpioResolverInstance;
+		static GpioResolver* gpioResolverInstance;
 		/// GPIO resolver mutex
 		static std::mutex gpioResolverMtx;
 		/// Map of GPIO pin numbers and chip names / line offsets
@@ -25,7 +25,7 @@ namespace iqrf::gpio {
 		/**
 		 * Constructor with custom map
 		 */
-		GpioResolver(GpioMap map);
+		explicit GpioResolver(const GpioMap& map);
 
 		/**
 		 * Destructor
@@ -36,25 +36,25 @@ namespace iqrf::gpio {
 		/**
 		 * Delete copy constructor
 		 */
-		GpioResolver(GpioResolver &o) = delete;
+		GpioResolver(GpioResolver& o) = delete;
 
 		/**
 		 * Delete assignment operator
 		 */
-		void operator=(const GpioResolver &) = delete;
+		void operator=(const GpioResolver&) = delete;
 
 		/**
 		 * Get resolver instance
 		 * @return GPIO resolver instance
 		 */
-		static GpioResolver *GetResolver();
+		static GpioResolver* GetResolver();
 
 		/**
 		 * Get resolver instance (with manually passed GPIO map)
 		 * @param map Map of GPIO pins and chip names / line offsets
 		 * @return GPIO resolver instance
 		 */
-		static GpioResolver *GetResolver(GpioMap map);
+		static GpioResolver* GetResolver(const GpioMap& map);
 
 		/**
 		 * Resolves GPIO pin number to gpio chip name and line offset
@@ -62,12 +62,12 @@ namespace iqrf::gpio {
 		 * @param chip GPIO chip name (contains resolved chip name)
 		 * @param line Line offset (contains resolved line offset)
 		 */
-		void resolveGpioPin(int64_t pin, ::std::string &chip, ::std::size_t &line);
+		void resolveGpioPin(int64_t pin, ::std::string& chip, ::std::size_t& line);
 
 		/**
 		 * Dumps map of pin numbers and gpio chips / line numbers
 		 */
-		void dump();
+		void dump() const;
 	};
 
 }

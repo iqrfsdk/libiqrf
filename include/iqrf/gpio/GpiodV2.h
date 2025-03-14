@@ -46,7 +46,7 @@ namespace iqrf::gpio {
 		 * @throws std::system_error for invalid chip name or busy GPIO line
 		 * @throws std::out_of_range for line offset out of bands
 		 */
-		Gpiod(GpioConfig config);
+		explicit Gpiod(GpioConfig config);
 
 		/**
 		 * Constructor

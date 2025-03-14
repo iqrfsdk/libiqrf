@@ -43,18 +43,17 @@ int main() {
 	signal(SIGINT, signalHandler);
 	signal(SIGTERM, signalHandler);
 	button->initInput();
-	bool buttonState;
 	uint64_t counter = 0;
 
 	while (true) {
-		buttonState = button->getValue();
-
-		if (buttonState) {
+		if (button->getValue()) {
 			if (counter > 0) {
 				std::cout << "Button has been released. Button was pressed for " << std::to_string(static_cast<double>(counter) / 10.0) << " s." << std::endl;
 			}
 			counter = 0;
-		} else {
+		}
+		else
+		{
 			if (counter == 0) {
 				std::cout << "Button has been pressed." << std::endl;
 			}

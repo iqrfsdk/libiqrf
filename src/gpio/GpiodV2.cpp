@@ -18,9 +18,10 @@
 
 namespace iqrf::gpio {
 
-	Gpiod::Gpiod(GpioConfig config) {
-		chip = std::make_unique<::gpiod::chip>(::std::filesystem::path("/dev/" + config.chip));
-		if (!chip) {
+	Gpiod::Gpiod(GpioConfig config)
+		: chip(std::make_unique<::gpiod::chip>(::std::filesystem::path("/dev/" + config.chip)))
+	{
+		if (!chip.get()) {
 			throw std::runtime_error("No GPIO chip '/dev/" + config.chip + "' found");
 		}
 

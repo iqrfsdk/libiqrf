@@ -46,4 +46,48 @@ namespace iqrf::gpio {
 
         EXPECT_EQ(orig.impl, other.impl);
     }
+
+    TEST_F(GpioTest, TestInput_GPIO) {
+        const iqrf::gpio::GpioConfig config("gpiochip0", 2, "libiqrf:test:input");
+        auto gpio = std::make_unique<Gpio>(config);
+        gpio->initInput();
+
+#if LIBGPIOD_VERSION_MAJOR == 1
+        auto chip = std::make_unique<::gpiod::chip>("gpiochip0");
+        auto line = chip->get_line(2);
+
+        ASSERT_TRUE(line.is_used());
+        EXPECT_EQ(::gpiod::line::DIRECTION_INPUT, line.direction());
+        EXPECT_STREQ("libiqrf:test:input", line.consumer().c_str());
+#else
+        auto chip = std::make_unique<::gpiod::chip>(::std::filesystem::path("/dev/gpiochip0"));
+        auto line_info = chip->get_line_info(2);
+
+        ASSERT_TRUE(line_info.used());
+        EXPECT_EQ(::gpiod::line::direction::INPUT, line_info.direction());
+        EXPECT_STREQ("libiqrf:test:input", line_info.consumer().c_str());
+#endif
+    }
+
+    TEST_F(GpioTest, TestOutput_GPIO) {
+        const iqrf::gpio::GpioConfig config("gpiochip0", 0, "libiqrf:test:output");
+        auto gpio = std::make_unique<Gpio>(config);
+        gpio->initOutput(true);
+
+#if LIBGPIOD_VERSION_MAJOR == 1
+        auto chip = std::make_unique<::gpiod::chip>("gpiochip0");
+        auto line = chip->get_line(0);
+
+        ASSERT_TRUE(line.is_used());
+        EXPECT_EQ(::gpiod::line::DIRECTION_OUTPUT, line.direction());
+        EXPECT_STREQ("libiqrf:test:output", line.consumer().c_str());
+#else
+        auto chip = std::make_unique<::gpiod::chip>(::std::filesystem::path("/dev/gpiochip0"));
+        auto line_info = chip->get_line_info(0);
+
+        ASSERT_TRUE(line_info.used());
+        EXPECT_EQ(::gpiod::line::direction::OUTPUT, line_info.direction());
+        EXPECT_STREQ("libiqrf:test:output", line_info.consumer().c_str());
+#endif
+    }
 }

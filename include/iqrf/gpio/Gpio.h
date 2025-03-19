@@ -16,6 +16,9 @@
 
 #pragma once
 
+#include <memory>
+#include <utility>
+
 #include <gpiod.hpp>
 #if BUILD_TESTS
 #include <gtest/gtest_prod.h>
@@ -32,87 +35,89 @@
 
 namespace iqrf::gpio {
 
-	/**
-	 * GPIO pin
-	 */
-	class Gpio {
-	public:
-		 /**
-		  * Constructor
-		  * @param config GPIO pin configuration
-		  */
-		explicit Gpio(const GpioConfig& config);
+/**
+ * GPIO pin
+ */
+class Gpio {
+ public:
+    /**
+    * Constructor
+    * @param config GPIO pin configuration
+    */
+    explicit Gpio(const GpioConfig& config);
 
-		/**
-		 * Copy Constructor
-		 * @param other Gpio object to copy
-		 */
-		Gpio(const Gpio& other) noexcept;
+    /**
+     * Copy Constructor
+     * @param other Gpio object to copy
+     */
+    Gpio(const Gpio& other) noexcept;
 
-		/**
-		 * Move Constructor
-		 * @param other Gpio object to move
-		 */
-		Gpio(Gpio&& other) noexcept;
+    /**
+     * Move Constructor
+     * @param other Gpio object to move
+     */
+    Gpio(Gpio&& other) noexcept;
 
-		 /**
-		  * Destructor
-		  */
-		~Gpio();
-		
-		/**
-		 * Assignment Operator
-		 */
-		Gpio& operator=(Gpio other) noexcept;
+    /**
+    * Destructor
+    */
+    ~Gpio();
 
-		 /**
-		  * Initializes GPIO pin as an input
-		  */
-		void initInput();
+    /**
+     * Assignment Operator
+     */
+    Gpio& operator=(Gpio other) noexcept;
 
-		 /**
-		  * Initializes GPIO pin as an output
-		  * @param initialValue Initial output value
-		  */
-		void initOutput(bool initialValue);
+    /**
+    * Initializes GPIO pin as an input
+    */
+    void initInput();
 
-		 /**
-		  * Sets GPIO pin direction
-		  * @param direction GPIO pin direction
-		  */
-		void setDirection(iqrf::gpio::GpioDirection direction);
+    /**
+    * Initializes GPIO pin as an output
+    * @param initialValue Initial output value
+    */
+    void initOutput(bool initialValue);
 
-		 /**
-		  * Retrieves GPIO pin direction
-		  * @return GPIO pin direction
-		  */
-		iqrf::gpio::GpioDirection getDirection();
+    /**
+    * Sets GPIO pin direction
+    * @param direction GPIO pin direction
+    */
+    void setDirection(iqrf::gpio::GpioDirection direction);
 
-		 /**
-		  * Sets GPIO pin output value
-		  * @param value GPIO pin output value
-		  */
-		void setValue(bool value);
+    /**
+    * Retrieves GPIO pin direction
+    * @return GPIO pin direction
+    */
+    iqrf::gpio::GpioDirection getDirection();
 
-		/**
-		 * Retrieves GPIO line input value
-		 * @return GPIO line input value
-		 */
-		bool getValue();
+    /**
+    * Sets GPIO pin output value
+    * @param value GPIO pin output value
+    */
+    void setValue(bool value);
 
-		 /**
-		  * Swap function
-		  */
-		friend void swap(Gpio& first, Gpio& second);
-	private:
-		 /// GPIO driver instance
-		std::shared_ptr<iqrf::gpio::Base> impl;
+    /**
+     * Retrieves GPIO line input value
+     * @return GPIO line input value
+     */
+    bool getValue();
 
-		 /// Testing friends
-		FRIEND_TEST(GpioTest, VerifyCopyConstructor_GPIO);
-		FRIEND_TEST(GpioTest, VerifyMoveConstructor_GPIO);
-		FRIEND_TEST(GpioTest, VerifyAssignmentOperator_GPIO);
-	};
+    /**
+    * Swap function
+    */
+    friend void swap(Gpio& first, Gpio& second);
 
-}
+ private:
+    /// GPIO driver instance
+    std::shared_ptr<iqrf::gpio::Base> impl;
 
+#if BUILD_TESTS
+    /// Testing friends
+    FRIEND_TEST(GpioTest, VerifyCopyConstructor_GPIO);
+    FRIEND_TEST(GpioTest, VerifyMoveConstructor_GPIO);
+    FRIEND_TEST(GpioTest, VerifyAssignmentOperator_GPIO);
+#endif
+};
+
+}  // namespace iqrf::gpio

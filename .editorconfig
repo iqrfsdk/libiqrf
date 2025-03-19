@@ -19,7 +19,8 @@ root = true
 end_of_line = lf
 insert_final_newline = true
 charset = utf-8
-indent_style = tab
+indent_style = space
+indent_size = 4
 ij_visual_guides = 80
 
 [.gitlab-ci.yml]

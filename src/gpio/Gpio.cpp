@@ -18,51 +18,52 @@
 
 namespace iqrf::gpio {
 
-	Gpio::Gpio(const GpioConfig& config) : impl(std::make_shared<iqrf::gpio::Gpiod>(config)) {
-	}
-
-	Gpio::Gpio(const Gpio& other) noexcept : impl(other.impl) {
-	}
-
-	Gpio::Gpio(Gpio&& other) noexcept : impl(std::move(other.impl)) {
-	}
-
-	Gpio::~Gpio() {
-		impl.reset();
-	}
-
-	Gpio& Gpio::operator=(Gpio other) noexcept {
-		// copy-and-swap idiom
-		swap(*this, other);
-		return *this;
-	}
-
-	void Gpio::initInput() {
-		impl->initInput();
-	}
-
-	void Gpio::initOutput(bool initialValue) {
-		impl->initOutput(initialValue);
-	}
-
-	void Gpio::setDirection(iqrf::gpio::GpioDirection direction) {
-		impl->setDirection(direction);
-	}
-
-	iqrf::gpio::GpioDirection Gpio::getDirection() {
-		return impl->getDirection();
-	}
-
-	void Gpio::setValue(bool value) {
-		impl->setValue(value);
-	}
-
-	bool Gpio::getValue() {
-		return impl->getValue();
-	}
-
-	void swap(Gpio& first, Gpio& second) {
-		using std::swap;  // Enable ADL
-		swap(first.impl, second.impl);
-	}
+Gpio::Gpio(const GpioConfig& config) : impl(std::make_shared<iqrf::gpio::Gpiod>(config)) {
 }
+
+Gpio::Gpio(const Gpio& other) noexcept : impl(other.impl) {
+}
+
+Gpio::Gpio(Gpio&& other) noexcept : impl(std::move(other.impl)) {
+}
+
+Gpio::~Gpio() {
+    impl.reset();
+}
+
+Gpio& Gpio::operator=(Gpio other) noexcept {
+    // copy-and-swap idiom
+    swap(*this, other);
+    return *this;
+}
+
+void Gpio::initInput() {
+    impl->initInput();
+}
+
+void Gpio::initOutput(bool initialValue) {
+    impl->initOutput(initialValue);
+}
+
+void Gpio::setDirection(iqrf::gpio::GpioDirection direction) {
+    impl->setDirection(direction);
+}
+
+iqrf::gpio::GpioDirection Gpio::getDirection() {
+    return impl->getDirection();
+}
+
+void Gpio::setValue(bool value) {
+    impl->setValue(value);
+}
+
+bool Gpio::getValue() {
+    return impl->getValue();
+}
+
+void swap(Gpio& first, Gpio& second) {
+    using std::swap;  // Enable ADL
+    swap(first.impl, second.impl);
+}
+
+}  // namespace iqrf::gpio

@@ -17,16 +17,16 @@
 
 namespace iqrf::gpio {
 
-	class Base;
+class Base;
 
-	enum class GpioDirection;
+enum class GpioDirection;
 
-	struct GpioConfig;
+struct GpioConfig;
 
-	class GpiodConfig;
+class GpiodConfig;
 
-	class GpioResolver;
+class GpioResolver;
 
-	class Gpio;
+class Gpio;
 
-}
+}  // namespace iqrf::gpio

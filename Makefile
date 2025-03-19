@@ -18,8 +18,9 @@ build: clean
 	cmake -Bbuild -H. -DCMAKE_BUILD_TYPE=Debug -DCMAKE_VERBOSE_MAKEFILE:BOOL=ON
 	cmake --build build
 
-check:
-	cppcheck --enable=all --inconclusive -I include/ --suppress=missingIncludeSystem --quiet examples/ src/
+lint:
+	cpplint --quiet --recursive include/ src/ examples/
+	cppcheck --enable=all --inconclusive -I include/ --suppress=missingIncludeSystem --quiet src/ examples/
 
 test:
 	ctest --test-dir build/tests

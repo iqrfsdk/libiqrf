@@ -22,56 +22,61 @@
 
 namespace iqrf::gpio {
 
-	inline const std::string default_consumer_name = "libiqrf";
+inline const std::string default_consumer_name = "libiqrf";
 
-	/**
-	 * GPIO chip config
-	 */
-	class GpioConfig {
-	public:
-		/// GPIO chip name
-		::std::string chip;
-		/// GPIO line offset
-		::std::size_t line;
-		/// GPIO line name
-		::std::string line_name;
-		/// GPIO pin number (sysfs compatibility)
-		int64_t pin;
+/**
+ * GPIO chip config
+ */
+class GpioConfig {
+ public:
+    /// GPIO chip name
+    ::std::string chip;
+    /// GPIO line offset
+    ::std::size_t line;
+    /// GPIO line name
+    ::std::string line_name;
+    /// GPIO pin number (sysfs compatibility)
+    int64_t pin;
 
-		/// Consumer name for better identification
-		::std::string consumer_name;
+    /// Consumer name for better identification
+    ::std::string consumer_name;
 
-		/**
-		 * Empty constructor for filling up the data later
-		 */
-		GpioConfig();
+    /**
+     * Empty constructor for filling up the data later
+     */
+    GpioConfig();
 
-		/**
-		 * Constructor
-		 * @param chip GPIO chip name
-		 * @param line GPIO line offset
-		 * @param consumer_name Name of the GPIO line consumer
-		 */
-		GpioConfig(const ::std::string& chip, ::std::size_t line, const ::std::string& consumer_name = default_consumer_name);
+    /**
+     * Constructor
+     * @param chip GPIO chip name
+     * @param line GPIO line offset
+     * @param consumer_name Name of the GPIO line consumer
+     */
+    GpioConfig(const ::std::string& chip,
+               ::std::size_t line,
+               const ::std::string& consumer_name = default_consumer_name);
 
-		/**
-		 * Constructor with named line
-		 * @param chip GPIO chip name
-		 * @param line GPIO line name
-		 * @param consumer_name Name of the GPIO line consumer
-		 */
-		GpioConfig(const ::std::string& chip, const ::std::string& line_name, const ::std::string& consumer_name = default_consumer_name);
+    /**
+     * Constructor with named line
+     * @param chip GPIO chip name
+     * @param line GPIO line name
+     * @param consumer_name Name of the GPIO line consumer
+     */
+    GpioConfig(const ::std::string& chip,
+               const ::std::string& line_name,
+               const ::std::string& consumer_name = default_consumer_name);
 
-		/**
-		 * Compatibility constructor for sysfs
-		 * @param pin GPIO pin number
-		 * @param consumer_name Name of the GPIO pin consumer
-		 */
-		explicit GpioConfig(int64_t pin, const ::std::string& consumer_name = default_consumer_name);
+    /**
+     * Compatibility constructor for sysfs
+     * @param pin GPIO pin number
+     * @param consumer_name Name of the GPIO pin consumer
+     */
+    explicit GpioConfig(int64_t pin, const ::std::string& consumer_name = default_consumer_name);
 
-		/**
-		 * Returns textual representation of the configuration.
-		 */
-		const ::std::string to_string() const;
-	};
-}
+    /**
+     * Returns textual representation of the configuration.
+     */
+    const ::std::string to_string() const;
+};
+
+}  // namespace iqrf::gpio

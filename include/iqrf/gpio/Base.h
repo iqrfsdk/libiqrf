@@ -18,52 +18,50 @@
 
 namespace iqrf::gpio {
 
-	/**
-	 * GPIO driver - base interface
-	 */
-	class Base {
-	public:
-		/**
-		 * Destructor
-		 */
-		virtual ~Base() = default;
+/**
+ * GPIO driver - base interface
+ */
+class Base {
+ public:
+    /**
+     * Destructor
+     */
+    virtual ~Base() = default;
 
-		/**
-		 * Initializes GPIO as an input
-		 */
-		virtual void initInput() = 0;
+    /**
+     * Initializes GPIO as an input
+     */
+    virtual void initInput() = 0;
 
-		/**
-		 * Initializes GPIO pin as an output
-		 * @param initialValue
-		 */
-		virtual void initOutput(bool initialValue) = 0;
+    /**
+     * Initializes GPIO pin as an output
+     * @param initialValue
+     */
+    virtual void initOutput(bool initialValue) = 0;
 
-		/**
-		 * Sets GPIO pin direction
-		 * @param direction GPIO pin direction
-		 */
-		virtual void setDirection(iqrf::gpio::GpioDirection direction) = 0;
+    /**
+     * Sets GPIO pin direction
+     * @param direction GPIO pin direction
+     */
+    virtual void setDirection(iqrf::gpio::GpioDirection direction) = 0;
 
-		/**
-		 * Retrieves GPIO pin direction
-		 * @return GPIO pin direction
-		 */
-		virtual iqrf::gpio::GpioDirection getDirection() = 0;
+    /**
+     * Retrieves GPIO pin direction
+     * @return GPIO pin direction
+     */
+    virtual iqrf::gpio::GpioDirection getDirection() = 0;
 
-		/**
-		 * Sets GPIO pin output value
-		 * @param value GPIO pin output value
-		 */
-		virtual void setValue(bool value) = 0;
+    /**
+     * Sets GPIO pin output value
+     * @param value GPIO pin output value
+     */
+    virtual void setValue(bool value) = 0;
 
-		/**
-		 * Retrieves GPIO pin output value
-		 * @return GPIO pin output value
-		 */
-		virtual bool getValue() = 0;
-	};
+    /**
+     * Retrieves GPIO pin output value
+     * @return GPIO pin output value
+     */
+    virtual bool getValue() = 0;
+};
 
-}
-
-
+}  // namespace iqrf::gpio

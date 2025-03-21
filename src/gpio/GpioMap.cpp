@@ -34,7 +34,7 @@ GpioMap getGpioMap() {
         }
     }
 #else
-    std::vector<std::pair<unsigned long, std::filesystem::path>> chips;
+    std::vector< std::pair<unsigned long, std::filesystem::path> > chips;  // NOLINT(runtime/int)
 
     // Load all GPIO chips
     for (auto const &entry : std::filesystem::directory_iterator{GPIO_DIRECTORY}) {

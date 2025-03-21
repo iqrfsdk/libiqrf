@@ -74,7 +74,7 @@ class GpioResolver {
      * @param chip GPIO chip name (contains resolved chip name)
      * @param line Line offset (contains resolved line offset)
      */
-    void resolveGpioPin(int64_t pin, ::std::string& chip, ::std::size_t& line);
+    void resolveGpioPin(int64_t pin, ::std::string& chip, ::std::size_t& line);  // NOLINT(runtime/references)
 
     /**
      * Dumps map of pin numbers and gpio chips / line numbers

@@ -41,9 +41,9 @@ namespace iqrf::gpio {
 class Gpio {
  public:
     /**
-    * Constructor
-    * @param config GPIO pin configuration
-    */
+     * Constructor
+     * @param config GPIO pin configuration
+     */
     explicit Gpio(const GpioConfig& config);
 
     /**
@@ -59,8 +59,8 @@ class Gpio {
     Gpio(Gpio&& other) noexcept;
 
     /**
-    * Destructor
-    */
+     * Destructor
+     */
     ~Gpio();
 
     /**
@@ -69,32 +69,32 @@ class Gpio {
     Gpio& operator=(Gpio other) noexcept;
 
     /**
-    * Initializes GPIO pin as an input
-    */
+     * Initializes GPIO pin as an input
+     */
     void initInput();
 
     /**
-    * Initializes GPIO pin as an output
-    * @param initialValue Initial output value
-    */
+     * Initializes GPIO pin as an output
+     * @param initialValue Initial output value
+     */
     void initOutput(bool initialValue);
 
     /**
-    * Sets GPIO pin direction
-    * @param direction GPIO pin direction
-    */
+     * Sets GPIO pin direction
+     * @param direction GPIO pin direction
+     */
     void setDirection(iqrf::gpio::GpioDirection direction);
 
     /**
-    * Retrieves GPIO pin direction
-    * @return GPIO pin direction
-    */
+     * Retrieves GPIO pin direction
+     * @return GPIO pin direction
+     */
     iqrf::gpio::GpioDirection getDirection();
 
     /**
-    * Sets GPIO pin output value
-    * @param value GPIO pin output value
-    */
+     * Sets GPIO pin output value
+     * @param value GPIO pin output value
+     */
     void setValue(bool value);
 
     /**
@@ -104,8 +104,8 @@ class Gpio {
     bool getValue();
 
     /**
-    * Swap function
-    */
+     * Swap function
+     */
     friend void swap(Gpio& first, Gpio& second);
 
  private:

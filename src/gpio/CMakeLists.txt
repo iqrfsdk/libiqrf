@@ -24,7 +24,6 @@ file(GLOB LIB_HEADERS_BASE
 	"${libiqrf_SOURCE_DIR}/include/${LIB_NAME}/Gpio.h"
 	"${libiqrf_SOURCE_DIR}/include/${LIB_NAME}/GpioMap.h"
 	"${libiqrf_SOURCE_DIR}/include/${LIB_NAME}/GpioResolver.h"
-	"${libiqrf_SOURCE_DIR}/include/${LIB_NAME}/namespace.h"
 	"${libiqrf_SOURCE_DIR}/include/${LIB_NAME}/version.h"
 )
 file(GLOB LIB_SOURCES_BASE

@@ -18,36 +18,52 @@
 
 namespace iqrf::gpio {
 
-	Gpio::Gpio(GpioConfig config) {
-		this->impl = new iqrf::gpio::Gpiod(config);		
-	}
-
-	Gpio::~Gpio() {
-		delete this->impl;
-	}
-
-	void Gpio::initInput() {
-		this->impl->initInput();
-	}
-
-	void Gpio::initOutput(bool initialValue) {
-		this->impl->initOutput(initialValue);
-	}
-
-	void Gpio::setDirection(iqrf::gpio::GpioDirection direction) {
-		this->impl->setDirection(direction);
-	}
-
-	iqrf::gpio::GpioDirection Gpio::getDirection() {
-		return this->impl->getDirection();
-	}
-
-	void Gpio::setValue(bool value) {
-		this->impl->setValue(value);
-	}
-
-	bool Gpio::getValue() {
-		return this->impl->getValue();
-	}
-
+Gpio::Gpio(const GpioConfig& config) : impl(std::make_shared<iqrf::gpio::Gpiod>(config)) {
 }
+
+Gpio::Gpio(const Gpio& other) noexcept : impl(other.impl) {
+}
+
+Gpio::Gpio(Gpio&& other) noexcept : impl(std::move(other.impl)) {
+}
+
+Gpio::~Gpio() {
+    impl.reset();
+}
+
+Gpio& Gpio::operator=(Gpio other) noexcept {
+    // copy-and-swap idiom
+    swap(*this, other);
+    return *this;
+}
+
+void Gpio::initInput() {
+    impl->initInput();
+}
+
+void Gpio::initOutput(bool initialValue) {
+    impl->initOutput(initialValue);
+}
+
+void Gpio::setDirection(iqrf::gpio::GpioDirection direction) {
+    impl->setDirection(direction);
+}
+
+iqrf::gpio::GpioDirection Gpio::getDirection() {
+    return impl->getDirection();
+}
+
+void Gpio::setValue(bool value) {
+    impl->setValue(value);
+}
+
+bool Gpio::getValue() {
+    return impl->getValue();
+}
+
+void swap(Gpio& first, Gpio& second) {
+    using std::swap;  // Enable ADL
+    swap(first.impl, second.impl);
+}
+
+}  // namespace iqrf::gpio

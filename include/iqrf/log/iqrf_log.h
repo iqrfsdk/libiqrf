@@ -24,16 +24,25 @@ extern "C" {
 #include <stdio.h>
 
 typedef enum {
-	IQRF_LOG_LEVEL_FATAL,
-	IQRF_LOG_LEVEL_ERROR,
-	IQRF_LOG_LEVEL_WARNING,
-	IQRF_LOG_LEVEL_INFO,
-	IQRF_LOG_LEVEL_DEBUG,
-	IQRF_LOG_LEVEL_TRACE,
+    IQRF_LOG_LEVEL_FATAL,
+    IQRF_LOG_LEVEL_ERROR,
+    IQRF_LOG_LEVEL_WARNING,
+    IQRF_LOG_LEVEL_INFO,
+    IQRF_LOG_LEVEL_DEBUG,
+    IQRF_LOG_LEVEL_TRACE,
 } iqrf_log_level_t;
 
-typedef void (*iqrf_log_print_t)(iqrf_log_level_t level, const char *file, int line, const char *func, const char *str);
-typedef void (*iqrf_log_printf_t)(iqrf_log_level_t level, const char *file, int line, const char *func, const char *fmt, ...);
+typedef void (*iqrf_log_print_t)(iqrf_log_level_t level,
+                                 const char *file,
+                                 int line,
+                                 const char *func,
+                                 const char *str);
+typedef void (*iqrf_log_printf_t)(iqrf_log_level_t level,
+                                  const char *file,
+                                  int line,
+                                  const char *func,
+                                  const char *fmt,
+                                  ...);
 
 /**
  * Sets the log level
@@ -77,7 +86,11 @@ void iqrf_log_unset_printf();
  * @param func Function name
  * @param str Message
  */
-void iqrf_log_print_default(iqrf_log_level_t level, const char *file, int line, const char *func, const char *str);
+void iqrf_log_print_default(iqrf_log_level_t level,
+                            const char *file,
+                            int line,
+                            const char *func,
+                            const char *str);
 
 /**
  * Default log printf function
@@ -88,7 +101,12 @@ void iqrf_log_print_default(iqrf_log_level_t level, const char *file, int line, 
  * @param fmt Message format
  * @param ... Message arguments
  */
-void iqrf_log_printf_default(iqrf_log_level_t level, const char *file, int line, const char *func, const char *fmt, ...);
+void iqrf_log_printf_default(iqrf_log_level_t level,
+                             const char *file,
+                             int line,
+                             const char *func,
+                             const char *fmt,
+                             ...);
 
 /**
  * Minimal log level to print
@@ -109,12 +127,12 @@ static iqrf_log_printf_t iqrf_log_printf = &iqrf_log_printf_default;
  * Log level names
  */
 static const char *iqrf_log_level_names[] = {
-	"FATAL",
-	"ERROR",
-	"WARNING",
-	"INFO",
-	"DEBUG",
-	"TRACE",
+    "FATAL",
+    "ERROR",
+    "WARNING",
+    "INFO",
+    "DEBUG",
+    "TRACE",
 };
 
 #ifdef NDEBUG
@@ -131,21 +149,21 @@ static const char *iqrf_log_level_names[] = {
 
 #ifndef IQRF_LOG_PRINT
 #define IQRF_LOG_PRINT(level, str) do { \
-	if (iqrf_log_print == NULL) { \
-		fprintf(stderr, "Undefined iqrf_log_print function implementation."); \
-		break; \
-	} \
-	iqrf_log_print(level, __FILE__, __LINE__, __func__, str); \
+    if (iqrf_log_print == NULL) { \
+        fprintf(stderr, "Undefined iqrf_log_print function implementation."); \
+        break; \
+    } \
+    iqrf_log_print(level, __FILE__, __LINE__, __func__, str); \
 } while (0)
 #endif
 
 #ifndef IQRF_LOG_PRINTF
 #define IQRF_LOG_PRINTF(level, fmt, ...) do { \
-	if (iqrf_log_printf == NULL) { \
-		fprintf(stderr, "Undefined iqrf_log_printf function implementation."); \
-		break; \
-	} \
-	iqrf_log_printf(level, __FILE__, __LINE__, __func__, fmt, __VA_ARGS__); \
+    if (iqrf_log_printf == NULL) { \
+        fprintf(stderr, "Undefined iqrf_log_printf function implementation."); \
+        break; \
+    } \
+    iqrf_log_printf(level, __FILE__, __LINE__, __func__, fmt, __VA_ARGS__); \
 } while (0)
 #endif
 

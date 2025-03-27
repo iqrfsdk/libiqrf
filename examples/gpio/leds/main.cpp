@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-#include "iqrf/gpio/Gpio.h"
-
 #include <csignal>
 #include <iostream>
 #include <thread>
+
+#include "iqrf/gpio/Gpio.h"
 
 /// Green LED configuration
 const iqrf::gpio::GpioConfig greenLedConfig(0);
@@ -36,34 +36,34 @@ auto *redLed = new iqrf::gpio::Gpio(redLedConfig);
  * @param signal Signal number
  */
 void signalHandler(int signal) {
-	std::cout << "Signal " << signal << " received. Exiting..." << std::endl;
+    std::cout << "Signal " << signal << " received. Exiting..." << std::endl;
 
-	greenLed->setValue(false);
-	redLed->setValue(false);
+    greenLed->setValue(false);
+    redLed->setValue(false);
 
-	delete greenLed;
-	delete redLed;
+    delete greenLed;
+    delete redLed;
 
-	exit(signal);
+    exit(signal);
 }
 
 int main() {
-	signal(SIGINT, signalHandler);
-	signal(SIGTERM, signalHandler);
+    signal(SIGINT, signalHandler);
+    signal(SIGTERM, signalHandler);
 
-	bool greenLedState = false;
-	bool redLedState = true;
+    bool greenLedState = false;
+    bool redLedState = true;
 
-	greenLed->initOutput(greenLedState);
-	redLed->initOutput(redLedState);
+    greenLed->initOutput(greenLedState);
+    redLed->initOutput(redLedState);
 
-	while (true) {
-		greenLedState = !greenLedState;
-		redLedState = !redLedState;
-		greenLed->setValue(greenLedState);
-		redLed->setValue(redLedState);
-		std::this_thread::sleep_for(std::chrono::seconds(1));
-	}
+    while (true) {
+        greenLedState = !greenLedState;
+        redLedState = !redLedState;
+        greenLed->setValue(greenLedState);
+        redLed->setValue(redLedState);
+        std::this_thread::sleep_for(std::chrono::seconds(1));
+    }
 
-	return 0;
+    return 0;
 }

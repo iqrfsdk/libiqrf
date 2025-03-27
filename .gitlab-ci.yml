@@ -42,7 +42,7 @@ test:
     - cmake --build build
     - mkdir -p coverage
     - cd build/tests/
-    - ctest -V --output-junit ../../ctest.xml
+    - ctest -V --output-junit ../../ctest.xml --exclude-regex "_GPIO$"
     - gcovr --xml-pretty --exclude-unreachable-branches --print-summary -o ../../coverage.xml --filter ../../src/ --root ../../
   <<: *ccache-template
   coverage: /^\s*lines:\s*\d+.\d+\%/

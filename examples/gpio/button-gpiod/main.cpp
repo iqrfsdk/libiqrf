@@ -29,40 +29,39 @@ auto *button = new iqrf::gpio::Gpio(conf);
  * @param signal Signal number
  */
 void signalHandler(int signal) {
-	std::cout << "Signal " << signal << " received. Exiting..." << std::endl;
+    std::cout << "Signal " << signal << " received. Exiting..." << std::endl;
 
-	delete button;
+    delete button;
 
-	exit(signal);
+    exit(signal);
 }
 
 int main() {
+    std::cout << conf.to_string() << std::endl;
 
-	std::cout << conf.to_string() << std::endl;
+    signal(SIGINT, signalHandler);
+    signal(SIGTERM, signalHandler);
+    button->initInput();
+    uint64_t counter = 0;
 
-	signal(SIGINT, signalHandler);
-	signal(SIGTERM, signalHandler);
-	button->initInput();
-	bool buttonState;
-	uint64_t counter = 0;
+    while (true) {
+        if (button->getValue()) {
+            if (counter > 0) {
+                std::cout << "Button has been released. Button was pressed for "
+                          << std::to_string(static_cast<double>(counter) / 10.0)
+                          << " s."
+                          << std::endl;
+            }
+            counter = 0;
+        } else {
+            if (counter == 0) {
+                std::cout << "Button has been pressed." << std::endl;
+            }
+            counter++;
+        }
 
-	while (true) {
-		buttonState = button->getValue();
+        std::this_thread::sleep_for(std::chrono::milliseconds(100));
+    }
 
-		if (buttonState) {
-			if (counter > 0) {
-				std::cout << "Button has been released. Button was pressed for " << std::to_string(static_cast<double>(counter) / 10.0) << " s." << std::endl;
-			}
-			counter = 0;
-		} else {
-			if (counter == 0) {
-				std::cout << "Button has been pressed." << std::endl;
-			}
-			counter++;
-		}
-
-		std::this_thread::sleep_for(std::chrono::milliseconds(100));
-	}
-
-	return 0;
+    return 0;
 }

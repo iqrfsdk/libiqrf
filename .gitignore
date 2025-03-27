@@ -1,7 +1,10 @@
 # IDES
 .idea/
 .vscode/
+.devcontainer/
 cmake-build-debug/
+# CMake generated files
+include/iqrf/gpio/version.h
 # VIM swapfiles
 *.swp
 # Compiled Object files, Static and Dynamic libs (Shared Objects)

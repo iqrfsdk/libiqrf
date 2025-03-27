@@ -20,15 +20,14 @@
 
 namespace iqrf::gpio {
 
-	/**
-	 * GPIO pin direction
-	 */
-	enum class GpioDirection {
-		/// Input
-		Input,
-		/// Output
-		Output
-	};
+/**
+ * GPIO pin direction
+ */
+enum class GpioDirection {
+    /// Input
+    Input,
+    /// Output
+    Output
+};
 
-}
-
+}  // namespace iqrf::gpio

@@ -17,14 +17,15 @@
 #pragma once
 
 #include <cstdint>
-#include <gpiod.hpp>
-#include <string>
-#include <iostream>
+#include <filesystem>
 #include <fstream>
+#include <iostream>
+#include <memory>
 #include <sstream>
 #include <stdexcept>
-#include <filesystem>
+#include <string>
 
+#include <gpiod.hpp>
 #if BUILD_TESTS
 #include <gtest/gtest_prod.h>
 #endif
@@ -35,80 +36,75 @@
 
 namespace iqrf::gpio {
 
-	/**
-	 * GPIO driver - gpiod
-	 */
-	class Gpiod: public Base {
-	public:
-		/**
-		 * Constructor
-		 * @param config
-		 * @throws std::system_error for invalid chip name or busy GPIO line
-		 * @throws std::out_of_range for line offset out of bands
-		 */
-		Gpiod(GpioConfig config);
+/**
+ * GPIO driver - gpiod
+ */
+class Gpiod: public Base {
+ public:
+    /**
+     * Constructor
+     * @param config
+     * @throws std::system_error for invalid chip name or busy GPIO line
+     * @throws std::out_of_range for line offset out of bands
+     */
+    explicit Gpiod(GpioConfig config);
 
-		/**
-		 * Constructor
-		 * @param chip GPIO chip name
-		 * @param line GPIO line offset
-		 */
-		// explicit Gpiod(::std::filesystem::path chip, int line);
+    /**
+     * Constructor
+     * @param chip GPIO chip name
+     * @param line GPIO line offset
+     */
+    // explicit Gpiod(::std::filesystem::path chip, int line);
 
-		/**
-		 * Destructor
-		 */
-		~Gpiod() override;
+    /**
+     * Destructor
+     */
+    ~Gpiod() override;
 
-		/**
-		 * Initializes GPIO line as an input
-		 */
-		void initInput() override;
+    /**
+     * Initializes GPIO line as an input
+     */
+    void initInput() override;
 
-		/**
-		 * Initializes GPIO line as an output
-		 * @param initialValue Initial output value
-		 */
-		void initOutput(bool initialValue) override;
+    /**
+     * Initializes GPIO line as an output
+     * @param initialValue Initial output value
+     */
+    void initOutput(bool initialValue) override;
 
-		/**
-		 * Sets GPIO line direction
-		 * @param direction GPIO line direction
-		 */
-		void setDirection(iqrf::gpio::GpioDirection direction) override;
+    /**
+     * Sets GPIO line direction
+     * @param direction GPIO line direction
+     */
+    void setDirection(iqrf::gpio::GpioDirection direction) override;
 
-		/**
-		 * Retrieves GPIO line direction
-		 * @return GPIO line direction
-		 */
-		iqrf::gpio::GpioDirection getDirection() override;
+    /**
+     * Retrieves GPIO line direction
+     * @return GPIO line direction
+     */
+    iqrf::gpio::GpioDirection getDirection() override;
 
-		/**
-		 * Sets GPIO line output value
-		 * @param value GPIO line output value
-		 */
-		void setValue(bool value) override;
+    /**
+     * Sets GPIO line output value
+     * @param value GPIO line output value
+     */
+    void setValue(bool value) override;
 
-		/**
-		 * Retrieves GPIO line input value
-		 * @return GPIO line input value
-		 */
-		bool getValue() override;
-	private:
-		/**
-		 * Generate consumer name
-		 * @return Consumer name
-		 */
-		std::string generateConsumerName();
+    /**
+     * Retrieves GPIO line input value
+     * @return GPIO line input value
+     */
+    bool getValue() override;
 
-		/// GPIO chip
-		std::unique_ptr<::gpiod::chip> chip;
-		/// GPIO line
-		::gpiod::line::offset line;
-		/// Request
-		std::unique_ptr<::gpiod::line_request> request;
-	};
+ private:
+    /// GPIO chip
+    std::unique_ptr<::gpiod::chip> chip;
+    /// GPIO line
+    ::gpiod::line::offset line;
+    /// Request
+    std::unique_ptr<::gpiod::line_request> request;
+    /// Name
+    ::std::string name;
+};
 
-}
-
-
+}  // namespace iqrf::gpio

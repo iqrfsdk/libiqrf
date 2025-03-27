@@ -20,7 +20,7 @@ build: clean
 
 lint:
 	cpplint --quiet --recursive include/ src/ examples/
-	cppcheck --enable=all --inconclusive -I include/ --suppress=missingIncludeSystem --quiet src/ examples/
+	cppcheck --enable=all --inconclusive -I include/ --suppress=missingIncludeSystem --inline-suppr --quiet src/ examples/
 
 test:
 	ctest --test-dir build/tests

@@ -47,6 +47,12 @@ X(Trace, 10)
 #define IQRF_TRACE() \
     IQRF_LOG(iqrf::log::Level::Trace) << __FILE__ << ":" << __LINE__ << " - " << __func__ << "(): "
 
+/**
+ * Log header is prepended to every log message.
+ */
+#ifndef IQRF_LOG_HEADER
+#define IQRF_LOG_HEADER "[" << LevelNames.at(level) << "] "
+#endif
 
 namespace iqrf::log {
 

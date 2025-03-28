@@ -25,8 +25,8 @@ Logger::Logger(): messageLevel(Level::Info) {}
 std::ostringstream& Logger::stream(Level level) {
     messageLevel = level;
 
-    // Include a header with log level
-    buffer << "[" << LevelNames.at(level) << "] ";
+    // Include the log header
+    buffer << IQRF_LOG_HEADER;
 
     return buffer;
 }

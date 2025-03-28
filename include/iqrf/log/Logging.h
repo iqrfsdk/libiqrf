@@ -12,6 +12,7 @@
 #pragma once
 
 #include <iostream>
+#include <memory>
 #include <unordered_map>
 #include <sstream>
 #include <string>
@@ -22,18 +23,18 @@
  * Severity levels are compatible with Syslog.
  */
 #define _IQRF_LOG_LEVELS \
-X(Fatal, 2)             \
-X(Error, 3)             \
-X(Warning, 4)           \
-X(Info, 6)              \
-X(Debug, 7)             \
+X(Fatal, 2)              \
+X(Error, 3)              \
+X(Warning, 4)            \
+X(Info, 6)               \
+X(Debug, 7)              \
 X(Trace, 10)
 
 /**
  * Main logging macro.
  */
 #define IQRF_LOG(level)            \
-    if (level > Logger::logLevel) \
+    if (level > Logger::logLevel)  \
         ;                          \
     else                           \
         Logger().stream(level)
@@ -67,9 +68,16 @@ const std::unordered_map<Level, std::string> LevelNames = {
     #undef X
 };
 
+class ILog {
+ public:
+    virtual ~ILog() = default;
+    virtual void append(const std::string& msg) = 0;
+};
+
 class Logger {
  public:
     static Level logLevel;
+    static std::unique_ptr<ILog> log;
 
     Logger();
     virtual ~Logger();
@@ -93,6 +101,11 @@ class Logger {
 
     Logger(const Logger&) = default;
     Logger& operator=(const Logger&) = default;
+};
+
+class StderrLog : public ILog {
+ public:
+    void append(const std::string& msg) override;
 };
 
 }  // namespace iqrf::log

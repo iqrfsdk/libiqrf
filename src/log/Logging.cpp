@@ -13,6 +13,8 @@
 
 namespace iqrf::log {
 
+std::unique_ptr<ILog> Logger::log = std::make_unique<StderrLog>();
+
 // Default Log Level is Error
 Level Logger::logLevel = Level::Error;
 
@@ -31,7 +33,11 @@ std::ostringstream& Logger::stream(Level level) {
 
 Logger::~Logger() {
     buffer << std::endl;
-    fprintf(stderr, "%s", buffer.str().c_str());
+    log->append(buffer.str());
+}
+
+void StderrLog::append(const std::string& msg) {
+    fprintf(stderr, "%s", msg.c_str());
     fflush(stderr);
 }
 

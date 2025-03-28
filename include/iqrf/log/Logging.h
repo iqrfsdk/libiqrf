@@ -68,18 +68,56 @@ const std::unordered_map<Level, std::string> LevelNames = {
     #undef X
 };
 
+/**
+ * Log interface.
+ * 
+ * Represents an output where logs are stored.
+ */
 class ILog {
  public:
+    /**
+     * Virtual destructor to prevent possible inheritance leaks.
+     */
     virtual ~ILog() = default;
+
+    /**
+     * Add the message `msg` to the log.
+     * 
+     * @param msg is a message which shall be appended.
+     */
     virtual void append(const std::string& msg) = 0;
 };
 
+/**
+ * The main logging class.
+ * 
+ * Accumulates the log messages and then appends it to a log output.
+ */
 class Logger {
  public:
+    /**
+     * Reporting level which is shared amongst all loggers. 
+     * 
+     * Defaults to Level::Error.
+     */
     static Level logLevel;
+    /**
+     * Output log shared amongst all loggers.
+     * 
+     * Defaults to logging to stderr.
+     */
     static std::unique_ptr<ILog> log;
 
+    /**
+     * Constructor
+     * 
+     * Creates a new empty Logger instance. The default message severity level is Level::Info.
+     */
     Logger();
+
+    /**
+     * Writes the contents of accumulated log message and destructs the Logger.
+     */
     virtual ~Logger();
 
     /**
@@ -94,17 +132,29 @@ class Logger {
     std::ostringstream& stream(Level level = Level::Info);
 
  protected:
+    /**
+     * String stream where the log message is accumulated.
+     */
     std::ostringstream buffer;
 
  private:
+    /**
+     * The severity level of this message.
+     */
     Level messageLevel;
 
     Logger(const Logger&) = default;
     Logger& operator=(const Logger&) = default;
 };
 
+/**
+ * Implementation of the Log interface for logging into stderr.
+ */
 class StderrLog : public ILog {
  public:
+    /**
+     * Appends the message to stderr.
+     */
     void append(const std::string& msg) override;
 };
 

@@ -1,6 +1,6 @@
-#include <regex>
-
 #include <gtest/gtest.h>
+
+#include <regex>
 
 #include "iqrf/log/Logging.h"
 
@@ -72,8 +72,7 @@ TEST_F(LoggingTest, SeverityLevels) {
 TEST_F(LoggingTest, VerifyTraceInfo) {
     Logger::logLevel = Level::Trace;
     const std::regex trace_regex(
-        "\\[Trace\\] .*/tests/LoggingTest.cpp:[0-9]+ - TestBody\\(\\): Tracing information.\n"
-    );
+        "\\[Trace\\] LoggingTest.cpp:[0-9]+ - TestBody\\(\\): Tracing information.\n");
 
     ::testing::internal::CaptureStderr();
 

@@ -22,7 +22,7 @@ Level Logger::logLevel = Level::Error;
 Logger::Logger(): messageLevel(Level::Info) {}
 
 // cppcheck-suppress unusedFunction
-std::ostringstream& Logger::stream(Level level) {
+std::ostringstream& Logger::stream(const Level level) {
     messageLevel = level;
 
     // Include the log header

@@ -45,13 +45,20 @@ X(Trace, 10)
  * Includes file, line and function where it was called.
  */
 #define IQRF_TRACE() \
-    IQRF_LOG(iqrf::log::Level::Trace) << __FILE__ << ":" << __LINE__ << " - " << __func__ << "(): "
+    IQRF_LOG(iqrf::log::Level::Trace) << __FILENAME__ << ":" << __LINE__ << " - " << __func__ << "(): "
 
 /**
  * Log header is prepended to every log message.
  */
 #ifndef IQRF_LOG_HEADER
 #define IQRF_LOG_HEADER "[" << LevelNames.at(level) << "] "
+#endif
+
+/**
+ * Strip the path from __FILE__ and keep only file name.
+ */
+#ifndef __FILENAME__
+#define __FILENAME__ (strrchr(__FILE__, '/') ? strrchr(__FILE__, '/') + 1 : __FILE__)
 #endif
 
 namespace iqrf::log {
@@ -121,6 +128,9 @@ class Logger {
      */
     Logger();
 
+    Logger(const Logger&) = delete;
+    Logger& operator=(const Logger&) = delete;
+
     /**
      * Writes the contents of accumulated log message and destructs the Logger.
      */
@@ -135,7 +145,7 @@ class Logger {
      *
      * @details Preferred use is via the IQRF_LOG macro.
      */
-    std::ostringstream& stream(Level level = Level::Info);
+    std::ostringstream& stream(const Level level = Level::Info);
 
  protected:
     /**
@@ -148,9 +158,6 @@ class Logger {
      * The severity level of this message.
      */
     Level messageLevel;
-
-    Logger(const Logger&) = default;
-    Logger& operator=(const Logger&) = default;
 };
 
 /**

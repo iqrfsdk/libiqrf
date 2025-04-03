@@ -13,3 +13,4 @@
 # limitations under the License.
 
 add_subdirectory(gpio)
+add_subdirectory(log)

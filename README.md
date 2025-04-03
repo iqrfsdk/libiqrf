@@ -16,7 +16,7 @@ This repository contains the IQRF libraries for C/C++.
 
 ## Dependencies
 
-- [CMake](https://cmake.org/) >= 3.5
+- [CMake](https://cmake.org/) >= 3.8
 - [Libgpiod](https://libgpiod.readthedocs.io/en/latest/index.html) >= 1.6.2
 - [Ccache](https://ccache.dev/) >= 3.7 (optional)
 

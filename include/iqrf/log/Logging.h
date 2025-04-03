@@ -37,7 +37,7 @@ X(Trace, 10)
     if (level > ::iqrf::log::Logger::logLevel)  \
         ;                          \
     else                           \
-        iqrf::log::Logger().stream(level)
+        iqrf::log::Logger().stream(level) << IQRF_LOG_HEADER(level)
 
 /**
  * Trace logging shorthand.
@@ -51,7 +51,7 @@ X(Trace, 10)
  * Log header is prepended to every log message.
  */
 #ifndef IQRF_LOG_HEADER
-#define IQRF_LOG_HEADER "[" << ::iqrf::log::LevelNames.at(level) << "] "
+#define IQRF_LOG_HEADER(level) "[" << ::iqrf::log::LevelNames.at(level) << "] "
 #endif
 
 /**
@@ -99,6 +99,14 @@ class ILog {
      * @param msg is a message which shall be appended.
      */
     virtual void append(const std::string& msg) = 0;
+
+    /**
+     * Add the message `msg` to the log with severity level `severity`.
+     *
+     * @param msg is a message which shall be appended.
+     * @param severity is the severity level of the message.
+     */
+    virtual void append(const std::string& msg, const Level& severity);
 };
 
 /**

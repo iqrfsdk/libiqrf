@@ -23,16 +23,17 @@ Logger::Logger(): messageLevel(Level::Info) {}
 
 std::ostringstream& Logger::stream(const Level level) {
     messageLevel = level;
-
-    // Include the log header
-    buffer << IQRF_LOG_HEADER;
-
     return buffer;
 }
 
 Logger::~Logger() {
     buffer << std::endl;
-    log->append(buffer.str());
+    log->append(buffer.str(), messageLevel);
+}
+
+void ILog::append(const std::string& msg, const Level& severity) {
+    (void)severity;
+    this->append(msg);
 }
 
 void StderrLog::append(const std::string& msg) {

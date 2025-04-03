@@ -24,11 +24,12 @@ TEST_F(LoggingTest, CheckDefaultLogLevel) {
 TEST_F(LoggingTest, DefaultLogging) {
     std::string message;
 
-    ::testing::internal::CaptureStderr();
     Logger::logLevel = Level::Info;
+
+    ::testing::internal::CaptureStderr();
     Logger().stream(Level::Info) << "Basic information logging.";
     message = ::testing::internal::GetCapturedStderr();
-    ASSERT_STREQ(message.c_str(), "[Info] Basic information logging.\n");
+    ASSERT_STREQ(message.c_str(), "Basic information logging.\n");
 
     ::testing::internal::CaptureStderr();
     IQRF_LOG(Level::Error) << "An error occured.";

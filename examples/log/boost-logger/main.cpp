@@ -15,6 +15,9 @@
 #include <boost/log/sinks.hpp>
 #include <boost/log/trivial.hpp>
 
+// Override the log header so it does not duplicate the severity level
+#define IQRF_LOG_HEADER(level) ""
+
 #include "iqrf/log/Logging.h"
 
 namespace logging = boost::log;
@@ -28,13 +31,50 @@ namespace iqrf::log {
 /**
  * Implementation of the Log interface for logging into boost::log.
  */
-class BoostLog : public ILog {
+class BoostLogTrivial : public ILog {
  public:
   /**
-   * Appends the message to Boost logger.
+   * Appends the message to Boost logger with default severity.
+   *
+   * @param msg is a message which shall be appended.
    */
   void append(const std::string& msg) override {
-    BOOST_LOG_TRIVIAL(info) << msg;
+    this->append(msg, Level::Info);
+  }
+
+  /**
+   * Appends the message to Boost logger with severity `severity`.
+   *
+   * @param msg is a message which shall be appended.
+   * @param severity is the severity level of the message.
+   * 
+   * @details Boost Trivial Logging uses lvl from BOOST_LOG_TRIVIAL(lvl) to expand
+   * ::boost::log::trivial::lvl, so unfortunatelly no simpler mapping is possible.
+   */
+  void append(const std::string& msg, const Level& severity) override {
+    switch (severity) {
+    case Level::Fatal:
+        BOOST_LOG_TRIVIAL(fatal) << msg;
+        break;
+    case Level::Error:
+        BOOST_LOG_TRIVIAL(error) << msg;
+        break;
+    case Level::Warning:
+        BOOST_LOG_TRIVIAL(warning) << msg;
+        break;
+    case Level::Info:
+        BOOST_LOG_TRIVIAL(info) << msg;
+        break;
+    case Level::Debug:
+        BOOST_LOG_TRIVIAL(debug) << msg;
+        break;
+    case Level::Trace:
+        BOOST_LOG_TRIVIAL(trace) << msg;
+        break;
+    default:
+        BOOST_LOG_TRIVIAL(info) << msg;
+        break;
+    }
   }
 };
 
@@ -56,7 +96,7 @@ void init_logging() {
     boost::shared_ptr<sink_t> sink(new sink_t(backend));
 
     // Add information that this was logged by Boost
-    sink->set_formatter(expr::stream << "(Boost:" << logging::trivial::severity << ") " << expr::smessage);
+    sink->set_formatter(expr::stream << "(Boost) [" << logging::trivial::severity << "] " << expr::smessage);
 
     // Register the sink in the core
     logging::core::get()->add_sink(sink);
@@ -68,7 +108,7 @@ int main() {
 
     // Initialize logging with libiqrf
     iqrf_log::Logger::logLevel = iqrf_log::Level::Trace;
-    iqrf_log::Logger::log = std::make_unique<iqrf_log::BoostLog>();
+    iqrf_log::Logger::log = std::make_unique<iqrf_log::BoostLogTrivial>();
 
     // Write several log messages
     IQRF_LOG(iqrf_log::Level::Trace) << "This is a trace message.";

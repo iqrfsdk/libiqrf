@@ -21,7 +21,6 @@ Level Logger::logLevel = Level::Error;
 // Default Message Level is Info
 Logger::Logger(): messageLevel(Level::Info) {}
 
-// cppcheck-suppress unusedFunction
 std::ostringstream& Logger::stream(const Level level) {
     messageLevel = level;
 

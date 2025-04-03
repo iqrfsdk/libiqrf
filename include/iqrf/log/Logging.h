@@ -34,10 +34,10 @@ X(Trace, 10)
  * Main logging macro.
  */
 #define IQRF_LOG(level)            \
-    if (level > Logger::logLevel)  \
+    if (level > ::iqrf::log::Logger::logLevel)  \
         ;                          \
     else                           \
-        Logger().stream(level)
+        iqrf::log::Logger().stream(level)
 
 /**
  * Trace logging shorthand.
@@ -45,13 +45,13 @@ X(Trace, 10)
  * Includes file, line and function where it was called.
  */
 #define IQRF_TRACE() \
-    IQRF_LOG(iqrf::log::Level::Trace) << __FILENAME__ << ":" << __LINE__ << " - " << __func__ << "(): "
+    IQRF_LOG(::iqrf::log::Level::Trace) << __FILENAME__ << ":" << __LINE__ << " - " << __func__ << "(): "
 
 /**
  * Log header is prepended to every log message.
  */
 #ifndef IQRF_LOG_HEADER
-#define IQRF_LOG_HEADER "[" << LevelNames.at(level) << "] "
+#define IQRF_LOG_HEADER "[" << ::iqrf::log::LevelNames.at(level) << "] "
 #endif
 
 /**

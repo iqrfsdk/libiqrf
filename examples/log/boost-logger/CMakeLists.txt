@@ -10,7 +10,7 @@
 set(EXAMPLE_NAME iqrf-log-boost-logger)
 
 # Find the Boost package
-find_package(Boost REQUIRED COMPONENTS log log_setup system)
+find_package(Boost CONFIG REQUIRED COMPONENTS log log_setup system)
 
 include_directories(${PROJECT_SOURCE_DIR}/include)
 

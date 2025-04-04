@@ -41,6 +41,10 @@ option(BUILD_STATIC "Build static library" OFF)
 option(BUILD_SHARED "Build shared library" ON)
 option(CODE_COVERAGE "Enable coverage reporting" OFF)
 
+if (NOT BUILD_STATIC AND NOT BUILD_SHARED)
+    message(FATAL_ERROR "At least one of BUILD_STATIC or BUILD_SHARED must be ON")
+endif()
+
 if (BUILD_TESTS)
     add_compile_definitions(BUILD_TESTS=1)
 else ()

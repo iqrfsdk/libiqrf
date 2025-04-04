@@ -35,7 +35,7 @@ auto *redLed = new iqrf::gpio::Gpio(redLedConfig);
  * Signal handler
  * @param signal Signal number
  */
-void signalHandler(int signal) {
+void signalHandler(const int signal) {
     std::cout << "Signal " << signal << " received. Exiting..." << std::endl;
 
     greenLed->setValue(false);

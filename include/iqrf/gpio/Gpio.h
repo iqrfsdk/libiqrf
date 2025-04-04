@@ -71,42 +71,42 @@ class Gpio {
     /**
      * Initializes GPIO pin as an input
      */
-    void initInput();
+    void initInput() const;
 
     /**
      * Initializes GPIO pin as an output
      * @param initialValue Initial output value
      */
-    void initOutput(bool initialValue);
+    void initOutput(bool initialValue) const;
 
     /**
      * Sets GPIO pin direction
      * @param direction GPIO pin direction
      */
-    void setDirection(iqrf::gpio::GpioDirection direction);
+    void setDirection(iqrf::gpio::GpioDirection direction) const;
 
     /**
      * Retrieves GPIO pin direction
      * @return GPIO pin direction
      */
-    iqrf::gpio::GpioDirection getDirection();
+    iqrf::gpio::GpioDirection getDirection() const;
 
     /**
      * Sets GPIO pin output value
      * @param value GPIO pin output value
      */
-    void setValue(bool value);
+    void setValue(bool value) const;
 
     /**
      * Retrieves GPIO line input value
      * @return GPIO line input value
      */
-    bool getValue();
+    bool getValue() const;
 
     /**
      * Swap function
      */
-    friend void swap(Gpio& first, Gpio& second);
+    friend void swap(Gpio& first, Gpio& second) noexcept;
 
  private:
     /// GPIO driver instance

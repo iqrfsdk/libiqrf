@@ -59,7 +59,7 @@ class GpioConfig {
     /**
      * Constructor with named line
      * @param chip GPIO chip name
-     * @param line GPIO line name
+     * @param line_name GPIO line name
      * @param consumer_name Name of the GPIO line consumer
      */
     GpioConfig(const ::std::string& chip,
@@ -76,7 +76,7 @@ class GpioConfig {
     /**
      * Returns textual representation of the configuration.
      */
-    const ::std::string to_string() const;
+    ::std::string to_string() const;
 };
 
 }  // namespace iqrf::gpio

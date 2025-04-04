@@ -21,8 +21,7 @@ insert_final_newline = true
 charset = utf-8
 indent_style = space
 indent_size = 4
-ij_visual_guides = 80
+ij_visual_guides = 80, 120
 
 [.gitlab-ci.yml]
-indent_style = space
 indent_size = 2

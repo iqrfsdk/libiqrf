@@ -35,7 +35,7 @@ class Base {
 
     /**
      * Initializes GPIO pin as an output
-     * @param initialValue
+     * @param initialValue Initial output value
      */
     virtual void initOutput(bool initialValue) = 0;
 

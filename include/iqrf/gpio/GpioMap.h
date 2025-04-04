@@ -26,7 +26,7 @@ namespace iqrf::gpio {
 
     /**
      * Get map of GPIO pins and chips names / line offsets
-     * @return Map of PGIO pins and chips / line offsets
+     * @return Map of GPIO pins and chips / line offsets
      */
     GpioMap getGpioMap();
 }

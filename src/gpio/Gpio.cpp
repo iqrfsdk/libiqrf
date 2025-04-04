@@ -37,31 +37,31 @@ Gpio& Gpio::operator=(Gpio other) noexcept {
     return *this;
 }
 
-void Gpio::initInput() {
+void Gpio::initInput() const {
     impl->initInput();
 }
 
-void Gpio::initOutput(bool initialValue) {
+void Gpio::initOutput(const bool initialValue) const {
     impl->initOutput(initialValue);
 }
 
-void Gpio::setDirection(iqrf::gpio::GpioDirection direction) {
+void Gpio::setDirection(const iqrf::gpio::GpioDirection direction) const {
     impl->setDirection(direction);
 }
 
-iqrf::gpio::GpioDirection Gpio::getDirection() {
+iqrf::gpio::GpioDirection Gpio::getDirection() const {
     return impl->getDirection();
 }
 
-void Gpio::setValue(bool value) {
+void Gpio::setValue(const bool value) const {
     impl->setValue(value);
 }
 
-bool Gpio::getValue() {
+bool Gpio::getValue() const {
     return impl->getValue();
 }
 
-void swap(Gpio& first, Gpio& second) {
+void swap(Gpio& first, Gpio& second) noexcept {
     using std::swap;  // Enable ADL
     swap(first.impl, second.impl);
 }

@@ -41,18 +41,11 @@ class Gpiod: public Base {
  public:
     /**
      * Constructor
-     * @param config
+     * @param config GPIO configuration
      * @throws std::system_error for invalid chip name or busy GPIO line
      * @throws std::out_of_range for line offset out of bands
      */
-    explicit Gpiod(GpioConfig config);
-
-    /**
-     * Constructor
-     * @param chip GPIO chip name
-     * @param line GPIO line offset
-     */
-    // explicit Gpiod(::std::filesystem::path chip, int line);
+    explicit Gpiod(const GpioConfig& config);
 
     /**
      * Destructor

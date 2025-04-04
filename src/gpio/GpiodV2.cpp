@@ -18,17 +18,12 @@
 
 namespace iqrf::gpio {
 
-Gpiod::Gpiod(GpioConfig config)
+Gpiod::Gpiod(const GpioConfig& config)
     : chip(std::make_unique<::gpiod::chip>(::std::filesystem::path("/dev/" + config.chip))) {
-    if (!chip.get()) {
-        throw std::runtime_error("No GPIO chip '/dev/" + config.chip + "' found");
-    }
-
     if (config.line_name.empty()) {
         line = config.line;
     } else {
-        int offset;
-        offset = chip->get_line_offset_from_name(config.line_name);
+        int offset = chip->get_line_offset_from_name(config.line_name);
         if (offset >= 0) {
             line = offset;
         } else {
@@ -55,8 +50,8 @@ void Gpiod::initInput() {
             .do_request());
 }
 
-void Gpiod::initOutput(bool initialValue) {
-    auto val = initialValue ? ::gpiod::line::value::ACTIVE : ::gpiod::line::value::INACTIVE;
+void Gpiod::initOutput(const bool initialValue) {
+    const auto val = initialValue ? ::gpiod::line::value::ACTIVE : ::gpiod::line::value::INACTIVE;
 
     // Initialize line request
     request = std::make_unique<::gpiod::line_request>(
@@ -71,8 +66,8 @@ void Gpiod::initOutput(bool initialValue) {
             .do_request());
 }
 
-void Gpiod::setDirection(iqrf::gpio::GpioDirection direction) {
-    auto dir = (direction == iqrf::gpio::GpioDirection::Input) ?
+void Gpiod::setDirection(const iqrf::gpio::GpioDirection direction) {
+    const auto dir = direction == iqrf::gpio::GpioDirection::Input ?
         ::gpiod::line::direction::INPUT :
         ::gpiod::line::direction::OUTPUT;
 
@@ -89,7 +84,7 @@ void Gpiod::setDirection(iqrf::gpio::GpioDirection direction) {
 
 iqrf::gpio::GpioDirection Gpiod::getDirection() {
     // Get line direction
-    auto direction = chip->get_line_info(line).direction();
+    const auto direction = chip->get_line_info(line).direction();
     switch (direction) {
         case ::gpiod::line::direction::OUTPUT:
             return iqrf::gpio::GpioDirection::Output;
@@ -100,8 +95,8 @@ iqrf::gpio::GpioDirection Gpiod::getDirection() {
     }
 }
 
-void Gpiod::setValue(bool value) {
-    auto val = value ? ::gpiod::line::value::ACTIVE : ::gpiod::line::value::INACTIVE;
+void Gpiod::setValue(const bool value) {
+    const auto val = value ? ::gpiod::line::value::ACTIVE : ::gpiod::line::value::INACTIVE;
     request->set_value(line, val);
 }
 

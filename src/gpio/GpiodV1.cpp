@@ -18,7 +18,7 @@
 
 namespace iqrf::gpio {
 
-Gpiod::Gpiod(GpioConfig config) : chip(::gpiod::chip(config.chip)) {
+Gpiod::Gpiod(const GpioConfig& config) : chip(::gpiod::chip(config.chip)) {
     if (!chip) {
         throw std::runtime_error("No GPIO chip '" + config.chip + "' found");
     }
@@ -38,26 +38,25 @@ Gpiod::Gpiod(GpioConfig config) : chip(::gpiod::chip(config.chip)) {
 }
 
 Gpiod::~Gpiod() {
-    if (line.is_requested())
+    if (line.is_requested()) {
         line.release();
+    }
 }
 
 void Gpiod::initInput() {
     // To be safe check whether the line wasn't already initialised
-    if (line.is_requested())
+    if (line.is_requested()) {
         line.release();
+    }
 
     // Request the access to the line
     ::gpiod::line_request req_conf;
     req_conf.consumer = name;
     req_conf.request_type = ::gpiod::line_request::DIRECTION_INPUT;
     line.request(req_conf);
-
-    // TODO(ondra): Probably redundant
-    this->setDirection(GpioDirection::Input);
 }
 
-void Gpiod::initOutput(bool initialValue) {
+void Gpiod::initOutput(const bool initialValue) {
     // To be safe check whether the line wasn't already initialised
     if (line.is_requested())
         line.release();
@@ -68,13 +67,10 @@ void Gpiod::initOutput(bool initialValue) {
     req_conf.request_type = ::gpiod::line_request::DIRECTION_OUTPUT;
     line.request(req_conf);
 
-    // TODO(ondra): Probably redundant
-    this->setDirection(GpioDirection::Output);
-
     this->setValue(initialValue);
 }
 
-void Gpiod::setDirection(iqrf::gpio::GpioDirection direction) {
+void Gpiod::setDirection(const iqrf::gpio::GpioDirection direction) {
     switch (direction) {
         case GpioDirection::Output:
             line.set_direction_output();
@@ -89,7 +85,7 @@ void Gpiod::setDirection(iqrf::gpio::GpioDirection direction) {
 }
 
 iqrf::gpio::GpioDirection Gpiod::getDirection() {
-    int direction = line.direction();
+    const int direction = line.direction();
     switch (direction) {
         case ::gpiod::line::DIRECTION_OUTPUT:
             return iqrf::gpio::GpioDirection::Output;

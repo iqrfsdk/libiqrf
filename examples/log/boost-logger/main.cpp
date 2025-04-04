@@ -85,7 +85,7 @@ class BoostLogTrivial : public ILog {
  */
 void init_logging() {
     // Create the STDOUT backend
-    boost::shared_ptr<sinks::text_ostream_backend> backend =
+    const boost::shared_ptr<sinks::text_ostream_backend> backend =
         boost::make_shared<sinks::text_ostream_backend>();
     backend->add_stream(
         boost::shared_ptr<std::ostream>(&std::clog, boost::null_deleter()));
@@ -93,7 +93,7 @@ void init_logging() {
 
     // Wrap it into the frontend
     typedef sinks::synchronous_sink<sinks::text_ostream_backend> sink_t;
-    boost::shared_ptr<sink_t> sink(new sink_t(backend));
+    const boost::shared_ptr<sink_t> sink(new sink_t(backend));
 
     // Add information that this was logged by Boost
     sink->set_formatter(expr::stream << "(Boost) [" << logging::trivial::severity << "] " << expr::smessage);

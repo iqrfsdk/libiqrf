@@ -22,10 +22,6 @@ class GpioResolverTest : public ::testing::Test {
         this->resolver = GpioResolver::GetResolver(map);
     }
 
-    void TearDown() override {
-        //
-    }
-
     /// GPIO resolver instance
     GpioResolver *resolver = nullptr;
     /// Chip 0 name

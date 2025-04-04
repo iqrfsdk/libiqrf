@@ -32,9 +32,9 @@ TEST_F(LoggingTest, DefaultLogging) {
     ASSERT_STREQ(message.c_str(), "Basic information logging.\n");
 
     ::testing::internal::CaptureStderr();
-    IQRF_LOG(Level::Error) << "An error occured.";
+    IQRF_LOG(Level::Error) << "An error occurred.";
     message = ::testing::internal::GetCapturedStderr();
-    ASSERT_STREQ(message.c_str(), "[Error] An error occured.\n");
+    ASSERT_STREQ(message.c_str(), "[Error] An error occurred.\n");
 }
 
 TEST_F(LoggingTest, SeverityLevels) {
@@ -79,7 +79,7 @@ TEST_F(LoggingTest, VerifyTraceInfo) {
 
     IQRF_TRACE() << "Tracing information.";
 
-    std::string message = ::testing::internal::GetCapturedStderr();
+    const std::string message = ::testing::internal::GetCapturedStderr();
     // The predicate assertion below is not working, unknown reference to ASSERT_THAT
     // ASSERT_THAT(log.c_str(), MatchesRegex(".*"));
     ASSERT_TRUE(std::regex_match(message, trace_regex));

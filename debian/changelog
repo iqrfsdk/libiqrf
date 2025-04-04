@@ -1,8 +1,7 @@
-libiqrf (0.0.2~1.gbpb60bc3) UNRELEASED; urgency=medium
-
-  ** SNAPSHOT build @b60bc3384484906f9467b416154cd4705dff1cb7 **
+libiqrf (0.1.0) stable; urgency=medium
 
   [ Roman Ondráček ]
+  * Initial commit
   * Add Debian package build, GitLab CI
   * Add enum class for GPIO directions for C++ wrapper
   * GPIO: add debug messages in sysfs driver
@@ -13,7 +12,8 @@ libiqrf (0.0.2~1.gbpb60bc3) UNRELEASED; urgency=medium
   * GitLab CI: build package for Ubuntu 24.04 Noble Numbat
   * .mailmap: add missing e-mail address mappings
   * Update copyright notices
-  * GitLab CI: drop build packages for Debian 10 buster and Ubuntu 18.04 Bionic Beaver
+  * GitLab CI: drop build packages for Debian 10 buster and Ubuntu 18.04 Bionic
+    Beaver
 
   [ Ondřej Hujňák ]
   * Updated dependencies in README.
@@ -28,13 +28,52 @@ libiqrf (0.0.2~1.gbpb60bc3) UNRELEASED; urgency=medium
   * WIP: support for libgpiod 1.x and 2.x
   * updated gpio setValue doc
   * gpio: removed empty base config class
+  * debian: updated changelog
+  * libiqrf-log-dev: added libiqrf-log shared lib as a dependency
+  * updated license headers
 
- -- Karel Hanák <karel.hanak@iqrf.org>  Tue, 14 Jan 2025 21:11:55 +0100
+  [ Roman Ondráček ]
+  * GitLab CI: build packages for Debian 13 trixie
+  * Debian packaging: update copyright information
 
-libiqrf (0.0.1~1.gbp8645e5) stable; urgency=medium
+  [ Ondřej Hujňák ]
+  * Added copy and move constructors, and = operator
+  * Added noexcept operators
+  * Improved GPIO Consumer name
+  * Enabled named GPIO lines
+  * Fixed GpioResolver test
+  * GPIO: Fixed libgpiod2 warnings
+  * GPIO: Fixed random chip order for GPIOD 2 pin mapping
+  * Added _GPIO suffix for tests requiring GPIO hardware
+  * GPIO: Added testing
+  * GPIO: Chip ordering numerically and not lexicographically
+  * GPIO: Filter out the unsortable chip names
 
-  ** SNAPSHOT build @8645e5fe7372e32361e13b1743e7bc27ef8076be **
+  [ Karel Hanák ]
+  * GPIO: fixed handling of vector of pairs
 
-  * Initial commit
+  [ Ondřej Hujňák ]
+  * GPIO: Compute prefix length instead of constant
+  * GPIO: Added Input/Output tests
+  * GPIO: Fixed cppcheck errors
+  * Reformatted code in accordance with Google style guide
+  * Added EOL
+  * Added NOLINT directives
+  * Code style
+  * Remove unnecessary namespace.h
+  * Fixed the CPPLINT
+  * Simple logging implementation in C++
+  * Allowed the modification of Log output stream.
+  * Added documentation comments.
+  * Allowed the modification of log header.
+  * Logging code improvements
+  * Added log > boost example
+  * Log: Passthrough severity levels.
 
- -- Roman Ondráček <mail@romanondracek.cz>  Thu, 14 Sep 2023 22:16:21 +0200
+  [ Roman Ondráček ]
+  * CMake: fix build on CMake 3.31
+  * CMake: at least one of BUILD_STATIC or BUILD_SHARED must be ON
+  * Rename license file
+  * Add missing const type qualifiers
+
+ -- Roman Ondráček <mail@romanondracek.cz>  Fri, 04 Apr 2025 14:02:56 +0200

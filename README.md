@@ -1,7 +1,7 @@
 # libiqrf
 
 [![Build Status](https://gitlab.iqrf.org/open-source/iqrf-sdk/libiqrf/badges/master/pipeline.svg)](https://gitlab.iqrf.org/open-source/iqrf-sdk/libiqrf/pipelines)
-[![Apache License](https://img.shields.io/badge/license-APACHE2-blue.svg)](LICENCE)
+[![Apache License](https://img.shields.io/badge/license-APACHE2-blue.svg)](LICENSE)
 
 ## Description
 

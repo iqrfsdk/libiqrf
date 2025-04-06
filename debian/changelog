@@ -1,3 +1,9 @@
+libiqrf (0.1.1) stable; urgency=medium
+
+  * Debian packaging: fix architecture for libiqrf-dev and libiqrf-common-dev packages
+
+ -- Roman Ondráček <mail@romanondracek.cz>  Sun, 06 Apr 2025 21:23:05 +0200
+
 libiqrf (0.1.0) stable; urgency=medium
 
   [ Roman Ondráček ]

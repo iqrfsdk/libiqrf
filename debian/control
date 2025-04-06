@@ -11,7 +11,8 @@ Vcs-Browser: https://gitlab.iqrf.org/open-source/iqrf-sdk/libiqrf
 
 Package: libiqrf-dev
 Section: libdevel
-Architecture: all
+Architecture: any
+Multi-Arch: same
 Depends:
  libiqrf-common-dev (= ${binary:Version}),
  libiqrf-gpio-dev (= ${binary:Version}),
@@ -21,7 +22,8 @@ Description: IQRF C++ libraries - development files
 
 Package: libiqrf-common-dev
 Section: libdevel
-Architecture: all
+Architecture: any
+Multi-Arch: same
 Depends: ${misc:Depends}
 Description: IQRF C++ common library - development files
  IQRF common library for C++.

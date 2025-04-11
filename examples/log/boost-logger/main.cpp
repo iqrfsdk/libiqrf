@@ -49,7 +49,7 @@ class BoostLogTrivial : public ILog {
    * @param severity is the severity level of the message.
    * 
    * @details Boost Trivial Logging uses lvl from BOOST_LOG_TRIVIAL(lvl) to expand
-   * ::boost::log::trivial::lvl, so unfortunatelly no simpler mapping is possible.
+   * ::boost::log::trivial::lvl, so unfortunately no simpler mapping is possible.
    */
   void append(const std::string& msg, const Level& severity) override {
     switch (severity) {

@@ -11,7 +11,7 @@
 #include "iqrf/gpio/GpioResolver.h"
 
 int main() {
-    const auto resolver = iqrf::gpio::GpioResolver::GetResolver();
+    const iqrf::gpio::GpioResolver *resolver = iqrf::gpio::GpioResolver::GetResolver();
     resolver->dump();
 
     return 0;

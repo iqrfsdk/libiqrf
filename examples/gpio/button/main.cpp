@@ -15,6 +15,7 @@
  */
 
 #include <csignal>
+#include <iostream>
 #include <thread>
 
 #include "iqrf/gpio/Gpio.h"

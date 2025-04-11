@@ -12,7 +12,6 @@
 #pragma once
 
 #include <iomanip>
-#include <mutex>
 #include <string>
 
 #include "iqrf/gpio/GpioMap.h"

@@ -15,7 +15,6 @@
 #include <mutex>
 #include <string>
 
-#include "iqrf/gpio/Config.h"
 #include "iqrf/gpio/GpioMap.h"
 
 namespace iqrf::gpio {
@@ -37,7 +36,7 @@ class GpioResolver {
     /**
      * Constructor with custom map
      */
-    explicit GpioResolver(const GpioMap& map);
+    explicit GpioResolver(GpioMap map);
 
     /**
      * Destructor

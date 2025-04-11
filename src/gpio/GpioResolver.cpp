@@ -10,6 +10,7 @@
  */
 
 #include <iostream>
+#include <utility>
 
 #include "iqrf/gpio/GpioResolver.h"
 
@@ -18,10 +19,10 @@ namespace iqrf::gpio {
 GpioResolver* GpioResolver::gpioResolverInstance{nullptr};
 std::mutex GpioResolver::gpioResolverMtx;
 
-GpioResolver::GpioResolver() : gpioMap(getGpioMap()) {
+GpioResolver::GpioResolver(): gpioMap(getGpioMap()) {
 }
 
-GpioResolver::GpioResolver(const GpioMap& map): gpioMap(map) {
+GpioResolver::GpioResolver(GpioMap map): gpioMap(std::move(map)) {
 }
 
 GpioResolver::~GpioResolver() {

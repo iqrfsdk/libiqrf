@@ -16,33 +16,20 @@
 
 namespace iqrf::gpio {
 
-GpioResolver* GpioResolver::gpioResolverInstance{nullptr};
-std::mutex GpioResolver::gpioResolverMtx;
-
 GpioResolver::GpioResolver(): gpioMap(getGpioMap()) {
 }
 
 GpioResolver::GpioResolver(GpioMap map): gpioMap(std::move(map)) {
 }
 
-GpioResolver::~GpioResolver() {
-    delete gpioResolverInstance;
-}
-
 GpioResolver* GpioResolver::GetResolver() {
-    std::lock_guard<std::mutex> lock(gpioResolverMtx);
-    if (gpioResolverInstance == nullptr) {
-        gpioResolverInstance = new GpioResolver();
-    }
-    return gpioResolverInstance;
+    static GpioResolver instance;
+    return &instance;
 }
 
 GpioResolver* GpioResolver::GetResolver(const GpioMap& map) {
-    std::lock_guard<std::mutex> lock(gpioResolverMtx);
-    if (gpioResolverInstance == nullptr) {
-        gpioResolverInstance = new GpioResolver(map);
-    }
-    return gpioResolverInstance;
+    static GpioResolver instance(map);
+    return &instance;
 }
 
 void GpioResolver::resolveGpioPin(const int64_t pin, ::std::string& chip, ::std::size_t& line) {

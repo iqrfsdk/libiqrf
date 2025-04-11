@@ -21,10 +21,6 @@ namespace iqrf::gpio {
 
 class GpioResolver {
  private:
-    /// GPIO resolver instance carrier
-    static GpioResolver* gpioResolverInstance;
-    /// GPIO resolver mutex
-    static std::mutex gpioResolverMtx;
     /// Map of GPIO pin numbers and chip names / line offsets
     GpioMap gpioMap;
 
@@ -37,11 +33,6 @@ class GpioResolver {
      * Constructor with custom map
      */
     explicit GpioResolver(GpioMap map);
-
-    /**
-     * Destructor
-     */
-    ~GpioResolver();
 
  public:
     /**

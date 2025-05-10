@@ -88,7 +88,7 @@ class IConnector {
      * Get the current state of the connector.
      *
      * TODO: Used in Daemon(IqrfCdc, IqrfSpi, IqrfUart)
-     * 
+     *
      * FIXME: clibspi - very different states with more detail
      */
     virtual State getState() const = 0;
@@ -100,7 +100,7 @@ class IConnector {
      *
      * TODO: Used in Daemon(IqrfCdc, IqrfSpi, IqrfUart), clibspi, clibuart
      */
-    virtual void send(const std::vector<uint8_t> data) = 0;
+    virtual void send(const std::vector<uint8_t> &data) = 0;
 
     /**
      * Read the data synchronously from the connector.
@@ -141,7 +141,7 @@ class IConnector {
      * Retrieve basic information about the TR module.
      *
      * TODO: Used in Daemon(IqrfCdc, IqrfSpi), Uploader, clibcdc
-     * 
+     *
      * FIXME: In clibcdc somehow 8b reserved and 16b IBK is included
      */
     virtual TrInfo readTrInfo() = 0;
@@ -186,7 +186,7 @@ class IConnector {
      */
     virtual void upload(
         const ProgrammingTarget target,
-        const std::vector<uint8_t> data
+        const std::vector<uint8_t> &data
     ) = 0;
 
     /**
@@ -202,7 +202,7 @@ class IConnector {
      */
     virtual void upload(
         const ProgrammingTarget target,
-        const std::vector<uint8_t> data,
+        const std::vector<uint8_t> &data,
         const uint16_t address
     ) {
         std::vector<uint8_t> fullData = data;
@@ -236,7 +236,7 @@ class IConnector {
 
  protected:
     /**
-     * Listen to the connector and asychronously call responseHandler for
+     * Listen to the connector and asynchronously call responseHandler for
      * received messages.
      *
      * TODO: Used in Daemon(IqrfSpi)

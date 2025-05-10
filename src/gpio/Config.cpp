@@ -9,9 +9,6 @@
  * LICENSE file in the project root.
  */
 
-#include <sstream>
-#include <iostream>
-
 #include "iqrf/gpio/Config.h"
 
 namespace iqrf::gpio {
@@ -31,7 +28,7 @@ GpioConfig::GpioConfig(const ::std::string& chip, const ::std::string& line_name
 GpioConfig::GpioConfig(const int64_t pin, const ::std::string& consumer_name)
     : line(0), pin(pin), consumer_name(consumer_name) {
 
-    const auto gpioResolver = GpioResolver::GetResolver();
+    auto *const gpioResolver = GpioResolver::GetResolver();
     gpioResolver->resolveGpioPin(pin, chip, line);
 }
 

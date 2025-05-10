@@ -15,7 +15,8 @@
 
 build: clean
 	mkdir build
-	cmake -Bbuild -H. -DCMAKE_BUILD_TYPE=Debug -DCMAKE_VERBOSE_MAKEFILE:BOOL=ON
+	cmake -Bbuild -H. -DCMAKE_BUILD_TYPE=Debug -DCMAKE_VERBOSE_MAKEFILE:BOOL=ON \
+		-DBUILD_SHARED:BOOL=ON -DBUILD_STATIC:BOOL=ON
 	cmake --build build
 
 lint:

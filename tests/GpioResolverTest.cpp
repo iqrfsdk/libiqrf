@@ -36,7 +36,7 @@ class GpioResolverTest : public ::testing::Test {
 
 TEST_F(GpioResolverTest, ResolveExistingPins) {
     std::string chip_name;
-    size_t line_offset;
+    size_t line_offset = 0;
 
     // GPIO pin 0
     this->resolver->resolveGpioPin(0, chip_name, line_offset);
@@ -66,7 +66,7 @@ TEST_F(GpioResolverTest, ResolveExistingPins) {
 
 TEST_F(GpioResolverTest, ResolveNonexistentPins) {
     std::string chip_name;
-    size_t line_offset;
+    size_t line_offset = 0;
 
     ASSERT_THROW(this->resolver->resolveGpioPin(50, chip_name, line_offset), std::runtime_error);
 }

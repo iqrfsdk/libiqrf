@@ -12,47 +12,19 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-set(LIB_NAME gpio)
-set(LIB_INCLUDE_DIR "${libiqrf_SOURCE_DIR}/include/iqrf/${LIB_NAME}")
+set(LIB_NAME connector_uart)
+set(LIB_INCLUDE_DIR "${libiqrf_SOURCE_DIR}/include/iqrf/connector/uart")
 
-find_package(libgpiod REQUIRED)
+find_package(libserialport REQUIRED)
 
-configure_file(
-    ${LIB_INCLUDE_DIR}/version.h.in
-    ${LIB_INCLUDE_DIR}/version.h
-    @ONLY
-)
-file(GLOB LIB_HEADERS_BASE
-	"${LIB_INCLUDE_DIR}/Base.h"
-	"${LIB_INCLUDE_DIR}/Common.h"
-	"${LIB_INCLUDE_DIR}/Config.h"
-	"${LIB_INCLUDE_DIR}/Gpio.h"
-	"${LIB_INCLUDE_DIR}/GpioMap.h"
-	"${LIB_INCLUDE_DIR}/GpioResolver.h"
-	"${LIB_INCLUDE_DIR}/version.h"
-)
-file(GLOB LIB_SOURCES_BASE
-	"Config.cpp"
-	"Gpio.cpp"
-	"GpioMap.cpp"
-	"GpioResolver.cpp"
-)
-if (libgpiod_VERSION_MAJOR EQUAL "2")
-	file(GLOB LIB_HEADERS_EXTRA "${LIB_INCLUDE_DIR}/GpiodV2.h")
-	file(GLOB LIB_SOURCES_EXTRA "GpiodV2.cpp")
-else()
-	file(GLOB LIB_HEADERS_EXTRA "${LIB_INCLUDE_DIR}/GpiodV1.h")
-	file(GLOB LIB_SOURCES_EXTRA "GpiodV1.cpp")
-endif()
-
-set(LIB_HEADERS ${LIB_HEADERS_BASE} ${LIB_HEADERS_EXTRA})
-set(LIB_SOURCES ${LIB_SOURCES_BASE} ${LIB_SOURCES_EXTRA})
+file(GLOB LIB_HEADERS "${LIB_INCLUDE_DIR}/*.h")
+file(GLOB LIB_SOURCES "*.cpp")
 
 if (BUILD_STATIC)
     add_library(iqrf_${LIB_NAME}_static STATIC ${LIB_SOURCES} ${LIB_HEADERS})
     set_target_properties(iqrf_${LIB_NAME}_static PROPERTIES VERSION "${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}" SOVERSION "${PROJECT_VERSION_MAJOR}")
     target_include_directories(iqrf_${LIB_NAME}_static PUBLIC ${libiqrf_SOURCE_DIR}/include)
-    target_link_libraries(iqrf_${LIB_NAME}_static ${libgpiod_STATIC_LIBRARIES} iqrf_log_static)
+    target_link_libraries(iqrf_${LIB_NAME}_static ${libserialport_STATIC_LIBRARIES} iqrf_gpio_static iqrf_log_static)
     set_target_properties(iqrf_${LIB_NAME}_static PROPERTIES OUTPUT_NAME iqrf_${LIB_NAME})
     set_target_properties(iqrf_${LIB_NAME}_static PROPERTIES PREFIX "lib")
 endif ()
@@ -60,7 +32,7 @@ endif ()
 if (BUILD_SHARED)
     add_library(iqrf_${LIB_NAME} SHARED ${LIB_SOURCES} ${LIB_HEADERS})
     set_target_properties(iqrf_${LIB_NAME} PROPERTIES VERSION "${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}" SOVERSION "${PROJECT_VERSION_MAJOR}")
-    target_link_libraries(iqrf_${LIB_NAME} ${libgpiod_LIBRARIES} iqrf_log)
+    target_link_libraries(iqrf_${LIB_NAME} ${libserialport_LIBRARIES} iqrf_gpio iqrf_log)
     target_include_directories(iqrf_${LIB_NAME} PUBLIC ${libiqrf_SOURCE_DIR}/include)
 endif ()
 
@@ -68,4 +40,4 @@ install(TARGETS iqrf_${LIB_NAME} LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR} PUB
 if (BUILD_STATIC)
     install(TARGETS iqrf_${LIB_NAME}_static ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR} PUBLIC_HEADER DESTINATION ${LIB_INCLUDE_DIR})
 endif ()
-install(DIRECTORY ${LIB_INCLUDE_DIR} DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}/iqrf")
+install(DIRECTORY ${LIB_INCLUDE_DIR} DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}/iqrf/connector")

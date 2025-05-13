@@ -1,32 +1,33 @@
 /**
  * Copyright 2023-2025 MICRORISC s.r.o.
  * SPDX-License-Identifier: Apache-2.0
- * File: Spi.h
+ * File: SpiConnector.h
  * Authors: Ondřej Hujňák <ondrej.hujnak@iqrf.org>
  * Date: 2025-05-05
  *
  * This file is a part of the LIBIQRF. For the full license information, see the
  * LICENSE file in the project root.
  */
+#pragma once
 
 #include "IConnector.h"
 
-namespace iqrf::connector {
+namespace iqrf::connector::spi {
 
 /**
  * SPI Connector provides an access to TR module connected via SPI.
  */
-class Spi : public IConnector {
+class SpiConnector : public IConnector {
  public:
     /**
      * Constructs the SPI connector and initializes the SPI lines.
      */
-    Spi();
+    SpiConnector();
 
     /**
      * Release the SPI lines.
      */
-    virtual ~Spi();
+    virtual ~SpiConnector();
 
     // Basic state
 

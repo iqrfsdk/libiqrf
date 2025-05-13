@@ -1,7 +1,7 @@
 /**
  * Copyright 2023-2025 MICRORISC s.r.o.
  * SPDX-License-Identifier: Apache-2.0
- * File: Spi.cpp
+ * File: SpiConnector.cpp
  * Authors: Ondřej Hujňák <ondrej.hujnak@iqrf.org>
  * Date: 2025-05-09
  *
@@ -9,15 +9,17 @@
  * LICENSE file in the project root.
  */
 
-#include "iqrf/connector/Spi.h"
+#include "iqrf/connector/SpiConnector.h"
+#include "iqrf/log/Logging.h"
 
-namespace iqrf::connector {
+namespace iqrf::connector::spi {
 
-Spi::Spi() {}
+SpiConnector::SpiConnector() {
+}
 
-Spi::~Spi() {}
+SpiConnector::~SpiConnector() {}
 
-State Spi::getState() const { return State::NotReady; }
+State SpiConnector::getState() const { return State::NotReady; }
 
 void send(const std::vector<uint8_t> data) {};
 

@@ -81,3 +81,30 @@ Multi-Arch: same
 Depends: ${shlibs:Depends}, ${misc:Depends}
 Description: IQRF C++ GPIO library - shared libraries
  IQRF GPIO library for C++.
+
+Package: libiqrf-connector-dev
+Section: libdevel
+Architecture: any
+Multi-Arch: same
+Depends: libiqrf-connector0 (= ${binary:Version}), ${misc:Depends}
+Description: IQRF C++ TR connector library - development files
+ IQRF TR connector library for C++ for SPI, UART and USB CDC.
+ .
+ This package contains files for development and static libraries.
+
+Package: libiqrf-connector-examples
+Section: misc
+Architecture: any
+Depends: libiqrf-connector0 (= ${binary:Version}), ${shlibs:Depends}, ${misc:Depends}
+Description: IQRF C++ TR connector library - example files
+ IQRF TR connector library for C++ for SPI, UART and USB CDC.
+ .
+ This package contains example files and demonstration programs.
+
+Package: libiqrf-connector0
+Section: libs
+Architecture: any
+Multi-Arch: same
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Description: IQRF C++ TR connector library - shared libraries
+ IQRF TR connector library for C++ for SPI, UART and USB CDC.

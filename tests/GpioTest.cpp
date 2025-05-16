@@ -52,7 +52,7 @@ TEST_F(GpioTest, TestInput_GPIO) {
     const auto gpio = std::make_unique<Gpio>(config);
     gpio->initInput();
 
-#if LIBGPIOD_VERSION_MAJOR == 1
+#if libgpiod_VERSION_MAJOR == 1
     auto chip = std::make_unique<::gpiod::chip>("gpiochip0");
     const auto line = chip->get_line(2);
 
@@ -74,7 +74,7 @@ TEST_F(GpioTest, TestOutput_GPIO) {
     const auto gpio = std::make_unique<Gpio>(config);
     gpio->initOutput(true);
 
-#if LIBGPIOD_VERSION_MAJOR == 1
+#if libgpiod_VERSION_MAJOR == 1
     auto chip = std::make_unique<::gpiod::chip>("gpiochip0");
     const auto line = chip->get_line(0);
 

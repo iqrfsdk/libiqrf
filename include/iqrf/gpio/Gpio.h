@@ -27,7 +27,7 @@
 #include "iqrf/gpio/Common.h"
 #include "iqrf/gpio/Base.h"
 
-#if LIBGPIOD_VERSION_MAJOR == 1
+#if libgpiod_VERSION_MAJOR == 1
 #include "iqrf/gpio/GpiodV1.h"
 #else
 #include "iqrf/gpio/GpiodV2.h"
@@ -89,7 +89,7 @@ class Gpio {
      * Retrieves GPIO pin direction
      * @return GPIO pin direction
      */
-    iqrf::gpio::GpioDirection getDirection() const;
+    [[nodiscard]] iqrf::gpio::GpioDirection getDirection() const;
 
     /**
      * Sets GPIO pin output value
@@ -101,7 +101,7 @@ class Gpio {
      * Retrieves GPIO line input value
      * @return GPIO line input value
      */
-    bool getValue() const;
+    [[nodiscard]] bool getValue() const;
 
     /**
      * Swap function

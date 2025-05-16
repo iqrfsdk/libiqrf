@@ -13,11 +13,13 @@
 # limitations under the License.
 
 set(LIB_NAME common)
-file(GLOB LIB_HEADERS "${libiqrf_SOURCE_DIR}/include/${LIB_NAME}/*.h" "${libiqrf_SOURCE_DIR}/include/${LIB_NAME}/*.hpp")
+set(LIB_INCLUDE_DIR "${libiqrf_SOURCE_DIR}/include/iqrf/${LIB_NAME}")
+
+file(GLOB LIB_HEADERS "${LIB_INCLUDE_DIR}/*.h" "${LIB_INCLUDE_DIR}/*.hpp")
 file(GLOB LIB_SOURCES "*.c" "*.cpp")
 
 add_library(iqrf_${LIB_NAME} INTERFACE ${LIB_HEADERS})
 target_include_directories(iqrf_${LIB_NAME} INTERFACE ${libiqrf_SOURCE_DIR}/include)
 
 install(TARGETS iqrf_${LIB_NAME} PUBLIC_HEADER DESTINATION include/${LIB_NAME})
-install(DIRECTORY ${libiqrf_SOURCE_DIR}/include/iqrf/${LIB_NAME} DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}/iqrf")
+install(DIRECTORY ${LIB_INCLUDE_DIR} DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}/iqrf")

@@ -1,0 +1,3 @@
+usr/include/iqrf/connector/
+# usr/lib/*/libiqrf_connector.a
+# usr/lib/*/libiqrf_connector.so

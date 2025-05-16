@@ -25,7 +25,7 @@ GpioMap getGpioMap() {
     GpioMap map;
     std::size_t npin = 0;
 
-#if LIBGPIOD_VERSION_MAJOR == 1
+#if libgpiod_VERSION_MAJOR == 1
     for (auto &chip : ::gpiod::make_chip_iter()) {
         std::shared_ptr<std::string> chip_name = std::make_shared<std::string>(chip.name());
 

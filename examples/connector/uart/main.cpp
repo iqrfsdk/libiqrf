@@ -24,7 +24,7 @@
 #include "iqrf/log/Logging.h"
 
 /// IQRF UART connector configuration
-const iqrf::connector::uart::UartConfig uartConfig("/dev/ttyUSB0");
+const iqrf::connector::uart::UartConfig uartConfig("/dev/ttyACM0", 57600);
 /// IQRF UART connector instance
 iqrf::connector::uart::UartConnector *uartConnector = nullptr;
 
@@ -40,20 +40,39 @@ void signalHandler(const int signal) {
     exit(signal);
 }
 
+std::string vectorToHex(const std::vector<uint8_t>& input) {
+    std::stringstream ss;
+    ss << std::hex << std::setfill('0');
+
+    for (size_t i = 0; i < input.size(); ++i) {
+        ss << std::setw(2) << static_cast<int>(input[i]);
+        if (i + 1 < input.size()) {
+            ss << ".";
+        }
+    }
+
+    return ss.str();
+}
+
 int main() {
     iqrf::log::Logger::logLevel = iqrf::log::Level::Trace;
     iqrf::log::Logger logger;
     IQRF_LOG(iqrf::log::Level::Info) << "IQRF UART Connector Example";
     uartConnector = new iqrf::connector::uart::UartConnector(uartConfig);
 
+    bool ledState = true;
     while (true) {
+        std::vector<uint8_t> request = {0x00, 0x00, 0x06, static_cast<uint8_t>(ledState), 0xff, 0xff};
+        ledState = !ledState;
+        IQRF_LOG(iqrf::log::Level::Info) << "Sending: " << vectorToHex(request);
+        uartConnector->send(request);
         std::vector<uint8_t> receivedData = uartConnector->receive();
         if (receivedData.empty()) {
             IQRF_LOG(iqrf::log::Level::Warning) << "No data received.";
-            std::this_thread::sleep_for(std::chrono::seconds(1));
             continue;
         }
-        IQRF_LOG(iqrf::log::Level::Info) << "Received:" << std::string(receivedData.begin(), receivedData.end());
+        IQRF_LOG(iqrf::log::Level::Info) << "Received: " << vectorToHex(receivedData);
+        std::this_thread::sleep_for(std::chrono::seconds(1));
     }
 
     signal(SIGINT, signalHandler);

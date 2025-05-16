@@ -30,7 +30,7 @@ class UartConnector : public IConnector {
      * Constructs the IQRF UART connector
      * @param config UART connector configuration
      */
-    explicit UartConnector(const UartConfig& config);
+    explicit UartConnector(UartConfig config);
 
     /**
      * Destructs the IQRF UART connector
@@ -49,8 +49,7 @@ class UartConnector : public IConnector {
     /**
      * Send the data message via the connector.
      */
-    void send(const std::vector<uint8_t> &data) override {;
-    }
+    void send(const std::vector<uint8_t> &data) override;
 
     /**
      * Read the data synchronously from the connector.
@@ -72,7 +71,7 @@ class UartConnector : public IConnector {
     /**
      * Check whether the connector is in exclusive access mode.
      */
-    virtual bool hasExclusiveAccess() const override { return false; }
+    bool hasExclusiveAccess() const override { return false; }
 
     // Transceiver operations
 
@@ -80,13 +79,11 @@ class UartConnector : public IConnector {
      * Retrieve basic information about the TR module.
      */
     TrInfo readTrInfo() override {
-        throw new std::runtime_error("Not implemented");
+        throw std::runtime_error("Not implemented");
     }
 
     /**
      * Reset the TR module.
-     *
-     * TODO: Used in Daemon(IqrfCdc), clibspi, clibcdc
      */
     void resetTr() override {};
 
@@ -96,21 +93,21 @@ class UartConnector : public IConnector {
      * Switch the connected TR to programming mode.
      */
     void enterProgrammingMode() override {
-        throw new std::runtime_error("Not implemented");
+        throw std::runtime_error("Not implemented");
     }
 
     /**
      * Wait for TR to enter programming mode.
      */
     void awaitProgrammingMode() override {
-        throw new std::runtime_error("Not implemented");
+        throw std::runtime_error("Not implemented");
     }
 
     /**
      * Switch the connected TR back from programming mode.
      */
     void exitProgrammingMode() override {
-        throw new std::runtime_error("Not implemented");
+        throw std::runtime_error("Not implemented");
     }
 
     /**
@@ -123,7 +120,7 @@ class UartConnector : public IConnector {
         const ProgrammingTarget target,
         const std::vector<uint8_t> &data
     ) override {
-        throw new std::runtime_error("Not implemented");
+        throw std::runtime_error("Not implemented");
     }
 
     /**
@@ -140,7 +137,7 @@ class UartConnector : public IConnector {
         const std::vector<uint8_t> &data,
         const uint16_t address
     ) override {
-        throw new std::runtime_error("Not implemented");
+        throw std::runtime_error("Not implemented");
     }
 
     /**
@@ -149,7 +146,7 @@ class UartConnector : public IConnector {
      * @param target specifies which data shall be downloaded.
      */
     std::vector<uint8_t> download(const ProgrammingTarget target) override {
-        throw new std::runtime_error("Not implemented");
+        throw std::runtime_error("Not implemented");
     }
 
     /**
@@ -162,7 +159,7 @@ class UartConnector : public IConnector {
         const ProgrammingTarget target,
         const uint16_t address
     ) override {
-        throw new std::runtime_error("Not implemented");
+        throw std::runtime_error("Not implemented");
     }
 
 protected:
@@ -171,17 +168,29 @@ protected:
      * received messages.
      */
     void listeningLoop() override {
-        throw new std::runtime_error("Not implemented");
+        throw std::runtime_error("Not implemented");
     }
 
  private:
+    /**
+     * Check the result of the libserialport functions and throw an exception on error.
+     * @param result libserialport return code
+     * @return libserialport return code
+     */
+    static int checkSerialResult(sp_return result);
 
-    static int checkSerialResult(enum sp_return result);
+
+    /**
+     * Calculate 1-Wire CRC8 checksum for the given data.
+     * @param data Data to calculate the checksum for
+     * @return 1-Wire CRC8 checksum
+     */
+    static uint8_t calculateCrc(const std::vector<uint8_t> &data);
 
     /// UART configuration
     UartConfig config;
     /// UART port
-    struct sp_port *port = nullptr;
+    sp_port *port = nullptr;
 };
 
 }

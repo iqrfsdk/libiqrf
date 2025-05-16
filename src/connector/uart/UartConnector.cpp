@@ -18,25 +18,24 @@ UartConnector::UartConnector(UartConfig config): IConnector(), config(std::move(
     UartConnector::checkSerialResult(sp_get_port_by_name(this->config.device.c_str(), &this->port));
     IQRF_LOG(log::Level::Debug) << "UART port created: " << this->config.device
         << " (name: " << sp_get_port_name(this->port) << ", description: "
-        << sp_get_port_description(this->port) << ")";
+        << sp_get_port_description(this->port) << ")\n";
     if (sp_get_port_transport(this->port) == SP_TRANSPORT_USB) {
         int usbBus, usbAddress;
         UartConnector::checkSerialResult(sp_get_port_usb_bus_address(this->port, &usbBus, &usbAddress));
         IQRF_LOG(log::Level::Debug) << "UART port is on USB bus: " << usbBus << ", USB address: " << usbAddress
             << ", Manufacturer: " << sp_get_port_usb_manufacturer(this->port)
-            << ", Product: " << sp_get_port_usb_product(this->port);
+            << ", Product: " << sp_get_port_usb_product(this->port) << "\n";
     }
 
     // Open the port
     UartConnector::checkSerialResult(sp_open(this->port, SP_MODE_READ_WRITE));
 
     // Set up the port
-    UartConnector::checkSerialResult(sp_set_baudrate(this->port, this->config.baudRate));
+    UartConnector::checkSerialResult(sp_set_baudrate(this->port, static_cast<int>(this->config.baudRate)));
     UartConnector::checkSerialResult(sp_set_bits(this->port, 8));
     UartConnector::checkSerialResult(sp_set_parity(this->port, SP_PARITY_NONE));
     UartConnector::checkSerialResult(sp_set_stopbits(this->port, 1));
     UartConnector::checkSerialResult(sp_set_flowcontrol(this->port, SP_FLOWCONTROL_NONE));
-
 }
 
 UartConnector::~UartConnector() {
@@ -129,10 +128,10 @@ void UartConnector::send(const std::vector<uint8_t> &data) {
     }
     frame.push_back(calculateCrc(data));
     frame.push_back(0x7E);
-    checkSerialResult(sp_blocking_write(this->port, frame.data(), frame.size(), 1000));
+    UartConnector::checkSerialResult(sp_blocking_write(this->port, frame.data(), frame.size(), 1000));
 }
 
-uint8_t UartConnector::calculateCrc(const std::vector<uint8_t> &data){
+uint8_t UartConnector::calculateCrc(const std::vector<uint8_t> &data) {
     uint8_t crc = 0xFF;
     for (const uint8_t byte : data) {
         crc ^= byte;
@@ -146,4 +145,5 @@ uint8_t UartConnector::calculateCrc(const std::vector<uint8_t> &data){
     }
     return crc;
 }
-}
+
+}  // namespace iqrf::connector::uart

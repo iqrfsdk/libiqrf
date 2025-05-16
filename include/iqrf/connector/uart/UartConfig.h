@@ -16,6 +16,7 @@
 #include <cstdint>
 #include <optional>
 #include <string>
+#include <utility>
 
 #include "iqrf/gpio/Gpio.h"
 
@@ -29,7 +30,7 @@ using iqrf::gpio::Gpio;
 class UartConfig {
  public:
     /// UART device name
-    ::std::string device;
+    std::string device;
     /// UART baud rate
     uint32_t baudRate = 115200;
     /// GPIO to enable power supply to TR module
@@ -52,10 +53,10 @@ class UartConfig {
      * @param device UART device name
      * @param baudRate UART baud rate
      */
-    UartConfig(
-        const ::std::string& device,
-        uint32_t baudRate = 115200
-    ) : device(device), baudRate(baudRate) {}
+    explicit UartConfig(
+        std::string device,
+        const uint32_t baudRate = 115200
+    ) : device(std::move(device)), baudRate(baudRate) {}
 
     /**
      * Constructs the full UART connector configuration
@@ -70,8 +71,8 @@ class UartConfig {
      * @param trModuleReset Enable TR module reset during library initialization
      */
     UartConfig(
-        const ::std::string &device,
-        uint32_t baudRate,
+        std::string device,
+        const uint32_t baudRate,
         const std::optional<Gpio> &powerEnableGpio,
         const std::optional<Gpio> &busEnableGpio,
         const std::optional<Gpio> &pgmSwitchGpio,
@@ -80,7 +81,7 @@ class UartConfig {
         const std::optional<Gpio> &i2cEnableGpio,
         const bool trModuleReset
     ) :
-        device(device),
+        device(std::move(device)),
         baudRate(baudRate),
         powerEnableGpio(powerEnableGpio),
         busEnableGpio(busEnableGpio),
@@ -91,4 +92,4 @@ class UartConfig {
         trModuleReset(trModuleReset) {}
 };
 
-}
+}  // namespace iqrf::connector::uart

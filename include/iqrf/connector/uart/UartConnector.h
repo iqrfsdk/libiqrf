@@ -12,6 +12,13 @@
 #pragma once
 
 #include <libserialport.h>
+#if BUILD_TESTS
+#include <gtest/gtest_prod.h>
+#endif
+
+#include <cstdint>
+#include <stdexcept>
+#include <vector>
 
 #include "iqrf/connector/IConnector.h"
 #include "iqrf/connector/uart/UartConfig.h"
@@ -162,7 +169,7 @@ class UartConnector : public IConnector {
         throw std::runtime_error("Not implemented");
     }
 
-protected:
+ protected:
     /**
      * Listen to the connector and asynchronously call responseHandler for
      * received messages.
@@ -172,13 +179,16 @@ protected:
     }
 
  private:
+#ifdef BUILD_TESTS
+    FRIEND_TEST(UartConnectorTest, calculateCrc);
+#endif
+
     /**
      * Check the result of the libserialport functions and throw an exception on error.
      * @param result libserialport return code
      * @return libserialport return code
      */
     static int checkSerialResult(sp_return result);
-
 
     /**
      * Calculate 1-Wire CRC8 checksum for the given data.
@@ -193,4 +203,4 @@ protected:
     sp_port *port = nullptr;
 };
 
-}
+}  // namespace iqrf::connector::uart

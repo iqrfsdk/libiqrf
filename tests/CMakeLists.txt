@@ -8,6 +8,6 @@ include_directories(${PROJECT_SOURCE_DIR}/include)
 
 file(GLOB_RECURSE TEST_SOURCES "*.cpp")
 add_executable(tests ${TEST_SOURCES})
-target_link_libraries(tests GTest::GTest GTest::Main iqrf_gpio iqrf_log)
+target_link_libraries(tests GTest::GTest GTest::Main iqrf_connector_uart iqrf_gpio iqrf_log)
 
 gtest_discover_tests(tests)

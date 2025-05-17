@@ -14,19 +14,11 @@ Section: libdevel
 Architecture: any
 Multi-Arch: same
 Depends:
- libiqrf-common-dev (= ${binary:Version}),
+ libiqrf-connector-dev (= ${binary:Version}),
  libiqrf-gpio-dev (= ${binary:Version}),
  libiqrf-log-dev (= ${binary:Version}),
 Description: IQRF C++ libraries - development files
  Metapackage for IQRF libraries for C++.
-
-Package: libiqrf-common-dev
-Section: libdevel
-Architecture: any
-Multi-Arch: same
-Depends: ${misc:Depends}
-Description: IQRF C++ common library - development files
- IQRF common library for C++.
 
 Package: libiqrf-log0
 Section: libs

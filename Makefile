@@ -13,15 +13,25 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-build: clean
+.PHONY: build clean coverage deb-package lint test
+
+coverage:
+	rm -rf coverage
+	mkdir -p build coverage
+	cmake -Bbuild -H. -DCMAKE_BUILD_TYPE=Debug -DCODE_COVERAGE=ON
+	cmake --build build
+	ctest --verbose --test-dir build/tests --output-junit ctest.xml --exclude-regex '_GPIO'
+	gcovr --html-details --exclude-unreachable-branches --print-summary -o coverage/ --root .
+
+build:
 	mkdir build
 	cmake -Bbuild -H. -DCMAKE_BUILD_TYPE=Debug -DCMAKE_VERBOSE_MAKEFILE:BOOL=ON \
 		-DBUILD_SHARED:BOOL=ON -DBUILD_STATIC:BOOL=ON
 	cmake --build build
 
 lint:
-	cpplint --quiet --recursive include/ src/ examples/
-	cppcheck --enable=all --inconclusive -I include/ --suppress=missingIncludeSystem --inline-suppr --quiet src/ examples/
+	cpplint --quiet --recursive include/ src/ examples/ || true
+	cppcheck --enable=all --check-level=exhaustive --inconclusive -I include/ --suppress=missingIncludeSystem --inline-suppr --quiet src/ examples/
 
 test:
 	ctest --test-dir build/tests

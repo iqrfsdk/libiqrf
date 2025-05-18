@@ -18,13 +18,29 @@ UartConnector::UartConnector(UartConfig config): IConnector(), config(std::move(
     UartConnector::checkSerialResult(sp_get_port_by_name(this->config.device.c_str(), &this->port));
     IQRF_LOG(log::Level::Debug) << "UART port created: " << this->config.device
         << " (name: " << sp_get_port_name(this->port) << ", description: "
-        << sp_get_port_description(this->port) << ")\n";
+        << sp_get_port_description(this->port) << ")";
     if (sp_get_port_transport(this->port) == SP_TRANSPORT_USB) {
+        std::stringstream usbInfo;
         int usbBus, usbAddress;
-        UartConnector::checkSerialResult(sp_get_port_usb_bus_address(this->port, &usbBus, &usbAddress));
-        IQRF_LOG(log::Level::Debug) << "UART port is on USB bus: " << usbBus << ", USB address: " << usbAddress
-            << ", Manufacturer: " << sp_get_port_usb_manufacturer(this->port)
-            << ", Product: " << sp_get_port_usb_product(this->port) << "\n";
+        if (sp_get_port_usb_bus_address(this->port, &usbBus, &usbAddress) == SP_OK) {
+            usbInfo << "USB bus: " << usbBus << ", USB address: " << usbAddress;
+        } else {
+            usbInfo << "USB bus and address not available";
+        }
+        int usbVid, usbPid;
+        if (sp_get_port_usb_vid_pid(this->port, &usbVid, &usbPid) == SP_OK) {
+            usbInfo << ", USB VID: " << std::hex << usbVid << ", PID: " << usbPid;
+        } else {
+            usbInfo << ", USB VID and PID not available";
+        }
+        char *manufacturer = sp_get_port_usb_manufacturer(this->port);
+        usbInfo << ", Manufacturer: " << (manufacturer != nullptr ? manufacturer : "N/A");
+        char *product = sp_get_port_usb_product(this->port);
+        usbInfo << ", Product: " << (product != nullptr ? product : "N/A");
+        char *serial = sp_get_port_usb_serial(this->port);
+        usbInfo << ", Serial: " << (serial != nullptr ? serial : "N/A");
+
+        IQRF_LOG(log::Level::Debug) << usbInfo.str();
     }
 
     // Open the port
@@ -63,87 +79,27 @@ int UartConnector::checkSerialResult(sp_return result) {
 }
 
 std::vector<uint8_t> UartConnector::receive() {
-    std::vector<uint8_t> data;
     int bytesRead = 0;
     uint8_t byte;
-    bool running = false;
-    bool escape = false;
-
+    HdlcFrame frame;
     while ((bytesRead = sp_blocking_read(this->port, &byte, 1, 1000)) > 0) {
-        if (!running && byte == 0x7E) {
-            running = true;
-            continue;
-        }
-        if (running && byte == 0x7D) {
-            escape = true;
-            continue;
-        }
-        if (running && escape) {
-            escape = false;
-            if (byte == 0x7E) {
-                byte = 0x7F;
-            } else if (byte == 0x7D) {
-                byte = 0x7E;
-            }
-        }
-        if (running && byte == 0x7E) {
-            break;
-        }
-        data.push_back(byte);
+        frame.decodeByte(byte);
     }
 
     if (bytesRead < 0) {
         throw std::runtime_error("Failed to read from UART port");
     }
 
-    if (data.empty()) {
-        return data;
-    }
-
-    const uint8_t crc = data.back();
-    data.pop_back();
-    if (crc != calculateCrc(data)) {
-        throw std::runtime_error("CRC check failed");
-    }
-
-    return data;
+    return frame.getData();
 }
 
 void UartConnector::send(const std::vector<uint8_t> &data) {
     if (data.empty()) {
         throw std::runtime_error("No data to send");
     }
-    std::vector<uint8_t> frame;
-    frame.push_back(0x7E);
-    for (const auto byte : data) {
-        if (byte == 0x7E) {
-            frame.push_back(0x7D);
-            frame.push_back(0x7E);
-        } else if (byte == 0x7D) {
-            frame.push_back(0x7D);
-            frame.push_back(0x7D);
-        } else {
-            frame.push_back(byte);
-        }
-    }
-    frame.push_back(calculateCrc(data));
-    frame.push_back(0x7E);
+    HdlcFrame hdlcFrame(data);
+    std::vector<uint8_t> frame = hdlcFrame.encode();
     UartConnector::checkSerialResult(sp_blocking_write(this->port, frame.data(), frame.size(), 1000));
-}
-
-uint8_t UartConnector::calculateCrc(const std::vector<uint8_t> &data) {
-    uint8_t crc = 0xFF;
-    for (const uint8_t byte : data) {
-        crc ^= byte;
-        for (int i = 0; i < 8; ++i) {
-            if (crc & 0x01) {
-                crc = (crc >> 1) ^ 0x8C;
-            } else {
-                crc >>= 1;
-            }
-        }
-    }
-    return crc;
 }
 
 }  // namespace iqrf::connector::uart

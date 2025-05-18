@@ -21,7 +21,7 @@ coverage:
 	cmake -Bbuild -H. -DCMAKE_BUILD_TYPE=Debug -DCODE_COVERAGE=ON
 	cmake --build build
 	ctest --verbose --test-dir build/tests --output-junit ctest.xml --exclude-regex '_GPIO'
-	gcovr --html-details --exclude-unreachable-branches --print-summary -o coverage/ --root .
+	gcovr --html-details --exclude-unreachable-branches --print-summary -o coverage/ --filter src/ --filter include/ --root .
 
 build:
 	mkdir build

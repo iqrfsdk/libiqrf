@@ -1,7 +1,7 @@
 /**
  * Copyright 2023-2025 MICRORISC s.r.o.
  * SPDX-License-Identifier: Apache-2.0
- * File: IConnector.h
+ * File: UartConfig.h
  * Authors: Roman Ondráček <roman.ondracek@iqrf.com>
  * Date: 2025-05-10
  *

@@ -1,7 +1,7 @@
 /**
 * Copyright MICRORISC s.r.o.
  * SPDX-License-Identifier: Apache-2.0
- * File: UartConnectorTest.cpp
+ * File: ConnectorUtilsTest.cpp
  * Authors: Roman Ondráček <roman.ondracek@iqrf.com>
  * Date: 2025-05-16
  *
@@ -13,35 +13,34 @@
 
 #include <cstdint>
 #include <map>
+#include <string>
 #include <vector>
 
-#include "iqrf/connector/uart/UartConnector.h"
+#include "iqrf/connector/ConnectorUtils.h"
 
-namespace iqrf::connector::uart {
+namespace iqrf::connector {
 
-class UartConnectorTest : public ::testing::Test {
-};
-
-TEST_F(UartConnectorTest, calculateCrc) {
-    const std::map<uint8_t, std::vector<uint8_t>> values = {
+class ConnectorUtilsTest : public ::testing::Test {
+protected:
+    /// Raw bytes as std::vector to human-readable string conversion test data
+    std::map<std::vector<uint8_t>, std::string> testData = {
         {
-            0x4e,
             {
                 0x00, 0x00, 0xff, 0x3f, 0x00, 0x00, 0x80, 0x00, 0x17, 0x04,
                 0x00, 0xfd, 0x26, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x05,
             },
+            "00.00.ff.3f.00.00.80.00.17.04.00.fd.26.00.00.00.00.00.00.05",
         },
         {
-            0xa4,
             { 0x00, 0x00, 0x06, 0x80, 0x00, 0x00, 0x00, 0x00 },
-        },
-        {
-            0x69,
-            { 0x00, 0x00, 0x06, 0x81, 0x00, 0x00, 0x00, 0x00 },
+            "00.00.06.80.00.00.00.00"
         },
     };
-    for (const auto& [expectedCrc, bytes] : values) {
-        EXPECT_EQ(expectedCrc, UartConnector::calculateCrc(bytes));
+};
+
+TEST_F(ConnectorUtilsTest, vectorToHexString) {
+    for (const auto& [data, expected] : testData) {
+        EXPECT_EQ(expected, ConnectorUtils::vectorToHexString(data));
     }
 }
 

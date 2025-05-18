@@ -1,7 +1,7 @@
 /**
  * Copyright 2023-2025 MICRORISC s.r.o.
  * SPDX-License-Identifier: Apache-2.0
- * File: IConnector.h
+ * File: UartConnector.h
  * Authors: Roman Ondráček <roman.ondracek@iqrf.com>
  * Date: 2025-05-10
  *
@@ -12,15 +12,16 @@
 #pragma once
 
 #include <libserialport.h>
-#if BUILD_TESTS
-#include <gtest/gtest_prod.h>
-#endif
 
 #include <cstdint>
 #include <stdexcept>
 #include <vector>
 
+#include <boost/core/ignore_unused.hpp>
+
 #include "iqrf/connector/IConnector.h"
+#include "iqrf/connector/ConnectorUtils.h"
+#include "iqrf/connector/uart/HdlcFrame.h"
 #include "iqrf/connector/uart/UartConfig.h"
 #include "iqrf/log/Logging.h"
 
@@ -127,6 +128,7 @@ class UartConnector : public IConnector {
         const ProgrammingTarget target,
         const std::vector<uint8_t> &data
     ) override {
+        boost::ignore_unused(target, data);
         throw std::runtime_error("Not implemented");
     }
 
@@ -144,6 +146,7 @@ class UartConnector : public IConnector {
         const std::vector<uint8_t> &data,
         const uint16_t address
     ) override {
+        boost::ignore_unused(target, data, address);
         throw std::runtime_error("Not implemented");
     }
 
@@ -153,6 +156,7 @@ class UartConnector : public IConnector {
      * @param target specifies which data shall be downloaded.
      */
     std::vector<uint8_t> download(const ProgrammingTarget target) override {
+        boost::ignore_unused(target);
         throw std::runtime_error("Not implemented");
     }
 
@@ -166,6 +170,7 @@ class UartConnector : public IConnector {
         const ProgrammingTarget target,
         const uint16_t address
     ) override {
+        boost::ignore_unused(target, address);
         throw std::runtime_error("Not implemented");
     }
 
@@ -179,23 +184,12 @@ class UartConnector : public IConnector {
     }
 
  private:
-#ifdef BUILD_TESTS
-    FRIEND_TEST(UartConnectorTest, calculateCrc);
-#endif
-
     /**
      * Check the result of the libserialport functions and throw an exception on error.
      * @param result libserialport return code
      * @return libserialport return code
      */
     static int checkSerialResult(sp_return result);
-
-    /**
-     * Calculate 1-Wire CRC8 checksum for the given data.
-     * @param data Data to calculate the checksum for
-     * @return 1-Wire CRC8 checksum
-     */
-    static uint8_t calculateCrc(const std::vector<uint8_t> &data);
 
     /// UART configuration
     UartConfig config;

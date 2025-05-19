@@ -93,7 +93,7 @@ class UartConnector : public IConnector {
     /**
      * Reset the TR module.
      */
-    void resetTr() override {};
+    void resetTr() override;
 
     // Programming mode
 
@@ -182,6 +182,17 @@ class UartConnector : public IConnector {
     void listeningLoop() override {
         throw std::runtime_error("Not implemented");
     }
+
+    /**
+     * Initializes the GPIO pins used for the connector
+     */
+    void initGpio();
+
+    /**
+     * Enables or disables the bus
+     * @param enable true to enable the bus, false to disable it
+     */
+    void toggleBus(bool enable);
 
  private:
     /**

@@ -14,6 +14,7 @@
 namespace iqrf::connector::uart {
 
 UartConnector::UartConnector(UartConfig config): IConnector(), config(std::move(config)) {
+    this->initGpio();
     IQRF_LOG(log::Level::Debug) << "Opening UART port: " << this->config.device;
     UartConnector::checkSerialResult(sp_get_port_by_name(this->config.device.c_str(), &this->port));
     IQRF_LOG(log::Level::Debug) << "UART port created: " << this->config.device
@@ -55,9 +56,63 @@ UartConnector::UartConnector(UartConfig config): IConnector(), config(std::move(
 }
 
 UartConnector::~UartConnector() {
+    if (this->config.powerEnableGpio) {
+        this->config.powerEnableGpio->setValue(false);
+    }
+
+    this->toggleBus(false);
+
+    if (this->config.pgmSwitchGpio) {
+        this->config.pgmSwitchGpio->setValue(false);
+    }
+
     if (this->port) {
         sp_close(this->port);
         sp_free_port(this->port);
+    }
+}
+
+void UartConnector::initGpio() {
+    if (this->config.pgmSwitchGpio) {
+        this->config.pgmSwitchGpio->initOutput(false);
+    }
+    if (this->config.powerEnableGpio) {
+        this->config.powerEnableGpio->initOutput(true);
+    }
+    this->toggleBus(false);
+    std::this_thread::sleep_for(std::chrono::milliseconds(1));
+
+    if (this->config.trModuleReset) {
+        this->resetTr();
+    }
+
+    this->toggleBus(true);
+    std::this_thread::sleep_for(std::chrono::milliseconds(500));
+}
+
+void UartConnector::resetTr() {
+    if (!this->config.powerEnableGpio.has_value()) {
+        return;
+    }
+    this->config.powerEnableGpio->setValue(false);
+    std::this_thread::sleep_for(std::chrono::milliseconds(300));
+    this->config.powerEnableGpio->setValue(true);
+    std::this_thread::sleep_for(std::chrono::milliseconds(1));
+}
+
+void UartConnector::toggleBus(bool enable) {
+    if (this->config.busEnableGpio) {
+        this->config.busEnableGpio->setValue(enable);
+    } else {
+        if (this->config.i2cEnableGpio) {
+            this->config.i2cEnableGpio->setValue(false);
+        }
+        if (this->config.spiEnableGpio) {
+            this->config.spiEnableGpio->setValue(false);
+        }
+        if (this->config.uartEnableGpio) {
+            this->config.uartEnableGpio->setValue(enable);
+        }
     }
 }
 
@@ -82,7 +137,7 @@ std::vector<uint8_t> UartConnector::receive() {
     int bytesRead = 0;
     uint8_t byte;
     HdlcFrame frame;
-    while ((bytesRead = sp_blocking_read(this->port, &byte, 1, 1000)) > 0) {
+    while ((bytesRead = sp_blocking_read(this->port, &byte, 1, 100)) > 0) {
         frame.decodeByte(byte);
     }
 

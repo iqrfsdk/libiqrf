@@ -33,7 +33,7 @@ void HdlcFrame::decodeByte(uint8_t byte) {
         return;
     }
 
-    if (byte == HDLC_FLAG) {
+    if (!this->escape && byte == HDLC_FLAG) {
         this->decoding = false;
         this->escape = false;
         if (this->data.empty()) {
@@ -64,6 +64,7 @@ void HdlcFrame::decodeByte(uint8_t byte) {
             this->escape = false;
             throw std::logic_error("Invalid escape sequence");
         }
+        this->escape = false;
     }
     this->data.push_back(byte);
 }
@@ -81,9 +82,9 @@ std::vector<uint8_t> HdlcFrame::encode() {
     for (const auto byte : this->data) {
         if (byte == HDLC_FLAG || byte == HDLC_ESCAPE) {
             encoded.push_back(HDLC_ESCAPE);
-            encoded.push_back(byte ^ HDLC_ESCAPE_BIT);
-        } else {
             encoded.push_back(HdlcFrame::encodeByte(byte));
+        } else {
+            encoded.push_back(byte);
         }
     }
     if (this->crc == -1) {

@@ -37,6 +37,13 @@ protected:
             { 0x00, 0x00, 0x06, 0x80, 0x00, 0x00, 0x00, 0x00 },
             { 0x7e, 0x00, 0x00, 0x06, 0x80, 0x00, 0x00, 0x00, 0x00, 0xa4, 0x7e },
         },
+        {
+            { 0x00, 0x00, 0x03, 0x00, 0xff, 0xff, 0x00, 0x7e, 0x7d, 0x7e },
+            {
+                0x7e, 0x00, 0x00, 0x03, 0x00, 0xff, 0xff, 0x00, 0x7d, 0x5e,
+                0x7d, 0x5d, 0x7d, 0x5e, 0x48, 0x7e,
+            },
+        },
     };
 };
 
@@ -71,11 +78,23 @@ TEST_F(HdlcFrameTest, decode) {
         std::vector<uint8_t> emptyFrame = {0x7e, 0x7e};
         EXPECT_THROW(frame.decode(emptyFrame), std::logic_error);
     }
+    // Short frame
+    {
+        HdlcFrame frame;
+        std::vector<uint8_t> emptyFrame = {0x7e, 0x00, 0x7e};
+        EXPECT_THROW(frame.decode(emptyFrame), std::logic_error);
+    }
     // Abort sequence
     {
         HdlcFrame frame;
-        std::vector<uint8_t> abortSequence = {0x7e, 0x01, 0x7d, 0x7e, 0x40};
+        std::vector<uint8_t> abortSequence = {0x7e, 0x01, 0x02, 0x7d, 0x7e, 0x40, 0x7e};
         EXPECT_THROW(frame.decode(abortSequence), std::logic_error);
+    }
+    // Invalid escape sequence
+    {
+        HdlcFrame frame;
+        std::vector<uint8_t> invalidEscape = {0x7e, 0x01, 0x7d, 0x4e, 0x7d};
+        EXPECT_THROW(frame.decode(invalidEscape), std::logic_error);
     }
 }
 

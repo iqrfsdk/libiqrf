@@ -234,9 +234,15 @@ class IConnector {
      * TODO: Used in Daemon(IqrfCdc, IqrfSpi, IqrfUart)
      */
     virtual void listen() {
-        this->listening = true;
-        this->listeningThread = std::thread(&IConnector::listeningLoop, this);
-    }
+      // TODO: Add some access control
+      if (this->listening) {
+        // TODO: Custom exceptions
+        throw std::runtime_error("Listening loop already active");
+      }
+
+      this->listening = true;
+      this->listeningThread = std::thread(&IConnector::listeningLoop, this);
+  }
 
     // Exclusive access
 
@@ -357,7 +363,32 @@ class IConnector {
      *
      * TODO: Used in Daemon(IqrfSpi)
      */
-    virtual void listeningLoop() = 0;
+    virtual void listeningLoop() {
+      try {
+        std::vector<uint8_t> recvBuffer;
+
+        while (this->listening) {
+          recvBuffer = this->receive();
+
+          std::lock_guard<std::recursive_mutex> lock(this->guard);
+
+          if (this->hasExclusiveAccess()) {
+            this->exclusiveResponseHandler(recvBuffer);
+          } else {
+            this->normalResponseHandler(recvBuffer);
+          }
+
+          if (this->snifferResponseHandler) {
+            this->snifferResponseHandler(recvBuffer);
+          }
+          
+        }
+
+      } catch (...) {
+        // TODO: Report error
+        this->listening = false;
+      }
+    };
 
     /**
      * Send the data message directly via the connector.

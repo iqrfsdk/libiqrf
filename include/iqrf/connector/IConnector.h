@@ -13,6 +13,8 @@
 
 #include <atomic>
 #include <functional>
+#include <mutex>
+#include <stdexcept>
 #include <thread>
 #include <vector>
 
@@ -69,13 +71,52 @@ struct TrInfo {
 };
 #pragma pack(pop)
 
+/**
+ * Access Token to guard exclusive access to the connector.
+ */
+class AccessToken {
+ public:
+  // Disable copying
+  AccessToken(const AccessToken&) = delete;
+  AccessToken& operator=(const AccessToken&) = delete;
 
+  // Allow move (transfer of the access)
+  AccessToken(AccessToken&&) = default;
+  AccessToken& operator=(AccessToken&&) = default;
+
+  /**
+   * Get the level of access for this token.
+   */
+  const AccessType getAccessType() const {
+    return accessType;
+  }
+
+
+ private:
+  // Make the class instantiable only by the IConnector
+  friend class IConnector;
+  explicit AccessToken(AccessType accessType): accessType(accessType) {};
+
+  /**
+   * The level of access this token bears.
+   */
+  const AccessType accessType;
+};
+
+
+/**
+ * Interface for IQRF Transceiver module connectors.
+ */
 class IConnector {
  public:
     /**
      * Constructs the connector and initializes the necessary resources (GPIO lines).
      */
-    IConnector() {}
+    IConnector() {
+      this->normalResponseHandler = ResponseHandler();
+      this->exclusiveResponseHandler = ResponseHandler();
+      this->snifferResponseHandler = ResponseHandler();
+    }
 
     /**
      * Destructor to cleanly release the connection resources.
@@ -97,10 +138,34 @@ class IConnector {
 
     /**
      * Send the data message via the connector.
+     * 
+     * In order to send data, a ResponseHandler needs to be registered first.
+     * Registering the handler yields the AccessToken used as an authenticator in this function.
      *
      * TODO: Used in Daemon(IqrfCdc, IqrfSpi, IqrfUart), clibspi, clibuart
      */
-    virtual void send(const std::vector<uint8_t> &data) = 0;
+    void send(const std::vector<uint8_t>& data, const AccessToken token) {
+      std::lock_guard<std::recursive_mutex> lock(this->guard);
+
+      switch (token.getAccessType()) {
+        case AccessType::Normal:
+          if (this->hasExclusiveAccess()) {
+            // TODO: Custom exceptions
+            throw std::runtime_error("Cannot send: Exclusive access is active");
+          }
+          this->send(data);
+          break;
+        case AccessType::Exclusive:
+          this->send(data);
+          break;
+        case AccessType::Sniffer:
+          // TODO: Custom exceptions
+          throw std::runtime_error("Cannot send: Sniffer token does not allow sending");
+          break;
+        default:
+          break;
+      }
+    };
 
     /**
      * Read the data synchronously from the connector.
@@ -111,10 +176,57 @@ class IConnector {
 
     /**
      * Register the responseHandler for received messages.
+     * 
+     * Upon successfull register yields an AccessToken which can be used to access this channel.
      *
      * TODO: Used in Daemon(IqrfCdc, IqrfSpi, IqrfUart)
      */
-    virtual void registerResponseHandler(ResponseHandler responseHandler, AccessType access) = 0;
+    AccessToken registerResponseHandler(ResponseHandler responseHandler, AccessType access) {
+      std::lock_guard<std::recursive_mutex> lock(this->guard);
+
+      switch (access) {
+        case AccessType::Normal:
+          if (this->normalResponseHandler) {
+            // TODO: Send EOF to the previous handler
+          }
+          this->normalResponseHandler = responseHandler;
+          break;
+        case AccessType::Exclusive:
+          if (this->hasExclusiveAccess()) {
+            // TODO: Custom exceptions
+            throw std::runtime_error("Exclusive access already assigned");
+          }
+          this->exclusiveResponseHandler = responseHandler;
+          break;
+        case AccessType::Sniffer:
+          this->snifferResponseHandler = responseHandler;
+          break;
+        default:
+      }
+
+      return AccessToken(access);
+    };
+
+    /**
+     * Unregister the previously registered responseHandler.
+     */
+    void unregisterResponseHandler(AccessToken token) {
+      std::lock_guard<std::recursive_mutex> lock(this->guard);
+
+      switch (token.getAccessType()) {
+        case AccessType::Normal:
+          this->normalResponseHandler = ResponseHandler();
+          break;
+        case AccessType::Exclusive:
+          this->exclusiveResponseHandler = ResponseHandler();
+          break;
+        case AccessType::Sniffer:
+          this->snifferResponseHandler = ResponseHandler();
+          break;
+        default:
+          break;
+      }
+    }
 
     /**
      * Start the listening loop in a separate thread.
@@ -133,7 +245,10 @@ class IConnector {
      *
      * TODO: Used in Daemon(IqrfCdc, IqrfSpi, IqrfUart)
      */
-    virtual bool hasExclusiveAccess() const = 0;
+    virtual const bool hasExclusiveAccess() const {
+      std::lock_guard<std::recursive_mutex> lock(this->guard);
+      return (bool)this->exclusiveResponseHandler;
+    };
 
     // Transceiver operations
 
@@ -234,6 +349,7 @@ class IConnector {
         const uint16_t address
     ) = 0;
 
+
  protected:
     /**
      * Listen to the connector and asynchronously call responseHandler for
@@ -243,9 +359,27 @@ class IConnector {
      */
     virtual void listeningLoop() = 0;
 
- private:
-    std::atomic_bool listening = false;
-    std::thread listeningThread;
+    /**
+     * Send the data message directly via the connector.
+     * 
+     * Unlike the two-parameter public version, this method does not perform access control.
+     */
+    virtual void send(const std::vector<uint8_t>& data) = 0;
+
+
+  private:
+  // Response handlers for managing the replies from Transceiver modules asynchronously
+  // NOTE: Could be written as a map<AccessToken,ResponseHandler> to enable multiple access
+  ResponseHandler normalResponseHandler;
+  ResponseHandler exclusiveResponseHandler;
+  ResponseHandler snifferResponseHandler;
+
+  // Control variables for the listening loop
+  std::atomic_bool listening = false;
+  std::thread listeningThread;
+
+  // Guards atomicity of connector operations
+  mutable std::recursive_mutex guard;
 };
 
 }  // namespace iqrf::connector

@@ -64,23 +64,6 @@ class UartConnector : public IConnector {
      */
     std::vector<uint8_t> receive() override;
 
-    /**
-     * Register the responseHandler for received messages.
-     */
-    void registerResponseHandler(ResponseHandler responseHandler, AccessType access) override {}
-
-    /**
-     * Start the listening loop in a separate thread.
-     */
-    void listen() override {}
-
-    // Exclusive access
-
-    /**
-     * Check whether the connector is in exclusive access mode.
-     */
-    bool hasExclusiveAccess() const override { return false; }
-
     // Transceiver operations
 
     /**
@@ -133,24 +116,6 @@ class UartConnector : public IConnector {
     }
 
     /**
-     * Uploads the data to the TR module memory.
-     *
-     * Just an utility function which prepends the address to the data so it is properly packed for the upload.
-     *
-     * @param target specifies what the uploaded data contain.
-     * @param data is the actual data to be uploaded.
-     * @param address specifies the Flash or EEPROM address at which the data will be stored.
-     */
-    void upload(
-        const ProgrammingTarget target,
-        const std::vector<uint8_t> &data,
-        const uint16_t address
-    ) override {
-        boost::ignore_unused(target, data, address);
-        throw std::runtime_error("Not implemented");
-    }
-
-    /**
      * Downloads data from the TR module in programming mode.
      *
      * @param target specifies which data shall be downloaded.
@@ -175,13 +140,6 @@ class UartConnector : public IConnector {
     }
 
  protected:
-    /**
-     * Listen to the connector and asynchronously call responseHandler for
-     * received messages.
-     */
-    void listeningLoop() override {
-        throw std::runtime_error("Not implemented");
-    }
 
     /**
      * Initializes the GPIO pins used for the connector

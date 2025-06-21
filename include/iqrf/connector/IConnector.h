@@ -65,9 +65,9 @@ struct TrInfo {
     uint8_t trType;
     uint16_t osBuild;
 
-    uint8_t osVersionMajor() const { return osVersion >> 4; }
+    [[nodiscard]] uint8_t osVersionMajor() const { return osVersion >> 4; }
 
-    uint8_t osVersionMinor() const { return osVersion & 0x0F; }
+    [[nodiscard]] uint8_t osVersionMinor() const { return osVersion & 0x0F; }
 };
 #pragma pack(pop)
 
@@ -87,7 +87,7 @@ class AccessToken {
   /**
    * Get the level of access for this token.
    */
-  const AccessType getAccessType() const {
+  [[nodiscard]] const AccessType getAccessType() const {
     return accessType;
   }
 
@@ -121,7 +121,7 @@ class IConnector {
     /**
      * Destructor to cleanly release the connection resources.
      */
-    virtual ~IConnector() {}
+    virtual ~IConnector() = default;
 
     // Basic state
 
@@ -138,7 +138,7 @@ class IConnector {
 
     /**
      * Send the data message via the connector.
-     * 
+     *
      * In order to send data, a ResponseHandler needs to be registered first.
      * Registering the handler yields the AccessToken used as an authenticator in this function.
      *
@@ -161,7 +161,6 @@ class IConnector {
         case AccessType::Sniffer:
           // TODO: Custom exceptions
           throw std::runtime_error("Cannot send: Sniffer token does not allow sending");
-          break;
         default:
           break;
       }
@@ -176,8 +175,8 @@ class IConnector {
 
     /**
      * Register the responseHandler for received messages.
-     * 
-     * Upon successfull register yields an AccessToken which can be used to access this channel.
+     *
+     * Upon successful register yields an AccessToken which can be used to access this channel.
      *
      * TODO: Used in Daemon(IqrfCdc, IqrfSpi, IqrfUart)
      */
@@ -202,6 +201,8 @@ class IConnector {
           this->snifferResponseHandler = responseHandler;
           break;
         default:
+            // TODO: Custom exceptions
+            throw std::runtime_error("Invalid access type for response handler registration");
       }
 
       return AccessToken(access);
@@ -233,7 +234,7 @@ class IConnector {
      *
      * TODO: Used in Daemon(IqrfCdc, IqrfSpi, IqrfUart)
      */
-    virtual void listen() {
+    void listen() {
       // TODO: Add some access control
       if (this->listening) {
         // TODO: Custom exceptions
@@ -268,9 +269,9 @@ class IConnector {
      *
      * TODO: Used in Daemon(IqrfCdc, IqrfSpi, IqrfUart)
      */
-    virtual const bool hasExclusiveAccess() const {
+    bool hasExclusiveAccess() const {
       std::lock_guard<std::recursive_mutex> lock(this->guard);
-      return (bool)this->exclusiveResponseHandler;
+      return (bool) this->exclusiveResponseHandler;
     };
 
     // Transceiver operations
@@ -338,7 +339,7 @@ class IConnector {
      *
      * TODO: Used in Daemon(IqrfSpi), clibspi (for cutils, clibtr)
      */
-    virtual void upload(
+    void upload(
         const ProgrammingTarget target,
         const std::vector<uint8_t> &data,
         const uint16_t address
@@ -380,36 +381,42 @@ class IConnector {
      *
      * TODO: Used in Daemon(IqrfSpi)
      */
-    virtual void listeningLoop() {
-      try {
-        std::vector<uint8_t> recvBuffer;
+    void listeningLoop() {
+        try {
+            std::vector<uint8_t> recvBuffer;
 
-        while (this->listening) {
-          recvBuffer = this->receive();
+            while (this->listening) {
+                recvBuffer = this->receive();
 
-          std::lock_guard<std::recursive_mutex> lock(this->guard);
+                if (recvBuffer.empty()) {
+                    // No data received, continue listening
+                    std::this_thread::sleep_for(std::chrono::milliseconds(50));
+                    continue;
+                }
 
-          if (this->hasExclusiveAccess()) {
-            this->exclusiveResponseHandler(recvBuffer);
-          } else {
-            this->normalResponseHandler(recvBuffer);
-          }
+                std::lock_guard<std::recursive_mutex> lock(this->guard);
 
-          if (this->snifferResponseHandler) {
-            this->snifferResponseHandler(recvBuffer);
-          }
-          
+                if (this->hasExclusiveAccess()) {
+                    this->exclusiveResponseHandler(recvBuffer);
+                } else {
+                   this->normalResponseHandler(recvBuffer);
+                }
+
+                if (this->snifferResponseHandler) {
+                   this->snifferResponseHandler(recvBuffer);
+                }
+
+                std::this_thread::sleep_for(std::chrono::milliseconds(50));
+            }
+        } catch (...) {
+            // TODO: Report error
+            this->listening = false;
         }
-
-      } catch (...) {
-        // TODO: Report error
-        this->listening = false;
-      }
     };
 
     /**
      * Send the data message directly via the connector.
-     * 
+     *
      * Unlike the two-parameter public version, this method does not perform access control.
      */
     virtual void send(const std::vector<uint8_t>& data) = 0;

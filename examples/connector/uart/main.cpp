@@ -43,11 +43,22 @@ void signalHandler(const int signal) {
     exit(signal);
 }
 
+int responseHandler(const std::vector<uint8_t> &response) {
+    if (response.empty()) {
+        IQRF_LOG(iqrf::log::Level::Error) << "Empty response received.";
+        return -1;
+    }
+    IQRF_LOG(iqrf::log::Level::Info) << "Response: " << ConnectorUtils::vectorToHexString(response);
+    return 0;
+}
+
 int main() {
     iqrf::log::Logger::logLevel = iqrf::log::Level::Trace;
     iqrf::log::Logger logger;
     IQRF_LOG(iqrf::log::Level::Info) << "IQRF UART Connector Example";
     uartConnector = new iqrf::connector::uart::UartConnector(uartConfig);
+    uartConnector->registerResponseHandler(responseHandler, iqrf::connector::AccessType::Normal);
+    uartConnector->listen();
 
     bool ledState = true;
     while (true) {
@@ -55,12 +66,6 @@ int main() {
         ledState = !ledState;
         IQRF_LOG(iqrf::log::Level::Info) << "Sending: " << ConnectorUtils::vectorToHexString(request);
         uartConnector->send(request);
-        std::vector<uint8_t> receivedData = uartConnector->receive();
-        if (receivedData.empty()) {
-            IQRF_LOG(iqrf::log::Level::Warning) << "No data received.";
-            continue;
-        }
-        IQRF_LOG(iqrf::log::Level::Info) << "Received: " << ConnectorUtils::vectorToHexString(receivedData);
         std::this_thread::sleep_for(std::chrono::seconds(1));
     }
 

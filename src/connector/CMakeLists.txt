@@ -21,4 +21,5 @@ install(
     DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}/iqrf"
 )
 
+add_subdirectory(spi)
 add_subdirectory(uart)

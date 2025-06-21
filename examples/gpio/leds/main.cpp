@@ -20,16 +20,23 @@
 
 #include "iqrf/gpio/Gpio.h"
 
-/// Green LED configuration
-const iqrf::gpio::GpioConfig greenLedConfig(0);
-
-/// Red LED configuration
-const iqrf::gpio::GpioConfig redLedConfig(1);
-
 /// Green LED GPIO pin instance
-auto *greenLed = new iqrf::gpio::Gpio(greenLedConfig);
+iqrf::gpio::Gpio *greenLed = nullptr;
 /// Red LED GPIO pin instance
-auto *redLed = new iqrf::gpio::Gpio(redLedConfig);
+iqrf::gpio::Gpio *redLed = nullptr;
+
+void gpioCleanup() {
+    if (greenLed != nullptr) {
+        greenLed->setValue(false);
+        delete greenLed;
+        greenLed = nullptr;
+    }
+    if (redLed != nullptr) {
+        redLed->setValue(false);
+        delete redLed;
+        redLed = nullptr;
+    }
+}
 
 /**
  * Signal handler
@@ -37,33 +44,38 @@ auto *redLed = new iqrf::gpio::Gpio(redLedConfig);
  */
 void signalHandler(const int signal) {
     std::cout << "Signal " << signal << " received. Exiting..." << std::endl;
-
-    greenLed->setValue(false);
-    redLed->setValue(false);
-
-    delete greenLed;
-    delete redLed;
-
+    gpioCleanup();
     exit(signal);
 }
 
 int main() {
-    signal(SIGINT, signalHandler);
-    signal(SIGTERM, signalHandler);
+    try {
+        /// Green LED configuration
+        const iqrf::gpio::GpioConfig greenLedConfig(0, "green_led");
+        greenLed = new iqrf::gpio::Gpio(greenLedConfig);
+        /// Red LED configuration
+        const iqrf::gpio::GpioConfig redLedConfig(1, "red_led");
+        redLed = new iqrf::gpio::Gpio(redLedConfig);
 
-    bool greenLedState = false;
-    bool redLedState = true;
+        signal(SIGINT, signalHandler);
+        signal(SIGTERM, signalHandler);
 
-    greenLed->initOutput(greenLedState);
-    redLed->initOutput(redLedState);
+        bool greenLedState = false;
+        bool redLedState = true;
 
-    while (true) {
-        greenLedState = !greenLedState;
-        redLedState = !redLedState;
-        greenLed->setValue(greenLedState);
-        redLed->setValue(redLedState);
-        std::this_thread::sleep_for(std::chrono::seconds(1));
+        greenLed->initOutput(greenLedState);
+        redLed->initOutput(redLedState);
+
+        while (true) {
+            greenLedState = !greenLedState;
+            redLedState = !redLedState;
+            greenLed->setValue(greenLedState);
+            redLed->setValue(redLedState);
+            std::this_thread::sleep_for(std::chrono::seconds(1));
+        }
+    } catch (const std::exception &e) {
+        std::cerr << "Error: " << e.what() << std::endl;
+        gpioCleanup();
+        return 1;
     }
-
-    return 0;
 }

@@ -69,7 +69,7 @@ class HdlcFrame {
     const std::vector<uint8_t> &getData() const;
 
  private:
-#ifdef BUILD_TESTS
+#if BUILD_TESTS
     FRIEND_TEST(HdlcFrameTest, calculateCrc);
     FRIEND_TEST(HdlcFrameTest, getData);
 #endif

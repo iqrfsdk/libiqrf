@@ -87,7 +87,7 @@ class AccessToken {
   /**
    * Get the level of access for this token.
    */
-  [[nodiscard]] const AccessType getAccessType() const {
+  [[nodiscard]] AccessType getAccessType() const {
     return accessType;
   }
 
@@ -100,7 +100,7 @@ class AccessToken {
   /**
    * The level of access this token bears.
    */
-  const AccessType accessType;
+  AccessType accessType;
 };
 
 
@@ -180,7 +180,7 @@ class IConnector {
      *
      * TODO: Used in Daemon(IqrfCdc, IqrfSpi, IqrfUart)
      */
-    AccessToken registerResponseHandler(ResponseHandler responseHandler, AccessType access) {
+    AccessToken registerResponseHandler(const ResponseHandler &responseHandler, AccessType access) {
       std::lock_guard<std::recursive_mutex> lock(this->guard);
 
       switch (access) {

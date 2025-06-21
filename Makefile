@@ -24,7 +24,7 @@ coverage:
 	gcovr --html-details --exclude-unreachable-branches --print-summary -o coverage/ --filter src/ --filter include/ --root .
 
 build:
-	mkdir build
+	mkdir -p build
 	cmake -Bbuild -H. -DCMAKE_BUILD_TYPE=Debug -DCMAKE_VERBOSE_MAKEFILE:BOOL=ON \
 		-DBUILD_SHARED:BOOL=ON -DBUILD_STATIC:BOOL=ON
 	cmake --build build

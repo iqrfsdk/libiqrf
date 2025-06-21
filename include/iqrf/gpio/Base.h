@@ -16,6 +16,8 @@
 
 #pragma once
 
+#include "iqrf/gpio/Common.h"
+
 namespace iqrf::gpio {
 
 /**

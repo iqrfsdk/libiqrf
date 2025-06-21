@@ -16,7 +16,14 @@
 #include <utility>
 #include <string>
 
+#if defined(__linux__)
 #include <gpiod.hpp>
+#elif defined(__FreeBSD__)
+#include <fcntl.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <sys/gpio.h>
+#endif
 
 #include "iqrf/gpio/version.h"
 

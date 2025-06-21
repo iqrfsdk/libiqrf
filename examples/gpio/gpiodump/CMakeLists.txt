@@ -17,5 +17,5 @@ set(EXAMPLE_NAME iqrf-gpio-gpiodump-example)
 include_directories(${PROJECT_SOURCE_DIR}/include)
 
 add_executable(${EXAMPLE_NAME} main.cpp)
-target_link_libraries(${EXAMPLE_NAME} iqrf_gpio gpiod)
+target_link_libraries(${EXAMPLE_NAME} iqrf_gpio)
 install(TARGETS ${EXAMPLE_NAME} RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})

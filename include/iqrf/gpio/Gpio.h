@@ -19,18 +19,25 @@
 #include <memory>
 #include <utility>
 
+#if defined(__linux__)
 #include <gpiod.hpp>
+#endif
 #if BUILD_TESTS
 #include <gtest/gtest_prod.h>
 #endif
 
-#include "iqrf/gpio/Common.h"
 #include "iqrf/gpio/Base.h"
+#include "iqrf/gpio/Common.h"
+#include "iqrf/gpio/Config.h"
 
+#if defined(__linux__)
 #if libgpiod_VERSION_MAJOR == 1
 #include "iqrf/gpio/GpiodV1.h"
 #else
 #include "iqrf/gpio/GpiodV2.h"
+#endif
+#elif defined(__FreeBSD__)
+#include "iqrf/gpio/GpioFreeBsd.h"
 #endif
 
 namespace iqrf::gpio {

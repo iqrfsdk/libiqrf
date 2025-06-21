@@ -18,8 +18,13 @@
 
 namespace iqrf::gpio {
 
+#if defined(__linux__)
 Gpio::Gpio(const GpioConfig& config) : impl(std::make_shared<iqrf::gpio::Gpiod>(config)) {
 }
+#elif defined(__FreeBSD__)
+Gpio::Gpio(const GpioConfig& config) : impl(std::make_shared<iqrf::gpio::GpioFreeBsd>(config)) {
+}
+#endif
 
 Gpio::Gpio(const Gpio& other) noexcept : impl(other.impl) {
 }

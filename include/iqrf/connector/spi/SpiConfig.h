@@ -12,6 +12,7 @@
 
 #include <optional>
 #include <string>
+#include <utility>
 
 #include "iqrf/gpio/Gpio.h"
 
@@ -28,10 +29,12 @@ class SpiConfig {
   std::string interface;
 
   /// TR module reset during initialization (true by default)
-  std::bool trModuleReset;
+  bool trModuleReset;
 
   /// GPIO to enable power supply to TR module
   std::optional<Gpio> powerEnableGpio;
+  /// GPIO to enable function of buses
+  std::optional<Gpio> busEnableGpio;
   /// GPIO to enable function of SPI bus
   std::optional<Gpio> spiEnableGpio;
   /// GPIO to switch TR module to PGM mode
@@ -39,15 +42,15 @@ class SpiConfig {
   /// GPIO to enable function of UART bus (UART deactivated if set)
   std::optional<Gpio> uartEnableGpio;
   /// GPIO to enable function of I2C bus (I2C deactivated if set)
-  std::optional<Gpio> i2cEnableGpioPin;
+  std::optional<Gpio> i2cEnableGpio;
 
   /**
    * Constructs the minimal SPI connector configuration
    * @param interface is system path to an SPI device
-   * @param resetTr whether the TR module should be reset during initialization
+   * @param trModuleReset whether the TR module should be reset during initialization
    */
-  SpiConfig(const std::string interface, const std::bool resetTr = true)
-      : interface(interface), trModuleReset(resetTr) {}
+  explicit SpiConfig(std::string interface, const bool trModuleReset = true)
+      : interface(std::move(interface)), trModuleReset(trModuleReset) {}
 
   /**
    * Constructs the full SPI connector configuration
@@ -57,22 +60,24 @@ class SpiConfig {
    * @param pgmSwitchGpio GPIO to switch TR module to PGM mode
    * @param uartEnableGpio GPIO to enable function of UART bus (UART deactivated if set)
    * @param i2cEnableGpioPin GPIO to enable function of I2C bus (I2C deactivated if set)
-   * @param resetTr whether the TR module should be reset during initialization
+   * @param trModuleReset whether the TR module should be reset during initialization
    */
-  SpiConfig(const std::string interface,
+  SpiConfig(std::string interface,
             const std::optional<Gpio> &powerEnableGpio,
+            const std::optional<Gpio> &busEnableGpio,
             const std::optional<Gpio> &spiEnableGpio,
             const std::optional<Gpio> &pgmSwitchGpio,
             const std::optional<Gpio> &uartEnableGpio,
             const std::optional<Gpio> &i2cEnableGpioPin,
-            const std::bool resetTr = true)
-      : interface(interface),
+            const bool trModuleReset = true)
+      : interface(std::move(interface)),
+        trModuleReset(trModuleReset),
         powerEnableGpio(powerEnableGpio),
+        busEnableGpio(busEnableGpio),
         spiEnableGpio(spiEnableGpio),
         pgmSwitchGpio(pgmSwitchGpio),
         uartEnableGpio(uartEnableGpio),
-        i2cEnableGpioPin(i2cEnableGpioPin),
-        trModuleReset(resetTr) {}
-}
+        i2cEnableGpio(i2cEnableGpioPin) {}
+};
 
 }

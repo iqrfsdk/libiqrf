@@ -19,4 +19,5 @@ file(GLOB LIB_HEADERS "${LIB_INCLUDE_DIR}/*.h")
 
 install(DIRECTORY ${LIB_INCLUDE_DIR} DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}/iqrf")
 
+add_subdirectory(spi)
 add_subdirectory(uart)

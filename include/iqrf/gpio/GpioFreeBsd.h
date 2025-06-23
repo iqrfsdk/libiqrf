@@ -24,6 +24,7 @@
 #include <cstdint>
 #include <exception>
 #include <stdexcept>
+#include <string>
 
 #include "iqrf/gpio/Common.h"
 #include "iqrf/gpio/Base.h"
@@ -100,4 +101,4 @@ class GpioFreeBsd: public Base {
     /// Name
     ::std::string name;
 };
-}
+}  // namespace iqrf::gpio

@@ -34,14 +34,14 @@ X(Trace, 10)
  * Main logging macro.
  */
 #define IQRF_LOG(level)            \
-    if (level > ::iqrf::log::Logger::logLevel)  \
+    if ((level) > ::iqrf::log::Logger::logLevel)  \
         ;                          \
     else                           \
         iqrf::log::Logger().stream(level) << IQRF_LOG_HEADER(level)
 
 /**
  * Trace logging shorthand.
- * 
+ *
  * Includes file, line and function where it was called.
  */
 #define IQRF_TRACE() \
@@ -83,7 +83,7 @@ const std::unordered_map<Level, std::string> LevelNames = {
 
 /**
  * Log interface.
- * 
+ *
  * Represents an output where logs are stored.
  */
 class ILog {
@@ -95,7 +95,7 @@ class ILog {
 
     /**
      * Add the message `msg` to the log.
-     * 
+     *
      * @param msg is a message which shall be appended.
      */
     virtual void append(const std::string& msg) = 0;
@@ -111,27 +111,27 @@ class ILog {
 
 /**
  * The main logging class.
- * 
+ *
  * Accumulates the log messages and then appends it to a log output.
  */
 class Logger {
  public:
     /**
-     * Reporting level which is shared amongst all loggers. 
-     * 
+     * Reporting level which is shared amongst all loggers.
+     *
      * Defaults to Level::Error.
      */
     static Level logLevel;
     /**
      * Output log shared amongst all loggers.
-     * 
+     *
      * Defaults to logging to stderr.
      */
     static std::unique_ptr<ILog> log;
 
     /**
      * Constructor
-     * 
+     *
      * Creates a new empty Logger instance. The default message severity level is Level::Info.
      */
     Logger();

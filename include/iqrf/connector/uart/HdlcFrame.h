@@ -66,7 +66,7 @@ class HdlcFrame {
      * Returns the data of the HDLC frame
      * @return Data of the HDLC frame
      */
-    const std::vector<uint8_t> &getData() const;
+    [[nodiscard]] const std::vector<uint8_t> &getData() const;
 
  private:
 #if BUILD_TESTS

@@ -95,7 +95,7 @@ class AccessToken {
  private:
   // Make the class instantiable only by the IConnector
   friend class IConnector;
-  explicit AccessToken(AccessType accessType): accessType(accessType) {};
+  explicit AccessToken(AccessType accessType): accessType(accessType) {}
 
   /**
    * The level of access this token bears.
@@ -164,7 +164,7 @@ class IConnector {
         default:
           break;
       }
-    };
+    }
 
     /**
      * Read the data synchronously from the connector.
@@ -206,7 +206,7 @@ class IConnector {
       }
 
       return AccessToken(access);
-    };
+    }
 
     /**
      * Unregister the previously registered responseHandler.
@@ -271,8 +271,8 @@ class IConnector {
      */
     bool hasExclusiveAccess() const {
       std::lock_guard<std::recursive_mutex> lock(this->guard);
-      return (bool) this->exclusiveResponseHandler;
-    };
+      return static_cast<bool>(this->exclusiveResponseHandler);
+    }
 
     // Transceiver operations
 
@@ -412,7 +412,7 @@ class IConnector {
             // TODO: Report error
             this->listening = false;
         }
-    };
+    }
 
     /**
      * Send the data message directly via the connector.
@@ -422,7 +422,7 @@ class IConnector {
     virtual void send(const std::vector<uint8_t>& data) = 0;
 
 
-  private:
+ private:
   // Response handlers for managing the replies from Transceiver modules asynchronously
   // NOTE: Could be written as a map<AccessToken,ResponseHandler> to enable multiple access
   ResponseHandler normalResponseHandler;

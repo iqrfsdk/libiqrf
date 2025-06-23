@@ -140,7 +140,6 @@ class UartConnector : public IConnector {
     }
 
  protected:
-
     /**
      * Initializes the GPIO pins used for the connector
      */

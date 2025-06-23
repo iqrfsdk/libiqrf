@@ -20,7 +20,7 @@
 namespace iqrf::connector::uart {
 
 class HdlcFrameTest : public ::testing::Test {
-protected:
+ protected:
     /// Raw data to HDLC frame conversion test data
     std::map<std::vector<uint8_t>, std::vector<uint8_t>> testData = {
         {

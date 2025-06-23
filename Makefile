@@ -30,7 +30,7 @@ build:
 	cmake --build build
 
 lint:
-	cpplint --quiet --recursive include/ src/ examples/ || true
+	cpplint --quiet --recursive include/ src/ examples/ tests/ || true
 	cppcheck --enable=all --check-level=exhaustive --inconclusive -I include/ --suppress=missingIncludeSystem --inline-suppr --quiet src/ examples/
 
 test:

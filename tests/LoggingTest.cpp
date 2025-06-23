@@ -1,3 +1,14 @@
+/**
+ * Copyright MICRORISC s.r.o.
+ * SPDX-License-Identifier: Apache-2.0
+ * File: ConnectorUtilsTest.cpp
+ * Authors: Ondřej Hujňák <ondrej.hujnak@iqrf.com>
+ * Date: 2025-03-28
+ *
+ * This file is a part of the LIBIQRF. For the full license information, see the
+ * LICENSE file in the project root.
+ */
+
 #include <gtest/gtest.h>
 
 #include <regex>

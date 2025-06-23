@@ -1,3 +1,14 @@
+/**
+ * Copyright MICRORISC s.r.o.
+ * SPDX-License-Identifier: Apache-2.0
+ * File: ConnectorUtilsTest.cpp
+ * Authors: Karel Hanák <karel.hanak@iqrf.com>
+ * Date: 2024-10-29
+ *
+ * This file is a part of the LIBIQRF. For the full license information, see the
+ * LICENSE file in the project root.
+ */
+
 #include <gtest/gtest.h>
 
 #include <stdexcept>
@@ -41,7 +52,6 @@ class GpioResolverTest : public ::testing::Test {
     /// Chip 0 line count
     const size_t chip0_num_lines = 53;
 #endif
-
 };
 
 TEST_F(GpioResolverTest, ResolveExistingPins) {

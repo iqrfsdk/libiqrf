@@ -95,4 +95,4 @@ bool GpioFreeBsd::getValue() {
     return rq.gp_value != 0;
 }
 
-}
+}  // namespace iqrf::gpio

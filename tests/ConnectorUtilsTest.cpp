@@ -1,5 +1,5 @@
 /**
-* Copyright MICRORISC s.r.o.
+ * Copyright MICRORISC s.r.o.
  * SPDX-License-Identifier: Apache-2.0
  * File: ConnectorUtilsTest.cpp
  * Authors: Roman Ondráček <roman.ondracek@iqrf.com>
@@ -21,7 +21,7 @@
 namespace iqrf::connector {
 
 class ConnectorUtilsTest : public ::testing::Test {
-protected:
+ protected:
     /// Raw bytes as std::vector to human-readable string conversion test data
     std::map<std::vector<uint8_t>, std::string> testData = {
         {
@@ -44,4 +44,4 @@ TEST_F(ConnectorUtilsTest, vectorToHexString) {
     }
 }
 
-}  // namespace iqrf::connector::uart
+}  // namespace iqrf::connector

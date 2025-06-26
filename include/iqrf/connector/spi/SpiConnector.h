@@ -10,6 +10,16 @@
  */
 #pragma once
 
+#include <sys/ioctl.h>
+#include <fcntl.h>
+#include <unistd.h>
+#if defined(__linux__)
+#include <linux/spi/spidev.h>
+#elif defined(__FreeBSD__)
+#include <dev/spibus/spi.h>
+#endif
+
+#include <cerrno>
 #include <cstdint>
 #include <stdexcept>
 #include <vector>
@@ -22,6 +32,16 @@
 namespace iqrf::connector::spi {
 
 /**
+ * SPI transport modes.
+ */
+enum class SpiTransportMode {
+    /// Low speed SPI mode
+    LowSpeed,
+    /// High speed SPI mode
+    HighSpeed,
+};
+
+/**
  * SPI Connector provides an access to TR module connected via SPI.
  */
 class SpiConnector : public IConnector {
@@ -29,7 +49,7 @@ class SpiConnector : public IConnector {
     /**
      * Constructs the SPI connector and initializes the SPI lines.
      */
-    explicit SpiConnector(SpiConfig config);
+    explicit SpiConnector(SpiConfig config, SpiTransportMode transportMode = SpiTransportMode::LowSpeed);
 
     /**
      * Release the SPI lines.
@@ -73,30 +93,32 @@ class SpiConnector : public IConnector {
     /**
      * Reset the TR module.
      */
-    void resetTr() override;
+    void resetTr() override {
+        this->resetTr(true);
+    }
+
+    /**
+     * Reset the TR module.
+     * @param enableBus true to enable the bus after reset, false to keep it disabled
+     */
+    void resetTr(bool enableBus = true);
 
     // Programming mode
 
     /**
      * Switch the connected TR to programming mode.
      */
-    void enterProgrammingMode() override {
-        throw std::runtime_error("Not implemented yet");
-    }
+    void enterProgrammingMode() override;
 
     /**
      * Wait for TR to enter programming mode.
      */
-    void awaitProgrammingMode() override {
-        throw std::runtime_error("Not implemented yet");
-    }
+    void awaitProgrammingMode() override;
 
     /**
      * Switch the connected TR back from programming mode.
      */
-    void exitProgrammingMode() override {
-        throw std::runtime_error("Not implemented yet");
-    }
+    void exitProgrammingMode() override;
 
     /**
      * Uploads the data to the TR module in programming mode.
@@ -136,7 +158,29 @@ class SpiConnector : public IConnector {
         throw std::runtime_error("Not implemented yet");
     }
 
-protected:
+    /**
+     * Initializes the SPI transport in a null mode.
+     */
+    void initNullTransport();
+
+    /**
+     * Returns the SPI transport mode.
+     * @return the SPI transport mode
+     */
+    SpiTransportMode getTransportMode() const {
+        return this->transportMode;
+    }
+
+    /**
+     * Sets the SPI transport mode.
+     * @param mode the SPI transport mode to set
+     */
+    void setTransportMode(SpiTransportMode mode) {
+        this->transportMode = mode;
+        this->initNullTransport();
+    }
+
+ protected:
     /**
      * Initializes the GPIO pins used for the connector
      */
@@ -148,9 +192,36 @@ protected:
      */
     void toggleBus(bool enable);
 
-private:
+ private:
+    /// Device's word size for writing.
+    static constexpr uint8_t BITS_PER_WORD_WRITE = 8;
+    /// Device's word size for reading.
+    static constexpr uint8_t BITS_PER_WORD_READ = -1;
+    /// Time delay T1 between CS and SCLK falling edge for high speed communication.
+    static constexpr uint16_t DELAY_AFTER_CS_HS_US = 5;
+    /// Time delay T1 between CS and SCLK falling edge for low speed communication.
+    static constexpr uint16_t DELAY_AFTER_CS_LS_US = 10;
+    /// Device's maximum speed in Hz for writing.
+    static constexpr uint32_t SPI_MAX_SPEED_WRITE = 250000;
+    /// Device's maximum speed in Hz for reading.
+    static constexpr uint32_t SPI_MAX_SPEED_READ = -1;
+    /// Device's mode for writing.
+    static constexpr uint8_t SPI_MODE_WRITE = SPI_MODE_0;
+    /// Device's mode for reading.
+    static constexpr uint8_t SPI_MODE_READ = -1;
+    // Slave select behavior - deselect device after transfer
+    static constexpr uint8_t SPI_CS_DESELECT_DEVICE = 0;
+    /// Slave select behavior - keep device selected after transfer
+    static constexpr uint8_t SPI_CS_DEVICE_STAY_SELECTED = 1;
+
     /// SPI configuration
     SpiConfig config;
+    /// SPI transport mode
+    SpiTransportMode transportMode = SpiTransportMode::LowSpeed;
+    /// File descriptor for the SPI bus
+    mutable int fd = -1;
+    /// Null transport structure for SPI transfers
+    std::optional<struct spi_ioc_transfer> nullTransport;
 };
 
-}  // namespace iqrf::connector
+}  // namespace iqrf::connector::spi

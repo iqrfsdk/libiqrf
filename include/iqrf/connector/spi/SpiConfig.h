@@ -80,4 +80,4 @@ class SpiConfig {
         i2cEnableGpio(i2cEnableGpioPin) {}
 };
 
-}
+}  // namespace iqrf::connector::spi

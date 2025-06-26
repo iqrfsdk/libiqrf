@@ -19,5 +19,7 @@ file(GLOB LIB_HEADERS "${LIB_INCLUDE_DIR}/*.h")
 
 install(DIRECTORY ${LIB_INCLUDE_DIR} DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}/iqrf")
 
+if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
 add_subdirectory(spi)
+endif ()
 add_subdirectory(uart)

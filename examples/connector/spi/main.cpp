@@ -17,17 +17,35 @@
 #include <chrono>
 #include <csignal>
 #include <iostream>
+#include <optional>
 #include <string>
 #include <vector>
 
 #include "iqrf/connector/spi/SpiConnector.h"
 #include "iqrf/connector/ConnectorUtils.h"
+#include "iqrf/gpio/Gpio.h"
 #include "iqrf/log/Logging.h"
 
 using iqrf::connector::ConnectorUtils;
 
 /// IQRF SPI connector configuration
-const iqrf::connector::spi::SpiConfig spiConfig("/dev/ttyACM0", 57600);
+const iqrf::connector::spi::SpiConfig spiConfig(
+    "/dev/spidev0.0",
+    // Power enable GPIO
+    iqrf::gpio::Gpio(iqrf::gpio::GpioConfig(23, "iqrf_spi_power_enable")),
+    // Bus enable GPIO
+    std::nullopt,
+    // SPI enable GPIO
+    std::nullopt,
+    // PGM switch GPIO
+    std::nullopt,
+    // UART enable GPIO
+    std::nullopt,
+    // I2C enable GPIO
+    std::nullopt,
+    // TR module reset during initialization
+    true
+);
 /// IQRF SPI connector instance
 iqrf::connector::spi::SpiConnector *spiConnector = nullptr;
 
@@ -43,6 +61,28 @@ void signalHandler(const int signal) {
     exit(signal);
 }
 
+/**
+ * Identifies connected TR module
+ */
+void identifyConnectedTrModule() {
+    try {
+        IQRF_LOG(iqrf::log::Level::Info) << "Identifying connected TR module...";
+        IQRF_LOG(iqrf::log::Level::Debug) << "Entering programming mode...";
+        spiConnector->enterProgrammingMode();
+        IQRF_LOG(iqrf::log::Level::Debug) << "Reading TR module identification...";
+        spiConnector->readTrInfo();
+        IQRF_LOG(iqrf::log::Level::Debug) << "Terminating programming mode...";
+    } catch (std::exception &e) {
+        IQRF_LOG(iqrf::log::Level::Error) << "Failed to identify TR module: " << e.what();
+        return;
+    }
+}
+
+/**
+ * DPA response handler
+ * @param response Response data vector
+ * @return 0 on success, -1 on error
+ */
 int responseHandler(const std::vector<uint8_t> &response) {
     if (response.empty()) {
         IQRF_LOG(iqrf::log::Level::Error) << "Empty response received.";
@@ -52,11 +92,16 @@ int responseHandler(const std::vector<uint8_t> &response) {
     return 0;
 }
 
+/**
+ * Main function
+ * @return Exit code
+ */
 int main() {
     iqrf::log::Logger::logLevel = iqrf::log::Level::Trace;
     iqrf::log::Logger logger;
     IQRF_LOG(iqrf::log::Level::Info) << "IQRF SPI Connector Example";
     spiConnector = new iqrf::connector::spi::SpiConnector(spiConfig);
+    identifyConnectedTrModule();
     spiConnector->registerResponseHandler(responseHandler, iqrf::connector::AccessType::Normal);
     spiConnector->listen();
 

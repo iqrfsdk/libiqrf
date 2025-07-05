@@ -16,26 +16,7 @@ set(LIB_NAME connector)
 set(LIB_INCLUDE_DIR "${libiqrf_SOURCE_DIR}/include/iqrf/${LIB_NAME}")
 
 file(GLOB LIB_HEADERS "${LIB_INCLUDE_DIR}/*.h")
-#file(GLOB LIB_SOURCES "*.c" "*.cpp")
-#
-#if (BUILD_STATIC)
-#	add_library(iqrf_${LIB_NAME}_static STATIC ${LIB_SOURCES} ${LIB_HEADERS})
-#	set_target_properties(iqrf_${LIB_NAME}_static PROPERTIES VERSION "${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}" SOVERSION "${PROJECT_VERSION_MAJOR}")
-#	target_include_directories(iqrf_${LIB_NAME}_static PUBLIC ${libiqrf_SOURCE_DIR}/include)
-#	set_target_properties(iqrf_${LIB_NAME}_static PROPERTIES OUTPUT_NAME iqrf_${LIB_NAME})
-#	set_target_properties(iqrf_${LIB_NAME}_static PROPERTIES PREFIX "lib")
-#endif ()
-#
-#if (BUILD_SHARED)
-#	add_library(iqrf_${LIB_NAME} SHARED ${LIB_SOURCES} ${LIB_HEADERS})
-#	set_target_properties(iqrf_${LIB_NAME} PROPERTIES VERSION "${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}" SOVERSION "${PROJECT_VERSION_MAJOR}")
-#	target_include_directories(iqrf_${LIB_NAME} PUBLIC ${libiqrf_SOURCE_DIR}/include)
-#endif ()
-#
-#install(TARGETS iqrf_${LIB_NAME} LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR} PUBLIC_HEADER DESTINATION ${LIB_INCLUDE_DIR})
-#if (BUILD_STATIC)
-#	install(TARGETS iqrf_${LIB_NAME}_static ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR} PUBLIC_HEADER DESTINATION ${LIB_INCLUDE_DIR})
-#endif ()
+
 install(DIRECTORY ${LIB_INCLUDE_DIR} DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}/iqrf")
 
 add_subdirectory(uart)

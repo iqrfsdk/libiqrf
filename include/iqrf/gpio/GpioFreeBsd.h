@@ -92,13 +92,16 @@ class GpioFreeBsd: public Base {
      */
     struct gpio_pin getPinConfig() const;
 
+    /**
+     * Sets the consumer name for the GPIO line
+     * @param name Consumer name
+     * @throws std::system_error if setting the consumer name fails
+     */
+    void setConsumerName(const std::string &name) const;
+
     /// File descriptor for the GPIO chip
     mutable int fd = -1;
-    /// GPIO chip
-    ::std::string chip;
     /// GPIO line
     uint32_t line;
-    /// Name
-    ::std::string name;
 };
 }  // namespace iqrf::gpio

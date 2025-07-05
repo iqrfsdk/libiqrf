@@ -18,7 +18,7 @@
 
 namespace iqrf::gpio {
 
-GpioFreeBsd::GpioFreeBsd(const iqrf::gpio::GpioConfig &config): chip(config.chip), line(config.line), name(config.consumer_name) {
+GpioFreeBsd::GpioFreeBsd(const iqrf::gpio::GpioConfig &config):  line(config.line) {
     if (config.chip.empty()) {
         throw std::invalid_argument("GPIO chip name cannot be empty");
     }
@@ -28,13 +28,7 @@ GpioFreeBsd::GpioFreeBsd(const iqrf::gpio::GpioConfig &config): chip(config.chip
         throw std::system_error(errno, std::generic_category(), "Failed to open GPIO chip");
     }
     if (!config.consumer_name.empty()) {
-        struct gpio_pin pin;
-        pin.gp_pin = this->line;
-        strlcpy(pin.gp_name, config.consumer_name.c_str(), GPIOMAXNAME);
-        if (ioctl(this->fd, GPIOSETNAME, &pin) < 0) {
-            close(this->fd);
-            throw std::system_error(errno, std::generic_category(), "Failed to set GPIO consumer name");
-        }
+        this->setConsumerName(config.consumer_name);
     }
 }
 
@@ -93,6 +87,16 @@ bool GpioFreeBsd::getValue() {
         throw std::system_error(errno, std::generic_category(), "Failed to get GPIO value");
     }
     return rq.gp_value != 0;
+}
+
+void GpioFreeBsd::setConsumerName(const std::string &name) const {
+    struct gpio_pin pin;
+    pin.gp_pin = this->line;
+    strlcpy(pin.gp_name, name.c_str(), GPIOMAXNAME);
+    if (ioctl(this->fd, GPIOSETNAME, &pin) < 0) {
+        close(this->fd);
+        throw std::system_error(errno, std::generic_category(), "Failed to set GPIO consumer name");
+    }
 }
 
 }  // namespace iqrf::gpio

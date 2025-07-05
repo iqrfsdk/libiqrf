@@ -18,13 +18,14 @@
 #include <iostream>
 #include <thread>
 
+#include <boost/program_options.hpp>
+
 #include "iqrf/gpio/Gpio.h"
 
-/// Button configuration
-const iqrf::gpio::GpioConfig buttonConfig(2);
+namespace bpo = boost::program_options;
 
 /// Button GPIO pin instance
-auto *button = new iqrf::gpio::Gpio(buttonConfig);
+std::unique_ptr<iqrf::gpio::Gpio> button;
 
 /**
  * Signal handler
@@ -32,38 +33,79 @@ auto *button = new iqrf::gpio::Gpio(buttonConfig);
  */
 void signalHandler(const int signal) {
     std::cout << "Signal " << signal << " received. Exiting..." << std::endl;
-
-    delete button;
-
     exit(signal);
 }
 
-int main() {
-    std::cout << buttonConfig.to_string() << std::endl;
+/**
+ * Main function
+ * @param argc Argument count
+ * @param argv Argument vector
+ * @return Exit code
+ */
+int main(int argc, char *argv[]) {
+    bpo::options_description general("General options");
+    general.add_options()
+        ("help,h", "display help message");
+    bpo::options_description command("Command options");
+    command.add_options()
+        ("chip,c", bpo::value<std::string>(), "GPIO chip name for the button")
+        ("pin,p", bpo::value<std::size_t>()->default_value(2), "GPIO line for the button")
+        ("inverted,i", bpo::bool_switch()->default_value(false), "Invert button state (pressed = 1, released = 0)");
+    bpo::options_description desc("Available options");
+    desc.add(general).add(command);
+    bpo::variables_map vm;
 
-    signal(SIGINT, signalHandler);
-    signal(SIGTERM, signalHandler);
-    button->initInput();
-    uint64_t counter = 0;
-
-    while (true) {
-        if (button->getValue()) {
-            if (counter > 0) {
-                std::cout << "Button has been released. Button was pressed for "
-                          << std::to_string(static_cast<double>(counter) / 10.0)
-                          << " s."
-                          << std::endl;
-            }
-            counter = 0;
-        } else {
-            if (counter == 0) {
-                std::cout << "Button has been pressed." << std::endl;
-            }
-            counter++;
+    try {
+        bpo::store(bpo::parse_command_line(argc, argv, desc), vm);
+        bpo::notify(vm);
+        if (vm.count("help") || vm.empty()) {
+            std::cout << "Usage: " << argv[0] << " [options]" << std::endl;
+            std::cout << desc << std::endl;
+            return EXIT_SUCCESS;
+        }
+        if (vm.count("chip") && vm["chip"].as<std::string>().empty()) {
+            throw std::logic_error("GPIO chip name cannot be empty.");
         }
 
-        std::this_thread::sleep_for(std::chrono::milliseconds(100));
-    }
+        // Create GPIO configuration for the button
+        size_t buttonPin = vm["pin"].as<std::size_t>();
+        std::unique_ptr<iqrf::gpio::GpioConfig> buttonConfig;
+        if (vm.count("chip")) {
+            buttonConfig = std::make_unique<iqrf::gpio::GpioConfig>(vm["chip"].as<std::string>(), buttonPin);
+        } else {
+            buttonConfig = std::make_unique<iqrf::gpio::GpioConfig>(buttonPin);
+        }
+        button = std::make_unique<iqrf::gpio::Gpio>(*buttonConfig);
+        button->initInput();
+        signal(SIGINT, signalHandler);
+        signal(SIGTERM, signalHandler);
 
-    return 0;
+        uint64_t counter = 0;
+        bool inverted = vm["inverted"].as<bool>();
+
+        while (true) {
+            if (
+                (button->getValue() && !inverted) ||
+                (!button->getValue() && inverted)
+            ) {
+                if (counter > 0) {
+                    std::cout << "Button has been released. Button was pressed for "
+                              << std::to_string(static_cast<double>(counter) / 100.0)
+                              << " s."
+                              << std::endl;
+                }
+                counter = 0;
+            } else {
+                if (counter == 0) {
+                    std::cout << "Button has been pressed." << std::endl;
+                }
+                counter++;
+            }
+            std::this_thread::sleep_for(std::chrono::milliseconds(10));
+        }
+        return EXIT_SUCCESS;
+    } catch (const std::exception &e) {
+        std::cerr << "Error: " << e.what() << std::endl;
+        return EXIT_FAILURE;
+    }
 }

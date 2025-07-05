@@ -80,7 +80,6 @@ void Gpiod::setDirection(const iqrf::gpio::GpioDirection direction) {
             break;
         default:
             throw ::std::invalid_argument("Unknown direction");
-            break;
     }
 }
 

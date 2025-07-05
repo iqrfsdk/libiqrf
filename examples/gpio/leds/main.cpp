@@ -18,23 +18,27 @@
 #include <iostream>
 #include <thread>
 
+#include <boost/program_options.hpp>
+
 #include "iqrf/gpio/Gpio.h"
 
-/// Green LED GPIO pin instance
-iqrf::gpio::Gpio *greenLed = nullptr;
-/// Red LED GPIO pin instance
-iqrf::gpio::Gpio *redLed = nullptr;
+namespace bpo = boost::program_options;
 
+/// Green LED GPIO pin instance
+std::unique_ptr<iqrf::gpio::Gpio> greenLed = nullptr;
+/// Red LED GPIO pin instance
+std::unique_ptr<iqrf::gpio::Gpio> redLed = nullptr;
+
+/**
+ * Cleans up GPIO resources
+ * This function is called on exit to ensure that the GPIO pins are set to a safe state.
+ */
 void gpioCleanup() {
     if (greenLed != nullptr) {
-        greenLed->setValue(false);
-        delete greenLed;
-        greenLed = nullptr;
+        greenLed->setDirection(iqrf::gpio::GpioDirection::Input);
     }
     if (redLed != nullptr) {
-        redLed->setValue(false);
-        delete redLed;
-        redLed = nullptr;
+        redLed->setDirection(iqrf::gpio::GpioDirection::Input);
     }
 }
 
@@ -48,29 +52,89 @@ void signalHandler(const int signal) {
     exit(signal);
 }
 
-int main() {
+/**
+ * Main function
+ * @param argc Argument count
+ * @param argv Argument vector
+ * @return Exit code
+ */
+int main(int argc, char *argv[]) {
+    bpo::options_description general("General options");
+    general.add_options()
+        ("help,h", "display help message");
+    bpo::options_description command("Command options");
+    command.add_options()
+        ("chip-green,cg,c", bpo::value<std::string>(), "GPIO chip name for the green LED")
+        ("pin-green,pg,p", bpo::value<std::size_t>()->default_value(22), "GPIO line for the green LED")
+        ("chip-red,cr", bpo::value<std::string>(), "GPIO chip name for the red LED")
+        ("pin-red,pr", bpo::value<std::size_t>(), "GPIO line for the red LED");
+    bpo::options_description desc("Available options");
+    desc.add(general).add(command);
+    bpo::variables_map vm;
     try {
-        /// Green LED configuration
-        const iqrf::gpio::GpioConfig greenLedConfig(0, "green_led");
-        greenLed = new iqrf::gpio::Gpio(greenLedConfig);
-        /// Red LED configuration
-        const iqrf::gpio::GpioConfig redLedConfig(1, "red_led");
-        redLed = new iqrf::gpio::Gpio(redLedConfig);
-
-        signal(SIGINT, signalHandler);
-        signal(SIGTERM, signalHandler);
+        bpo::store(bpo::parse_command_line(argc, argv, desc), vm);
+        bpo::notify(vm);
+        if (vm.count("help") || vm.empty()) {
+            std::cout << "Usage: " << argv[0] << " [options]" << std::endl;
+            std::cout << desc << std::endl;
+            return EXIT_SUCCESS;
+        }
+        if (vm.count("chip-green") && vm["chip-green"].as<std::string>().empty()) {
+            throw std::logic_error("GPIO chip name cannot be empty.");
+        }
+        if (vm.count("chip-red") && vm["chip-red"].as<std::string>().empty()) {
+            throw std::logic_error("GPIO chip name cannot be empty.");
+        }
 
         bool greenLedState = false;
         bool redLedState = true;
 
+        /// Create GPIO configuration for the green LED
+        std::unique_ptr<iqrf::gpio::GpioConfig> greenLedConfig;
+        if (vm.count("chip-green")) {
+            greenLedConfig = std::make_unique<iqrf::gpio::GpioConfig>(
+                vm["chip-green"].as<std::string>(),
+                vm["pin-green"].as<std::size_t>(),
+                "green_led"
+            );
+        } else {
+            greenLedConfig = std::make_unique<iqrf::gpio::GpioConfig>(
+                vm["pin-green"].as<std::size_t>(),
+                "green_led"
+            );
+        }
+        greenLed = std::make_unique<iqrf::gpio::Gpio>(*greenLedConfig);
         greenLed->initOutput(greenLedState);
-        redLed->initOutput(redLedState);
+
+        /// Create GPIO configuration for the red LED
+        if (vm.count("pin-red")) {
+            std::unique_ptr<iqrf::gpio::GpioConfig> redLedConfig;
+            if (vm.count("chip-red")) {
+                redLedConfig = std::make_unique<iqrf::gpio::GpioConfig>(
+                    vm["chip-red"].as<std::string>(),
+                    vm["pin-red"].as<std::size_t>(),
+                    "red_led"
+                );
+            } else {
+                redLedConfig = std::make_unique<iqrf::gpio::GpioConfig>(
+                    vm["pin-red"].as<std::size_t>(),
+                    "red_led"
+                );
+            }
+            redLed = std::make_unique<iqrf::gpio::Gpio>(*redLedConfig);
+            redLed->initOutput(redLedState);
+        }
+
+        signal(SIGINT, signalHandler);
+        signal(SIGTERM, signalHandler);
 
         while (true) {
             greenLedState = !greenLedState;
-            redLedState = !redLedState;
             greenLed->setValue(greenLedState);
-            redLed->setValue(redLedState);
+            if (redLed) {
+                redLedState = !redLedState;
+                redLed->setValue(redLedState);
+            }
             std::this_thread::sleep_for(std::chrono::seconds(1));
         }
     } catch (const std::exception &e) {

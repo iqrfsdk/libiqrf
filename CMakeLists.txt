@@ -38,6 +38,7 @@ set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${libiqrf_SOURCE_DIR}/cmake" CACHE S
 
 include(${libiqrf_SOURCE_DIR}/cmake/ccache.cmake)
 include(${libiqrf_SOURCE_DIR}/cmake/hardening.cmake)
+include(CMakePackageConfigHelpers)
 
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
@@ -73,3 +74,36 @@ endif()
 if (BUILD_EXAMPLES)
 	add_subdirectory(examples)
 endif()
+
+install(
+    TARGETS iqrf_connector_uart iqrf_gpio iqrf_log
+    EXPORT iqrfTargets
+    ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+)
+
+install(
+    EXPORT iqrfTargets
+    FILE iqrfTargets.cmake
+    DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/iqrf
+)
+
+write_basic_package_version_file(
+    "${CMAKE_CURRENT_BINARY_DIR}/iqrfConfigVersion.cmake"
+    VERSION ${PROJECT_VERSION}
+    COMPATIBILITY SameMinorVersion
+)
+
+configure_package_config_file(
+    "${libiqrf_SOURCE_DIR}/cmake/iqrfConfig.cmake.in"
+    "${CMAKE_CURRENT_BINARY_DIR}/iqrfConfig.cmake"
+    INSTALL_DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/iqrf
+)
+
+install(
+    FILES
+        "${CMAKE_CURRENT_BINARY_DIR}/iqrfConfig.cmake"
+        "${CMAKE_CURRENT_BINARY_DIR}/iqrfConfigVersion.cmake"
+    DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/iqrf
+)

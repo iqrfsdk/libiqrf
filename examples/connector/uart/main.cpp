@@ -16,20 +16,22 @@
 
 #include <chrono>
 #include <csignal>
+#include <cstdint>
 #include <iostream>
 #include <string>
 #include <vector>
+
+#include <boost/program_options.hpp>
 
 #include "iqrf/connector/uart/UartConnector.h"
 #include "iqrf/connector/ConnectorUtils.h"
 #include "iqrf/log/Logging.h"
 
+namespace bpo = boost::program_options;
 using iqrf::connector::ConnectorUtils;
 
-/// IQRF UART connector configuration
-const iqrf::connector::uart::UartConfig uartConfig("/dev/ttyACM0", 57600);
 /// IQRF UART connector instance
-iqrf::connector::uart::UartConnector *uartConnector = nullptr;
+std::unique_ptr<iqrf::connector::uart::UartConnector> uartConnector = nullptr;
 
 /**
  * Signal handler
@@ -37,12 +39,14 @@ iqrf::connector::uart::UartConnector *uartConnector = nullptr;
  */
 void signalHandler(const int signal) {
     std::cout << "Signal " << signal << " received. Exiting..." << std::endl;
-
-    delete uartConnector;
-
     exit(signal);
 }
 
+/**
+ * Response handler for the IQRF UART connector
+ * @param response Response received from the IQRF module
+ * @return 0 on success, -1 on error
+ */
 int responseHandler(const std::vector<uint8_t> &response) {
     if (response.empty()) {
         IQRF_LOG(iqrf::log::Level::Error) << "Empty response received.";
@@ -52,25 +56,61 @@ int responseHandler(const std::vector<uint8_t> &response) {
     return 0;
 }
 
-int main() {
-    iqrf::log::Logger::logLevel = iqrf::log::Level::Trace;
-    iqrf::log::Logger logger;
-    IQRF_LOG(iqrf::log::Level::Info) << "IQRF UART Connector Example";
-    uartConnector = new iqrf::connector::uart::UartConnector(uartConfig);
-    uartConnector->registerResponseHandler(responseHandler, iqrf::connector::AccessType::Normal);
-    uartConnector->listen();
+/**
+ * Main function
+ * @param argc Argument count
+ * @param argv Argument vector
+ * @return Exit code
+ */
+int main(int argc, char *argv[]) {
+    bpo::options_description general("General options");
+    general.add_options()
+        ("help,h", "display help message");
+    bpo::options_description command("Command options");
+    command.add_options()
+        ("device,d", bpo::value<std::string>(), "UART device name")
+        ("baudrate,b", bpo::value<uint32_t>()->default_value(57600), "UART baud rate (default: 57600)");
+    bpo::options_description desc("Available options");
+    desc.add(general).add(command);
+    bpo::variables_map vm;
+    try {
+        bpo::store(bpo::parse_command_line(argc, argv, desc), vm);
+        bpo::notify(vm);
+        if (vm.count("help") || vm.empty()) {
+            std::cout << "Usage: " << argv[0] << " [options]" << std::endl;
+            std::cout << desc << std::endl;
+            return EXIT_SUCCESS;
+        }
 
-    bool ledState = true;
-    while (true) {
-        std::vector<uint8_t> request = {0x00, 0x00, 0x06, static_cast<uint8_t>(ledState), 0xff, 0xff};
-        ledState = !ledState;
-        IQRF_LOG(iqrf::log::Level::Info) << "Sending: " << ConnectorUtils::vectorToHexString(request);
-        uartConnector->send(request);
-        std::this_thread::sleep_for(std::chrono::seconds(1));
+        signal(SIGINT, signalHandler);
+        signal(SIGTERM, signalHandler);
+
+        iqrf::log::Logger::logLevel = iqrf::log::Level::Trace;
+        iqrf::log::Logger logger;
+        IQRF_LOG(iqrf::log::Level::Info) << "IQRF UART Connector Example";
+
+        if (!vm.count("device")) {
+            throw std::logic_error("UART device name is required.");
+        }
+
+        /// IQRF UART connector configuration
+        const iqrf::connector::uart::UartConfig uartConfig(vm["device"].as<std::string>(), vm["baudrate"].as<uint32_t>());
+        uartConnector = std::make_unique<iqrf::connector::uart::UartConnector>(uartConfig);
+        uartConnector->registerResponseHandler(responseHandler, iqrf::connector::AccessType::Normal);
+        uartConnector->listen();
+
+        bool ledState = true;
+        while (true) {
+            std::vector<uint8_t> request = {0x00, 0x00, 0x06, static_cast<uint8_t>(ledState), 0xff, 0xff};
+            ledState = !ledState;
+            IQRF_LOG(iqrf::log::Level::Info) << "Sending: " << ConnectorUtils::vectorToHexString(request);
+            uartConnector->send(request);
+            std::this_thread::sleep_for(std::chrono::seconds(1));
+        }
+
+        return EXIT_SUCCESS;
+    } catch (const std::exception &e) {
+        std::cerr << "Error: " << e.what() << std::endl;
+        return EXIT_FAILURE;
     }
-
-    signal(SIGINT, signalHandler);
-    signal(SIGTERM, signalHandler);
-
-    return 0;
 }

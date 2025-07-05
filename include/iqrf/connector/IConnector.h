@@ -248,7 +248,7 @@ class IConnector {
     /**
      * Checks whether the listening loop is running
      */
-    bool isListening() {
+    bool isListening() const {
         return this->listening;
     }
 

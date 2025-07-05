@@ -56,6 +56,8 @@ UartConnector::UartConnector(UartConfig config): IConnector(), config(std::move(
 }
 
 UartConnector::~UartConnector() {
+    this->stopListen();
+
     if (this->config.powerEnableGpio) {
         this->config.powerEnableGpio->setValue(false);
     }

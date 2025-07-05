@@ -242,7 +242,24 @@ class IConnector {
 
       this->listening = true;
       this->listeningThread = std::thread(&IConnector::listeningLoop, this);
-  }
+    }
+
+    /**
+     * Checks whether the listening loop is running
+     */
+    bool isListening() {
+        return this->listening;
+    }
+
+    /**
+     * Stops listening loop and joins thread
+     */
+    void stopListen() {
+        this->listening = false;
+        if (this->listeningThread.joinable()) {
+            this->listeningThread.join();
+        }
+    }
 
     // Exclusive access
 

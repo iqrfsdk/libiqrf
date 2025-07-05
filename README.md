@@ -11,13 +11,15 @@ This repository contains the IQRF libraries for C/C++.
 
 ### Libraries
 
+- [`libiqrf-connector-uart`](src/connector/uart) - UART connector library
 - [`libiqrf-gpio`](src/gpio) - GPIO library
 - [`libiqrf-log`](src/log) - Logging library
 
 ## Dependencies
 
 - [CMake](https://cmake.org/) >= 3.18
-- [Libgpiod](https://libgpiod.readthedocs.io/en/latest/index.html) >= 1.6.2
+- [Boost](https://www.boost.org/) (log, program_options, system)
+- [libgpiod](https://libgpiod.readthedocs.io/en/latest/index.html) >= 1.6.2
 - [Ccache](https://ccache.dev/) >= 3.7 (optional)
 
 ### Testing

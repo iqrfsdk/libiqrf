@@ -81,14 +81,38 @@ void UartConnector::initGpio() {
     if (this->config.powerEnableGpio) {
         this->config.powerEnableGpio->initOutput(true);
     }
-    this->toggleBus(false);
+    if (this->config.busEnableGpio) {
+        this->config.busEnableGpio->initOutput(false);
+    } else {
+        if (this->config.uartEnableGpio) {
+            this->config.uartEnableGpio->initOutput(false);
+        }
+        if (this->config.spiEnableGpio) {
+            this->config.spiEnableGpio->initOutput(false);
+        }
+        if (this->config.i2cEnableGpio) {
+            this->config.i2cEnableGpio->initOutput(false);
+        }
+    }
     std::this_thread::sleep_for(std::chrono::milliseconds(1));
 
     if (this->config.trModuleReset) {
         this->resetTr();
     }
 
-    this->toggleBus(true);
+    if (this->config.busEnableGpio) {
+        this->config.busEnableGpio->setValue(true);
+    } else {
+        if (this->config.uartEnableGpio) {
+            this->config.uartEnableGpio->setValue(true);
+        }
+        if (this->config.spiEnableGpio) {
+            this->config.spiEnableGpio->setValue(false);
+        }
+        if (this->config.i2cEnableGpio) {
+            this->config.i2cEnableGpio->setValue(true);
+        }
+    }
     std::this_thread::sleep_for(std::chrono::milliseconds(500));
 }
 

@@ -17,7 +17,11 @@
 include(CMakeFindDependencyMacro)
 
 set(iqrf_INCLUDE_DIRS "@CMAKE_INSTALL_INCLUDEDIR@")
-set(iqrf_LIBRARIES "@IQRF_EXPORTABLE_TARGETS@")
+set(iqrf_LIBRARIES)
+
+foreach (target @IQRF_EXPORTABLE_TARGETS@)
+    list(APPEND iqrf_LIBRARIES iqrf::${target})
+endforeach()
 
 if (IQRF_VERBOSE)
     message(STATUS "Found libiqrf version: ${iqrf_VERSION} at ${iqrf_INCLUDE_DIRS}")

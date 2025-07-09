@@ -26,7 +26,6 @@ function(iqrf_add_library LIB_NAME)
     )
     cmake_parse_arguments(ARG "${_flags}" "${_oneValueArgs}" "${_multiValueArgs}" "" ${ARGN})
 
-
     set(_targets_new)
     set(PUBLIC_INCLUDE_DIRS
         $<BUILD_INTERFACE:${libiqrf_SOURCE_DIR}/include>

@@ -33,12 +33,18 @@ function(iqrf_add_library LIB_NAME)
         $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
     )
 
-    if (NOT ARG_HEADERS AND NOT ARG_SOURCES)
+    if (
+        (NOT DEFINED ARG_HEADERS OR ARG_HEADERS STREQUAL "") AND
+        (NOT DEFINED ARG_SOURCES OR ARG_SOURCES STREQUAL "")
+    )
         message(FATAL_ERROR "No headers or sources provided for library ${LIB_NAME}.")
     endif ()
 
-    if (NOT ARG_INCLUDE_DIR)
+    if (NOT DEFINED ARG_INCLUDE_DIR OR ARG_INCLUDE_DIR STREQUAL "")
+        message(WARNING "Library ${LIB_NAME} does not specify include directory, using default.")
         set(ARG_INCLUDE_DIR "${libiqrf_SOURCE_DIR}/include/iqrf/${LIB_NAME}")
+    else ()
+        message(STATUS "Library ${LIB_NAME} include directory: ${ARG_INCLUDE_DIR}")
     endif ()
 
     if (BUILD_STATIC)
@@ -101,7 +107,9 @@ function(iqrf_add_library LIB_NAME)
         list(APPEND _targets_new ${SHARED_TARGET})
     endif ()
 
-    install(DIRECTORY ${ARG_INCLUDE_DIR} DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}/iqrf")
+    file(RELATIVE_PATH REL_INCLUDE_DIR "${libiqrf_SOURCE_DIR}/include" "${ARG_INCLUDE_DIR}")
+    get_filename_component(INSTALL_INCLUDE_DIR "${REL_INCLUDE_DIR}" DIRECTORY)
+    install(DIRECTORY ${ARG_INCLUDE_DIR} DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}/${INSTALL_INCLUDE_DIR}")
 
     get_property(_targets_existing GLOBAL PROPERTY IQRF_EXPORTABLE_TARGETS)
     if(NOT _targets_existing)

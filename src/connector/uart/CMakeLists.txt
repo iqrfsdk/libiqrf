@@ -12,38 +12,28 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-set(LIB_NAME connector_uart)
-set(LIB_INCLUDE_DIR "${libiqrf_SOURCE_DIR}/include/iqrf/connector/uart")
-
 find_package(libserialport REQUIRED)
+
+set(LIB_INCLUDE_DIR "${libiqrf_SOURCE_DIR}/include/iqrf/connector/uart")
 
 file(GLOB LIB_HEADERS "${LIB_INCLUDE_DIR}/*.h")
 file(GLOB LIB_SOURCES "*.cpp")
 
-if (BUILD_STATIC)
-    add_library(iqrf_${LIB_NAME}_static STATIC ${LIB_SOURCES} ${LIB_HEADERS})
-    set_target_properties(iqrf_${LIB_NAME}_static PROPERTIES VERSION "${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}" SOVERSION "${PROJECT_VERSION_MAJOR}")
-    target_include_directories(iqrf_${LIB_NAME}_static PUBLIC $<BUILD_INTERFACE:${libiqrf_SOURCE_DIR}/include> $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>)
-    target_link_libraries(iqrf_${LIB_NAME}_static ${libserialport_STATIC_LIBRARIES} iqrf_gpio_static iqrf_log_static)
-    if(${CMAKE_SYSTEM_NAME} STREQUAL "FreeBSD")
+iqrf_add_library(
+    connector_uart
+    HEADERS ${LIB_HEADERS}
+    SOURCES ${LIB_SOURCES}
+    INCLUDE_DIR ${LIB_INCLUDE_DIR}
+    DEPS_INCLUDES ${libserialport_INCLUDE_DIRS}
+    DEPS_STATIC ${libserialport_STATIC_LIBRARIES} iqrf_gpio_static iqrf_log_static
+    DEPS_SHARED ${libserialport_LIBRARIES} iqrf_gpio iqrf_log
+)
+
+if(${CMAKE_SYSTEM_NAME} STREQUAL "FreeBSD")
+    if (BUILD_STATIC)
         target_link_libraries(iqrf_${LIB_NAME}_static usb)
-    endif()
-    set_target_properties(iqrf_${LIB_NAME}_static PROPERTIES OUTPUT_NAME iqrf_${LIB_NAME})
-    set_target_properties(iqrf_${LIB_NAME}_static PROPERTIES PREFIX "lib")
-endif ()
-
-if (BUILD_SHARED)
-    add_library(iqrf_${LIB_NAME} SHARED ${LIB_SOURCES} ${LIB_HEADERS})
-    set_target_properties(iqrf_${LIB_NAME} PROPERTIES VERSION "${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}" SOVERSION "${PROJECT_VERSION_MAJOR}")
-    target_link_libraries(iqrf_${LIB_NAME} ${libserialport_LIBRARIES} iqrf_gpio iqrf_log)
-    if(${CMAKE_SYSTEM_NAME} STREQUAL "FreeBSD")
+    endif ()
+    if (BUILD_SHARED)
         target_link_libraries(iqrf_${LIB_NAME} usb)
-    endif()
-    target_include_directories(iqrf_${LIB_NAME} PUBLIC $<BUILD_INTERFACE:${libiqrf_SOURCE_DIR}/include> $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>)
+    endif ()
 endif ()
-
-install(TARGETS iqrf_${LIB_NAME} LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR} PUBLIC_HEADER DESTINATION ${LIB_INCLUDE_DIR})
-if (BUILD_STATIC)
-    install(TARGETS iqrf_${LIB_NAME}_static ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR} PUBLIC_HEADER DESTINATION ${LIB_INCLUDE_DIR})
-endif ()
-install(DIRECTORY ${LIB_INCLUDE_DIR} DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}/iqrf/connector")

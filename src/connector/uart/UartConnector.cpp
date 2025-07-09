@@ -100,19 +100,7 @@ void UartConnector::initGpio() {
         this->resetTr();
     }
 
-    if (this->config.busEnableGpio) {
-        this->config.busEnableGpio->setValue(true);
-    } else {
-        if (this->config.uartEnableGpio) {
-            this->config.uartEnableGpio->setValue(true);
-        }
-        if (this->config.spiEnableGpio) {
-            this->config.spiEnableGpio->setValue(false);
-        }
-        if (this->config.i2cEnableGpio) {
-            this->config.i2cEnableGpio->setValue(true);
-        }
-    }
+    this->toggleBus(true);
     std::this_thread::sleep_for(std::chrono::milliseconds(500));
 }
 

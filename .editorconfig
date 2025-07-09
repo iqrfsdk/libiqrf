@@ -26,3 +26,6 @@ ij_visual_guides = 80, 120
 
 [.gitlab-ci.yml]
 indent_size = 2
+
+[{Makefile,debian/rules}]
+indent_style = tab

@@ -38,6 +38,7 @@ set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${libiqrf_SOURCE_DIR}/cmake" CACHE S
 
 include(${libiqrf_SOURCE_DIR}/cmake/ccache.cmake)
 include(${libiqrf_SOURCE_DIR}/cmake/hardening.cmake)
+include(${libiqrf_SOURCE_DIR}/cmake/LibraryFunctions.cmake)
 include(CMakePackageConfigHelpers)
 
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
@@ -75,23 +76,10 @@ if (BUILD_EXAMPLES)
 	add_subdirectory(examples)
 endif()
 
-set(EXPORTABLE_TARGETS)
-foreach (target IN ITEMS
-    iqrf_connector_spi
-    iqrf_connector_uart
-    iqrf_gpio
-    iqrf_log
-)
-    if (BUILD_SHARED AND TARGET ${target})
-        list(APPEND EXPORTABLE_TARGETS ${target})
-    endif()
-    if (BUILD_STATIC AND TARGET ${target}_static)
-        list(APPEND EXPORTABLE_TARGETS ${target}_static)
-    endif()
-endforeach()
+get_property(IQRF_EXPORTABLE_TARGETS GLOBAL PROPERTY IQRF_EXPORTABLE_TARGETS)
 
 install(
-    TARGETS ${EXPORTABLE_TARGETS}
+    TARGETS ${IQRF_EXPORTABLE_TARGETS}
     EXPORT iqrfTargets
     ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
@@ -101,6 +89,7 @@ install(
 install(
     EXPORT iqrfTargets
     FILE iqrfTargets.cmake
+    NAMESPACE iqrf::
     DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/iqrf
 )
 
@@ -114,6 +103,7 @@ configure_package_config_file(
     "${libiqrf_SOURCE_DIR}/cmake/iqrfConfig.cmake.in"
     "${CMAKE_CURRENT_BINARY_DIR}/iqrfConfig.cmake"
     INSTALL_DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/iqrf
+    PATH_VARS CMAKE_INSTALL_INCLUDEDIR
 )
 
 install(

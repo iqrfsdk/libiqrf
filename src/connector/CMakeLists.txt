@@ -12,11 +12,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-set(LIB_NAME connector)
-set(LIB_INCLUDE_DIR "${libiqrf_SOURCE_DIR}/include/iqrf/${LIB_NAME}")
+set(LIB_INCLUDE_DIR "${libiqrf_SOURCE_DIR}/include/iqrf/connector")
 
 file(GLOB LIB_HEADERS "${LIB_INCLUDE_DIR}/*.h")
 
-install(DIRECTORY ${LIB_INCLUDE_DIR} DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}/iqrf")
+install(
+    DIRECTORY ${LIB_INCLUDE_DIR}
+    DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}/iqrf"
+)
 
 add_subdirectory(uart)

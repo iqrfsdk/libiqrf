@@ -14,7 +14,7 @@
 
 cmake_minimum_required(VERSION 3.18)
 
-project(libiqrf VERSION 0.0.1 DESCRIPTION "IQRF C/C++ library" LANGUAGES C CXX)
+project(libiqrf VERSION 0.1.2 DESCRIPTION "IQRF C/C++ library" LANGUAGES C CXX)
 
 include(GNUInstallDirs)
 

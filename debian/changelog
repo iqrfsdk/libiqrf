@@ -1,3 +1,49 @@
+libiqrf (0.1.2) stable; urgency=medium
+
+  [ Roman Ondráček ]
+  * Examples: fix typo
+  * Debian packaging: add packages for examples
+  * Debian packaging: fix packages with examples
+  * Revert "Debian packaging: fix packages with examples"
+  * GPIO: fix memory leak
+  * Remove unused imports
+  * GitLab CI: add coverage upload to Codecov
+  * Debian packaging: install connector files
+  * GitLab CI: drop package builds for Ubuntu focal, drop common C library
+  * GPIO: fix issues reported by clang-tidy
+  * Makefile: add coverage target
+  * Debian packaging: fix build dependencies
+  * GitLab CI: build package for Raspbian 13 trixie
+  * Connector[UART]: add constructor and method for receive
+  * Connector[UART]: add method for CRC and for sending data
+  * Connector[UART]: add test for 1-Wire CRC8, fix issues reported by linters
+  * Connector[UART]: add HDLC frame class
+  * Connector[UART]: fix HDLC frame decoding
+  * Connector[UART]: add GPIO handling
+  * Connector[UART]: update example
+  * GPIO: add FreeBSD driver
+  * Fix issues reported by cpplint and cppcheck
+  * GPIO: update examples
+  * CMake: add module config
+  * CMake: fix exportable targets
+  * Read me: update library and dependency lists
+  * CMake: fix issues caused by cherry-picking
+  * Connector[UART]: refactor example to use boost::program_options
+  * CMake: refactor library target adding
+  * CMake: fix header installation for files located in multiple sub directories
+  * CMake: fix iqrf_LIBRARIES variable in CMake config
+
+  [ Ondřej Hujňák ]
+  * Unified Connector interface
+  * Added exclusive access to IConnector
+  * Added listeningLoop to IConnector
+
+  [ Karel Hanák ]
+  * connector: added listening status getter and method to stop listening loop
+  * Connector[UART]: updated gpio init
+
+ -- Roman Ondráček <mail@romanondracek.cz>  Thu, 10 Jul 2025 15:13:55 +0200
+
 libiqrf (0.1.1) stable; urgency=medium
 
   * Debian packaging: fix architecture for libiqrf-dev and libiqrf-common-dev packages

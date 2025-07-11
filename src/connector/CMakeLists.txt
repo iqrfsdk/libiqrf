@@ -21,4 +21,7 @@ install(
     DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}/iqrf"
 )
 
+if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
+add_subdirectory(spi)
+endif ()
 add_subdirectory(uart)

@@ -1,7 +1,7 @@
 /**
  * Copyright MICRORISC s.r.o.
  * SPDX-License-Identifier: Apache-2.0
- * File: ConnectorUtilsTest.cpp
+ * File: GpioResolverTest.cpp
  * Authors: Karel Hanák <karel.hanak@iqrf.com>
  * Date: 2024-10-29
  *

@@ -40,7 +40,7 @@ function(iqrf_add_library LIB_NAME)
     endif ()
 
     if (NOT DEFINED ARG_INCLUDE_DIR OR ARG_INCLUDE_DIR STREQUAL "")
-        message(WARNING "Library ${LIB_NAME} does not specify include directory, using default.")
+        message(STATUS "Library ${LIB_NAME} does not specify include directory, using default.")
         set(ARG_INCLUDE_DIR "${libiqrf_SOURCE_DIR}/include/iqrf/${LIB_NAME}")
     else ()
         message(STATUS "Library ${LIB_NAME} include directory: ${ARG_INCLUDE_DIR}")

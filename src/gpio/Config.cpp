@@ -34,7 +34,7 @@ GpioConfig::GpioConfig(const int64_t pin, const ::std::string& consumer_name)
 
 ::std::string GpioConfig::to_string() const {
     ::std::ostringstream ss;
-    ss << "GPIO configuration: chip=" << chip << ", line=" << line;
+    ss << "GPIO configuration: chip=" << chip << ", line=" << line << ", consumer_name=" << consumer_name;
     return ss.str();
 }
 

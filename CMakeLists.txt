@@ -43,6 +43,7 @@ include(CMakePackageConfigHelpers)
 
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
+option(BUILD_DOCS "Build documentation" OFF)
 option(BUILD_TESTS "Build tests" ON)
 option(BUILD_EXAMPLES "Build examples" ON)
 option(BUILD_STATIC "Build static library" OFF)
@@ -52,6 +53,20 @@ option(CODE_COVERAGE "Enable coverage reporting" OFF)
 if (NOT BUILD_STATIC AND NOT BUILD_SHARED)
     message(FATAL_ERROR "At least one of BUILD_STATIC or BUILD_SHARED must be ON")
 endif()
+
+if (BUILD_DOCS)
+    find_package(Doxygen REQUIRED)
+    set(DOXYGEN_IN "${libiqrf_SOURCE_DIR}/docs/doxygen/Doxyfile.in")
+    set(DOXYGEN_OUT "${CMAKE_CURRENT_BINARY_DIR}/Doxyfile")
+
+    configure_file(${DOXYGEN_IN} ${DOXYGEN_OUT} @ONLY)
+    add_custom_target(doc ALL
+        COMMAND ${DOXYGEN_EXECUTABLE} ${DOXYGEN_OUT}
+        WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+        COMMENT "Generating API documentation with Doxygen"
+        VERBATIM
+    )
+endif ()
 
 if (BUILD_TESTS)
     add_compile_definitions(BUILD_TESTS=1)

@@ -30,6 +30,10 @@
 #include "iqrf/gpio/Common.h"
 #include "iqrf/gpio/Config.h"
 
+#if IQRF_TESTING_SUPPORT
+#include "iqrf/gpio/GpioMock.h"
+#endif
+
 #if defined(__linux__)
 #if libgpiod_VERSION_MAJOR == 1
 #include "iqrf/gpio/GpiodV1.h"
@@ -115,15 +119,41 @@ class Gpio {
      */
     friend void swap(Gpio& first, Gpio& second) noexcept;
 
+#if IQRF_TESTING_SUPPORT
+    /**
+     * Sets GPIO line input value for testing purposes
+     * @param value GPIO line input value
+     */
+    void setInputValue(bool value);
+
+    /**
+     * Registers a callback for GPIO direction change
+     * @param callback Callback function to be called when the GPIO direction changes
+     */
+    void registerDirectionCallback(const GpioDirectionCallback& callback);
+
+    /**
+     * Registers a callback for GPIO value change
+     * @param callback Callback function to be called when the GPIO value changes
+     */
+    void registerValueCallback(const GpioValueCallback& callback);
+#endif
+
  private:
     /// GPIO driver instance
     std::shared_ptr<iqrf::gpio::Base> impl;
+    /// Mock flag
+    bool isMock = false;
 
 #if BUILD_TESTS
     /// Testing friends
     FRIEND_TEST(GpioTest, VerifyCopyConstructor_GPIO);
     FRIEND_TEST(GpioTest, VerifyMoveConstructor_GPIO);
     FRIEND_TEST(GpioTest, VerifyAssignmentOperator_GPIO);
+    FRIEND_TEST(GpioMockTest, copyConstructor);
+    FRIEND_TEST(GpioMockTest, moveConstructor);
+    FRIEND_TEST(GpioMockTest, assignmentOperator);
+    FRIEND_TEST(GpioMockTest, swap);
 #endif
 };
 

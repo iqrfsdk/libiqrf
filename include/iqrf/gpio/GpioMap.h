@@ -25,7 +25,9 @@
 #include <sys/gpio.h>
 #endif
 
-#include "iqrf/gpio/version.h"
+#if defined(__linux__)
+#include "iqrf/gpio/libgpiodVersion.h"
+#endif
 
 namespace iqrf::gpio {
 

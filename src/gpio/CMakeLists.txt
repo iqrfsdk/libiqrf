@@ -16,6 +16,11 @@ set(LIB_INCLUDE_DIR "${libiqrf_SOURCE_DIR}/include/iqrf/gpio")
 
 if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
     find_package(libgpiod REQUIRED)
+    configure_file(
+        ${LIB_INCLUDE_DIR}/libgpiodVersion.h.in
+        ${LIB_INCLUDE_DIR}/libgpiodVersion.h
+        @ONLY
+    )
     if (libgpiod_VERSION_MAJOR EQUAL "2")
         file(GLOB LIB_HEADERS_EXTRA "${LIB_INCLUDE_DIR}/GpiodV2.h")
         file(GLOB LIB_SOURCES_EXTRA "GpiodV2.cpp")
@@ -32,11 +37,6 @@ elseif (CMAKE_SYSTEM_NAME STREQUAL "FreeBSD")
     set(GPIO_LIBRARIES "")
 endif()
 
-configure_file(
-    ${LIB_INCLUDE_DIR}/version.h.in
-    ${LIB_INCLUDE_DIR}/version.h
-    @ONLY
-)
 file(GLOB LIB_HEADERS_BASE
     "${LIB_INCLUDE_DIR}/Base.h"
     "${LIB_INCLUDE_DIR}/Common.h"

@@ -38,27 +38,27 @@ namespace iqrf::gpio {
 class GpioFreeBsd: public Base {
  public:
     /**
-    * Constructor
-    * @param config GPIO configuration
-    * @throws std::system_error for invalid chip name or busy GPIO line
-    * @throws std::out_of_range for line offset out of bands
-    */
+     * Constructor
+     * @param config GPIO configuration
+     * @throws std::system_error for invalid chip name or busy GPIO line
+     * @throws std::out_of_range for line offset out of bands
+     */
     explicit GpioFreeBsd(const GpioConfig& config);
 
     /**
-    * Destructor
-    */
+     * Destructor
+     */
     ~GpioFreeBsd() override;
 
     /**
-    * Initializes GPIO line as an input
-    */
+     * Initializes GPIO line as an input
+     */
     void initInput() override;
 
     /**
-    * Initializes GPIO line as an output
-    * @param initialValue Initial output value
-    */
+     * Initializes GPIO line as an output
+     * @param initialValue Initial output value
+     */
     void initOutput(bool initialValue) override;
 
     /**

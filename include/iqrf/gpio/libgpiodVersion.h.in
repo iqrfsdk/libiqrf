@@ -1,9 +1,7 @@
 #pragma once
 
-#ifdef __linux__
 #define libgpiod_VERSION "@libgpiod_VERSION@"
 #define libgpiod_VERSION_MAJOR @libgpiod_VERSION_MAJOR@
 #define libgpiod_VERSION_MINOR @libgpiod_VERSION_MINOR@
 #define libgpiod_VERSION_PATCH @libgpiod_VERSION_PATCH@
 #define libgpiod_VERSION_EXT "@libgpiod_VERSION_EXT@"
-#endif

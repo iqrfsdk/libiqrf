@@ -13,7 +13,7 @@
 
 namespace iqrf::connector::uart {
 
-UartConnector::UartConnector(UartConfig config): IConnector(), config(std::move(config)) {
+UartConnector::UartConnector(UartConfig config): IConnector(), busSwitcher(config.busSwitch()), config(std::move(config)) {
     this->initGpio();
     IQRF_LOG(log::Level::Debug) << "Opening UART port: " << this->config.device;
     UartConnector::checkSerialResult(sp_get_port_by_name(this->config.device.c_str(), &this->port));
@@ -62,7 +62,7 @@ UartConnector::~UartConnector() {
         this->config.powerEnableGpio->setValue(false);
     }
 
-    this->toggleBus(false);
+    this->busSwitcher.toggleUart(false);
 
     if (this->config.pgmSwitchGpio) {
         this->config.pgmSwitchGpio->setValue(false);
@@ -81,26 +81,14 @@ void UartConnector::initGpio() {
     if (this->config.powerEnableGpio) {
         this->config.powerEnableGpio->initOutput(true);
     }
-    if (this->config.busEnableGpio) {
-        this->config.busEnableGpio->initOutput(false);
-    } else {
-        if (this->config.uartEnableGpio) {
-            this->config.uartEnableGpio->initOutput(false);
-        }
-        if (this->config.spiEnableGpio) {
-            this->config.spiEnableGpio->initOutput(false);
-        }
-        if (this->config.i2cEnableGpio) {
-            this->config.i2cEnableGpio->initOutput(false);
-        }
-    }
+    this->busSwitcher.init();
     std::this_thread::sleep_for(std::chrono::milliseconds(1));
 
     if (this->config.trModuleReset) {
         this->resetTr();
     }
 
-    this->toggleBus(true);
+    this->busSwitcher.toggleUart(true);
     std::this_thread::sleep_for(std::chrono::milliseconds(500));
 }
 
@@ -112,22 +100,6 @@ void UartConnector::resetTr() {
     std::this_thread::sleep_for(std::chrono::milliseconds(300));
     this->config.powerEnableGpio->setValue(true);
     std::this_thread::sleep_for(std::chrono::milliseconds(1));
-}
-
-void UartConnector::toggleBus(bool enable) {
-    if (this->config.busEnableGpio) {
-        this->config.busEnableGpio->setValue(enable);
-    } else {
-        if (this->config.i2cEnableGpio) {
-            this->config.i2cEnableGpio->setValue(false);
-        }
-        if (this->config.spiEnableGpio) {
-            this->config.spiEnableGpio->setValue(false);
-        }
-        if (this->config.uartEnableGpio) {
-            this->config.uartEnableGpio->setValue(enable);
-        }
-    }
 }
 
 int UartConnector::checkSerialResult(sp_return result) {

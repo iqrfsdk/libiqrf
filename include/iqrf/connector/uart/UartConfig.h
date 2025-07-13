@@ -18,6 +18,7 @@
 #include <string>
 #include <utility>
 
+#include "iqrf/connector/BusSwitcher.h"
 #include "iqrf/gpio/Gpio.h"
 
 namespace iqrf::connector::uart {
@@ -27,7 +28,7 @@ using iqrf::gpio::Gpio;
 /**
  * IQRF UART connector configuration
  */
-class UartConfig {
+class UartConfig: public iqrf::connector::BusSwitcherConfig {
  public:
     /// UART device name
     std::string device;
@@ -35,16 +36,8 @@ class UartConfig {
     uint32_t baudRate = 115200;
     /// GPIO to enable power supply to TR module
     std::optional<Gpio> powerEnableGpio;
-    /// GPIO to enable function of buses
-    std::optional<Gpio> busEnableGpio;
     /// GPIO to switch TR module to PGM mode
     std::optional<Gpio> pgmSwitchGpio;
-    /// GPIO to enable function of SPI bus
-    std::optional<Gpio> spiEnableGpio;
-    /// GPIO to enable function of UART bus
-    std::optional<Gpio> uartEnableGpio;
-    /// GPIO to enable function of I2C bus
-    std::optional<Gpio> i2cEnableGpio;
     /// Enable TR module reset during library initialization
     bool trModuleReset = true;
 
@@ -81,15 +74,18 @@ class UartConfig {
         const std::optional<Gpio> &i2cEnableGpio,
         const bool trModuleReset
     ) :
+        BusSwitcherConfig(
+            busEnableGpio,
+            i2cEnableGpio,
+            spiEnableGpio,
+            uartEnableGpio
+        ),
         device(std::move(device)),
         baudRate(baudRate),
         powerEnableGpio(powerEnableGpio),
-        busEnableGpio(busEnableGpio),
         pgmSwitchGpio(pgmSwitchGpio),
-        spiEnableGpio(spiEnableGpio),
-        uartEnableGpio(uartEnableGpio),
-        i2cEnableGpio(i2cEnableGpio),
-        trModuleReset(trModuleReset) {}
+        trModuleReset(trModuleReset) {
+    }
 };
 
 }  // namespace iqrf::connector::uart

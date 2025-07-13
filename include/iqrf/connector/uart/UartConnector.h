@@ -19,6 +19,7 @@
 
 #include <boost/core/ignore_unused.hpp>
 
+#include "iqrf/connector/BusSwitcher.h"
 #include "iqrf/connector/IConnector.h"
 #include "iqrf/connector/ConnectorUtils.h"
 #include "iqrf/connector/uart/HdlcFrame.h"
@@ -159,6 +160,8 @@ class UartConnector : public IConnector {
      */
     static int checkSerialResult(sp_return result);
 
+    /// Bus switcher
+    iqrf::connector::BusSwitcher busSwitcher;
     /// UART configuration
     UartConfig config;
     /// UART port

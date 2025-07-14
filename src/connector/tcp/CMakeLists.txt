@@ -12,5 +12,20 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-add_subdirectory(tcp)
-add_subdirectory(uart)
+
+set(LIB_INCLUDE_DIR "${libiqrf_SOURCE_DIR}/include/iqrf/connector/uart")
+
+file(GLOB LIB_HEADERS "${LIB_INCLUDE_DIR}/*.h")
+file(GLOB LIB_SOURCES "*.cpp")
+
+find_package(Boost CONFIG REQUIRED COMPONENTS headers)
+
+iqrf_add_library(
+    connector_tcp
+    HEADERS ${LIB_HEADERS}
+    SOURCES ${LIB_SOURCES}
+    INCLUDE_DIR ${LIB_INCLUDE_DIR}
+    DEPS_INCLUDES ${Boost_INCLUDE_DIRS}
+    DEPS_STATIC iqrf_log_static
+    DEPS_SHARED iqrf_log
+)

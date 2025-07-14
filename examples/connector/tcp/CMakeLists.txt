@@ -12,5 +12,18 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-add_subdirectory(tcp)
-add_subdirectory(uart)
+set(EXAMPLE_NAME iqrf-connector-tcp-example)
+
+set(THREADS_PREFER_PTHREAD_FLAG ON)
+find_package(Boost CONFIG REQUIRED COMPONENTS program_options)
+find_package(Threads REQUIRED)
+
+add_executable(${EXAMPLE_NAME} main.cpp)
+target_include_directories(${EXAMPLE_NAME} PRIVATE
+    ${PROJECT_SOURCE_DIR}/include
+    ${Boost_INCLUDE_DIRS}
+)
+target_link_libraries(${EXAMPLE_NAME} PUBLIC iqrf_connector_tcp iqrf_gpio iqrf_log)
+target_link_libraries(${EXAMPLE_NAME} PRIVATE ${Boost_LIBRARIES} Threads::Threads)
+
+install(TARGETS ${EXAMPLE_NAME} RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})

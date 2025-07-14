@@ -43,6 +43,7 @@ file(GLOB LIB_HEADERS_BASE
     "${LIB_INCLUDE_DIR}/Config.h"
     "${LIB_INCLUDE_DIR}/Gpio.h"
     "${LIB_INCLUDE_DIR}/GpioMap.h"
+    "${LIB_INCLUDE_DIR}/GpioMock.h"
     "${LIB_INCLUDE_DIR}/GpioResolver.h"
     "${LIB_INCLUDE_DIR}/version.h"
 )
@@ -50,6 +51,7 @@ file(GLOB LIB_SOURCES_BASE
     "Config.cpp"
     "Gpio.cpp"
     "GpioMap.cpp"
+    "GpioMock.cpp"
     "GpioResolver.cpp"
 )
 

@@ -18,18 +18,25 @@
 
 namespace iqrf::gpio {
 
-#if defined(__linux__)
-Gpio::Gpio(const GpioConfig& config) : impl(std::make_shared<iqrf::gpio::Gpiod>(config)) {
-}
-#elif defined(__FreeBSD__)
-Gpio::Gpio(const GpioConfig& config) : impl(std::make_shared<iqrf::gpio::GpioFreeBsd>(config)) {
-}
+Gpio::Gpio(const GpioConfig& config) {
+#if IQRF_TESTING_SUPPORT
+    if (config.use_mock) {
+        this->impl = std::make_shared<iqrf::gpio::GpioMock>(config);
+        this->isMock = true;
+        return;
+    }
 #endif
-
-Gpio::Gpio(const Gpio& other) noexcept : impl(other.impl) {
+#if defined(__linux__)
+    this->impl = std::make_shared<iqrf::gpio::Gpiod>(config);
+#elif defined(__FreeBSD__)
+    this->impl = std::make_shared<iqrf::gpio::GpioFreeBsd>(config);
+#endif
 }
 
-Gpio::Gpio(Gpio&& other) noexcept : impl(std::move(other.impl)) {
+Gpio::Gpio(const Gpio& other) noexcept : impl(other.impl), isMock(other.isMock) {
+}
+
+Gpio::Gpio(Gpio&& other) noexcept : impl(std::move(other.impl)), isMock(other.isMock) {
 }
 
 Gpio::~Gpio() {
@@ -69,6 +76,31 @@ bool Gpio::getValue() const {
 void swap(Gpio& first, Gpio& second) noexcept {
     using std::swap;  // Enable ADL
     swap(first.impl, second.impl);
+    swap(first.isMock, second.isMock);
 }
+
+#if IQRF_TESTING_SUPPORT
+void Gpio::setInputValue(bool value) {
+    if (!this->isMock) {
+        throw std::logic_error("setInputValue is only available for mock GPIO");
+    }
+    std::dynamic_pointer_cast<GpioMock>(impl)->setInputValue(value);
+}
+
+void Gpio::registerDirectionCallback(const GpioDirectionCallback& callback) {
+    if (!this->isMock) {
+        throw std::logic_error("registerDirectionCallback is only available for mock GPIO");
+    }
+    std::dynamic_pointer_cast<GpioMock>(this->impl)->registerDirectionCallback(callback);
+}
+
+
+void Gpio::registerValueCallback(const GpioValueCallback& callback) {
+    if (!this->isMock) {
+        throw std::logic_error("registerValueCallback is only available for mock GPIO");
+    }
+    std::dynamic_pointer_cast<GpioMock>(this->impl)->registerValueCallback(callback);
+}
+#endif
 
 }  // namespace iqrf::gpio

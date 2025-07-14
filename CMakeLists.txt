@@ -44,6 +44,7 @@ include(CMakePackageConfigHelpers)
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
 option(BUILD_DOCS "Build documentation" OFF)
+option(BUILD_TESTING_SUPPORT "Build testing support" ON)
 option(BUILD_TESTS "Build tests" ON)
 option(BUILD_EXAMPLES "Build examples" ON)
 option(BUILD_STATIC "Build static library" OFF)
@@ -68,11 +69,10 @@ if (BUILD_DOCS)
     )
 endif ()
 
-if (BUILD_TESTS)
-    add_compile_definitions(BUILD_TESTS=1)
-else ()
-    add_compile_definitions(BUILD_TESTS=0)
-endif()
+add_compile_definitions(
+    BUILD_TESTS=$<BOOL:${BUILD_TESTS}>
+    IQRF_TESTING_SUPPORT=$<BOOL:${BUILD_TESTING_SUPPORT}>
+)
 
 if (CODE_COVERAGE)
     set(COVERAGE_FLAGS "--coverage -fprofile-arcs -ftest-coverage")

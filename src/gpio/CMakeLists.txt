@@ -43,7 +43,6 @@ file(GLOB LIB_HEADERS_BASE
     "${LIB_INCLUDE_DIR}/Config.h"
     "${LIB_INCLUDE_DIR}/Gpio.h"
     "${LIB_INCLUDE_DIR}/GpioMap.h"
-    "${LIB_INCLUDE_DIR}/GpioMock.h"
     "${LIB_INCLUDE_DIR}/GpioResolver.h"
     "${LIB_INCLUDE_DIR}/version.h"
 )
@@ -51,9 +50,13 @@ file(GLOB LIB_SOURCES_BASE
     "Config.cpp"
     "Gpio.cpp"
     "GpioMap.cpp"
-    "GpioMock.cpp"
     "GpioResolver.cpp"
 )
+
+if (BUILD_TESTING_SUPPORT)
+    file(GLOB LIB_HEADERS_EXTRA "${LIB_HEADERS_EXTRA}" "${LIB_INCLUDE_DIR}/GpioMock.h")
+    file(GLOB LIB_SOURCES_EXTRA "${LIB_SOURCES_EXTRA}" "GpioMock.cpp")
+endif ()
 
 iqrf_add_library(
     gpio

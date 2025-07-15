@@ -53,7 +53,7 @@ TEST_F(GpioTest, VerifyAssignmentOperator_GPIO) {
     const auto orig = Gpio(config);
 
     // Assign the Gpio instance
-    const auto other = orig;
+    const auto& other = orig;
 
     EXPECT_EQ(orig.impl, other.impl);
 }

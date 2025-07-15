@@ -88,9 +88,9 @@ class GpioMock: public Base {
 
     /**
      * Sets GPIO line direction
-     * @param direction GPIO line direction
+     * @param newDirection GPIO line direction
      */
-    void setDirection(iqrf::gpio::GpioDirection direction) override;
+    void setDirection(iqrf::gpio::GpioDirection newDirection) override;
 
     /**
      * Retrieves GPIO line direction
@@ -100,15 +100,15 @@ class GpioMock: public Base {
 
     /**
      * Sets GPIO line output value
-     * @param value GPIO line output value
+     * @param newValue GPIO line output value
      */
-    void setValue(bool value) override;
+    void setValue(bool newValue) override;
 
     /**
      * Sets GPIO line input value for testing purposes
-     * @param value GPIO line input value
+     * @param newValue GPIO line input value
      */
-    void setInputValue(bool value);
+    void setInputValue(bool newValue);
 
     /**
      * Retrieves GPIO line input value

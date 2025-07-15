@@ -61,7 +61,7 @@ TEST_F(GpioMockTest, assignmentOperator) {
     const auto orig = Gpio(config);
 
     // Assign the Gpio instance
-    const auto other = orig;
+    const auto &other = orig;
 
     EXPECT_EQ(orig.impl, other.impl);
 }

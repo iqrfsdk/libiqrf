@@ -146,12 +146,6 @@ class UartConnector : public IConnector {
      */
     void initGpio();
 
-    /**
-     * Enables or disables the bus
-     * @param enable true to enable the bus, false to disable it
-     */
-    void toggleBus(bool enable);
-
  private:
     /**
      * Check the result of the libserialport functions and throw an exception on error.

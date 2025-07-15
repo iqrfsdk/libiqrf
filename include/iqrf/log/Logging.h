@@ -67,7 +67,7 @@ namespace iqrf::log {
  * Enumeration for severity level used for setting the level of logging.
  */
 enum class Level {
-    #define X(name, value) name = value,
+    #define X(name, value) name = (value),
     _IQRF_LOG_LEVELS
     #undef X
 };
@@ -153,7 +153,7 @@ class Logger {
      *
      * @details Preferred use is via the IQRF_LOG macro.
      */
-    std::ostringstream& stream(const Level level = Level::Info);
+    std::ostringstream& stream(Level level = Level::Info);
 
  protected:
     /**

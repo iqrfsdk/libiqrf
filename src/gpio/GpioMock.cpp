@@ -35,14 +35,14 @@ void GpioMock::initOutput(bool initialValue) {
     this->state = GpioMockState::Initialized;
 }
 
-void GpioMock::setDirection(iqrf::gpio::GpioDirection direction) {
+void GpioMock::setDirection(iqrf::gpio::GpioDirection newDirection) {
     if (this->state == GpioMockState::Uninitialized) {
         throw std::runtime_error("GPIO line is not initialized");
     }
-    if (this->direction != direction && this->directionCallback) {
-        this->directionCallback(this->direction, direction);
+    if (this->direction != newDirection && this->directionCallback) {
+        this->directionCallback(this->direction, newDirection);
     }
-    this->direction = direction;
+    this->direction = newDirection;
 }
 
 iqrf::gpio::GpioDirection GpioMock::getDirection() {
@@ -52,24 +52,24 @@ iqrf::gpio::GpioDirection GpioMock::getDirection() {
     return this->direction;
 }
 
-void GpioMock::setValue(bool value) {
+void GpioMock::setValue(bool newValue) {
     if (this->state == GpioMockState::Uninitialized) {
         throw std::runtime_error("GPIO line is not initialized");
     }
     if (this->direction != GpioDirection::Output) {
         throw std::runtime_error("Cannot set value on GPIO line that is not an output");
     }
-    if (this->value != value && this->valueCallback) {
-        this->valueCallback(this->value, value);
+    if (this->value != newValue && this->valueCallback) {
+        this->valueCallback(this->value, newValue);
     }
-    this->value = value;
+    this->value = newValue;
 }
 
-void GpioMock::setInputValue(bool value) {
+void GpioMock::setInputValue(bool newValue) {
     if (this->direction != GpioDirection::Input) {
         throw std::runtime_error("Cannot set input value on GPIO line that is not an input");
     }
-    this->value = value;
+    this->value = newValue;
 }
 
 bool GpioMock::getValue() {

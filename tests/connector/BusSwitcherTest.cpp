@@ -44,7 +44,7 @@ class BusSwitcherTest : public ::testing::Test {
         config.use_mock = true;
         iqrf::gpio::Gpio gpio(config);
         gpio.registerValueCallback([this, config](bool oldValue, bool newValue) {
-            this->history.emplace_back(this->epochTime(), config.consumer_name, oldValue, newValue);
+            this->history.emplace_back(BusSwitcherTest::epochTime(), config.consumer_name, oldValue, newValue);
         });
         return gpio;
     }
@@ -53,12 +53,12 @@ class BusSwitcherTest : public ::testing::Test {
      * Returns epoch time in milliseconds.
      * @return Current time in milliseconds since epoch.
      */
-    std::chrono::milliseconds epochTime() const {
+    [[nodiscard]] static std::chrono::milliseconds epochTime() {
         return std::chrono::duration_cast<std::chrono::milliseconds>(
             std::chrono::system_clock::now().time_since_epoch());
     }
 
-    void expectGpioChange(
+    static void expectGpioChange(
         GpioValueChangeEvent currentEvent,
         const std::string& gpioName,
         bool oldValue,
@@ -100,8 +100,8 @@ TEST_F(BusSwitcherTest, busEnableGpioOnly) {
     EXPECT_FALSE(busEnableGpio.getValue());
 
     EXPECT_EQ(history.size(), 2);
-    this->expectGpioChange(history[0], "busEnable", false, true);
-    this->expectGpioChange(history[1], "busEnable", true, false, history[0], std::chrono::milliseconds(50));
+    BusSwitcherTest::expectGpioChange(history[0], "busEnable", false, true);
+    BusSwitcherTest::expectGpioChange(history[1], "busEnable", true, false, history[0], std::chrono::milliseconds(50));
 }
 
 TEST_F(BusSwitcherTest, enableGpios) {
@@ -151,12 +151,12 @@ TEST_F(BusSwitcherTest, enableGpios) {
 
     EXPECT_EQ(history.size(), 6);
 
-    this->expectGpioChange(history[0], "i2cEnable", false, true, std::nullopt, std::nullopt);
-    this->expectGpioChange(history[1], "i2cEnable", true, false, history[0], std::chrono::milliseconds(50));
-    this->expectGpioChange(history[2], "spiEnable", false, true, history[0], std::chrono::milliseconds(50));
-    this->expectGpioChange(history[3], "spiEnable", true, false, history[2], std::chrono::milliseconds(50));
-    this->expectGpioChange(history[4], "uartEnable", false, true, history[2], std::chrono::milliseconds(50));
-    this->expectGpioChange(history[5], "uartEnable", true, false, history[4], std::chrono::milliseconds(50));
+    BusSwitcherTest::expectGpioChange(history[0], "i2cEnable", false, true, std::nullopt, std::nullopt);
+    BusSwitcherTest::expectGpioChange(history[1], "i2cEnable", true, false, history[0], std::chrono::milliseconds(50));
+    BusSwitcherTest::expectGpioChange(history[2], "spiEnable", false, true, history[0], std::chrono::milliseconds(50));
+    BusSwitcherTest::expectGpioChange(history[3], "spiEnable", true, false, history[2], std::chrono::milliseconds(50));
+    BusSwitcherTest::expectGpioChange(history[4], "uartEnable", false, true, history[2], std::chrono::milliseconds(50));
+    BusSwitcherTest::expectGpioChange(history[5], "uartEnable", true, false, history[4], std::chrono::milliseconds(50));
 }
 
 }  // namespace iqrf::connector

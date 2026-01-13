@@ -40,6 +40,8 @@ class UartConfig: public iqrf::connector::BusSwitcherConfig {
     std::optional<Gpio> pgmSwitchGpio;
     /// Enable TR module reset during library initialization
     bool trModuleReset = true;
+    /// Disable TR module power during connector destruction
+    bool disablePowerOnShutdown = true;
 
     /**
      * Constructs the minimal UART connector configuration
@@ -62,6 +64,7 @@ class UartConfig: public iqrf::connector::BusSwitcherConfig {
      * @param uartEnableGpio GPIO to enable function of UART bus
      * @param i2cEnableGpio GPIO to enable function of I2C bus
      * @param trModuleReset Enable TR module reset during library initialization
+     * @param disablePowerOnShutdown Disable TR power on shutdown
      */
     UartConfig(
         std::string device,
@@ -72,7 +75,8 @@ class UartConfig: public iqrf::connector::BusSwitcherConfig {
         const std::optional<Gpio> &spiEnableGpio,
         const std::optional<Gpio> &uartEnableGpio,
         const std::optional<Gpio> &i2cEnableGpio,
-        const bool trModuleReset
+        const bool trModuleReset,
+        const bool disablePowerOnShutdown
     ) :
         BusSwitcherConfig(
             busEnableGpio,
@@ -84,7 +88,8 @@ class UartConfig: public iqrf::connector::BusSwitcherConfig {
         baudRate(baudRate),
         powerEnableGpio(powerEnableGpio),
         pgmSwitchGpio(pgmSwitchGpio),
-        trModuleReset(trModuleReset) {
+        trModuleReset(trModuleReset),
+        disablePowerOnShutdown(disablePowerOnShutdown) {
     }
 };
 

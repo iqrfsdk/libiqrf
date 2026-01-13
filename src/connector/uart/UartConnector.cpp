@@ -58,7 +58,7 @@ UartConnector::UartConnector(UartConfig config): IConnector(), busSwitcher(confi
 UartConnector::~UartConnector() {
     this->stopListen();
 
-    if (this->config.powerEnableGpio) {
+    if (this->config.powerEnableGpio && this->config.disablePowerOnShutdown) {
         this->config.powerEnableGpio->setValue(false);
     }
 

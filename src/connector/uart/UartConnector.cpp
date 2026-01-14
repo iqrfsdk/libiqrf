@@ -13,7 +13,7 @@
 
 namespace iqrf::connector::uart {
 
-UartConnector::UartConnector(UartConfig config): IConnector(), busSwitcher(config.busSwitch()), config(std::move(config)) {
+UartConnector::UartConnector(UartConfig config): busSwitcher(config.busSwitch()), config(std::move(config)) {
     this->initGpio();
     IQRF_LOG(log::Level::Debug) << "Opening UART port: " << this->config.device;
     UartConnector::checkSerialResult(sp_get_port_by_name(this->config.device.c_str(), &this->port));
@@ -34,11 +34,11 @@ UartConnector::UartConnector(UartConfig config): IConnector(), busSwitcher(confi
         } else {
             usbInfo << ", USB VID and PID not available";
         }
-        char *manufacturer = sp_get_port_usb_manufacturer(this->port);
+        const char *manufacturer = sp_get_port_usb_manufacturer(this->port);
         usbInfo << ", Manufacturer: " << (manufacturer != nullptr ? manufacturer : "N/A");
-        char *product = sp_get_port_usb_product(this->port);
+        const char *product = sp_get_port_usb_product(this->port);
         usbInfo << ", Product: " << (product != nullptr ? product : "N/A");
-        char *serial = sp_get_port_usb_serial(this->port);
+        const char *serial = sp_get_port_usb_serial(this->port);
         usbInfo << ", Serial: " << (serial != nullptr ? serial : "N/A");
 
         IQRF_LOG(log::Level::Debug) << usbInfo.str();
@@ -102,7 +102,7 @@ void UartConnector::resetTr() {
     std::this_thread::sleep_for(std::chrono::milliseconds(1));
 }
 
-int UartConnector::checkSerialResult(sp_return result) {
+int UartConnector::checkSerialResult(const sp_return result) {
     switch (result) {
         case SP_ERR_ARG:
             throw std::runtime_error("Invalid argument");
@@ -139,7 +139,7 @@ void UartConnector::send(const std::vector<uint8_t> &data) {
         throw std::runtime_error("No data to send");
     }
     HdlcFrame hdlcFrame(data);
-    std::vector<uint8_t> frame = hdlcFrame.encode();
+    const std::vector<uint8_t> frame = hdlcFrame.encode();
     UartConnector::checkSerialResult(sp_blocking_write(this->port, frame.data(), frame.size(), 1000));
 }
 

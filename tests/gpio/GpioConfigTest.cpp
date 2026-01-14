@@ -11,8 +11,6 @@
 
 #include <gtest/gtest.h>
 
-#include <stdexcept>
-
 #include "iqrf/gpio/Config.h"
 
 namespace iqrf::gpio {

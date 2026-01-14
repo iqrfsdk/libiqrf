@@ -16,12 +16,7 @@
 
 #pragma once
 
-#include <cstdlib>
-#include <cstdint>
-#include <exception>
 #include <functional>
-#include <stdexcept>
-#include <string>
 
 #include "iqrf/gpio/Common.h"
 #include "iqrf/gpio/Base.h"

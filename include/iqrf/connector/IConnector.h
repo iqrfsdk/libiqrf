@@ -95,7 +95,7 @@ class AccessToken {
  private:
   // Make the class instantiable only by the IConnector
   friend class IConnector;
-  explicit AccessToken(AccessType accessType): accessType(accessType) {}
+  explicit AccessToken(const AccessType accessType): accessType(accessType) {}
 
   /**
    * The level of access this token bears.
@@ -180,7 +180,7 @@ class IConnector {
      *
      * TODO: Used in Daemon(IqrfCdc, IqrfSpi, IqrfUart)
      */
-    AccessToken registerResponseHandler(const ResponseHandler &responseHandler, AccessType access) {
+    AccessToken registerResponseHandler(const ResponseHandler &responseHandler, const AccessType access) {
       std::lock_guard<std::recursive_mutex> lock(this->guard);
 
       switch (access) {
@@ -211,7 +211,7 @@ class IConnector {
     /**
      * Unregister the previously registered responseHandler.
      */
-    void unregisterResponseHandler(AccessToken token) {
+    void unregisterResponseHandler(const AccessToken token) {
       std::lock_guard<std::recursive_mutex> lock(this->guard);
 
       switch (token.getAccessType()) {

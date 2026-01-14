@@ -72,8 +72,8 @@ TEST_F(GpioMockTest, swap) {
     auto config2 = GpioConfig("gpiochip0", 2, "test:mock2");
     config2.use_mock = true;
     auto gpio2 = Gpio(config2);
-    auto expected1 = gpio2.impl;
-    auto expected2 = gpio1.impl;
+    const auto expected1 = gpio2.impl;
+    const auto expected2 = gpio1.impl;
 
     // Swap the instances
     swap(gpio1, gpio2);
@@ -99,7 +99,7 @@ TEST_F(GpioMockTest, initInput) {
 }
 
 TEST_F(GpioMockTest, initOutput) {
-    Gpio gpio(this->config);
+    const Gpio gpio(this->config);
     EXPECT_NO_THROW(gpio.initOutput(true));
     EXPECT_EQ(gpio.getDirection(), GpioDirection::Output);
     EXPECT_TRUE(gpio.getValue());
@@ -109,7 +109,7 @@ TEST_F(GpioMockTest, initOutput) {
 }
 
 TEST_F(GpioMockTest, setDirection) {
-    Gpio gpio(this->config);
+    const Gpio gpio(this->config);
     gpio.initOutput(true);
     EXPECT_NO_THROW(gpio.setDirection(GpioDirection::Input));
     EXPECT_EQ(gpio.getDirection(), GpioDirection::Input);

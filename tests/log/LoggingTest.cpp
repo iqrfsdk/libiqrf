@@ -25,7 +25,7 @@ class StdoutLog : public ILog {
     void append(const std::string& msg) override {
         fprintf(stdout, "%s", msg.c_str());
         fflush(stdout);
-    };
+    }
 };
 
 TEST_F(LoggingTest, CheckDefaultLogLevel) {

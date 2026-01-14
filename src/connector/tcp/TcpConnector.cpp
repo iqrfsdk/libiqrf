@@ -15,7 +15,7 @@
 
 namespace iqrf::connector::tcp {
 
-TcpConnector::TcpConnector(TcpConfig config): IConnector(), config(std::move(config)), ioContext(), socket(ioContext), resolver(ioContext), timer(ioContext) {
+TcpConnector::TcpConnector(TcpConfig config): config(std::move(config)), socket(ioContext), resolver(ioContext), timer(ioContext) {
     this->connect();
 }
 
@@ -50,7 +50,7 @@ std::vector<uint8_t> TcpConnector::receive() {
 
     this->socket.async_read_some(
         boost::asio::buffer(buffer),
-        [&](const boost::system::error_code& error, std::size_t length) {
+        [&](const boost::system::error_code& error, const std::size_t length) {
             ec = error;
             bytesRead = length;
             deadline.cancel();

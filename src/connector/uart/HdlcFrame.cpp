@@ -29,7 +29,8 @@ void HdlcFrame::decodeByte(uint8_t byte) {
         this->crc = -1;
         this->decoding = true;
         return;
-    } else if (!this->decoding) {
+    }
+    if (!this->decoding) {
         return;
     }
 
@@ -95,7 +96,7 @@ std::vector<uint8_t> HdlcFrame::encode() {
     return encoded;
 }
 
-uint8_t HdlcFrame::encodeByte(uint8_t byte) {
+uint8_t HdlcFrame::encodeByte(const uint8_t byte) {
     if (byte == HDLC_FLAG || byte == HDLC_ESCAPE) {
         return byte ^ HDLC_ESCAPE_BIT;
     }

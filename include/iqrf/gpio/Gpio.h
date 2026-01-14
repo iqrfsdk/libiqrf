@@ -124,19 +124,19 @@ class Gpio {
      * Sets GPIO line input value for testing purposes
      * @param value GPIO line input value
      */
-    void setInputValue(bool value);
+    void setInputValue(bool value) const;
 
     /**
      * Registers a callback for GPIO direction change
      * @param callback Callback function to be called when the GPIO direction changes
      */
-    void registerDirectionCallback(const GpioDirectionCallback& callback);
+    void registerDirectionCallback(const GpioDirectionCallback& callback) const;
 
     /**
      * Registers a callback for GPIO value change
      * @param callback Callback function to be called when the GPIO value changes
      */
-    void registerValueCallback(const GpioValueCallback& callback);
+    void registerValueCallback(const GpioValueCallback& callback) const;
 #endif
 
  private:

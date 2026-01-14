@@ -80,14 +80,14 @@ void swap(Gpio& first, Gpio& second) noexcept {
 }
 
 #if IQRF_TESTING_SUPPORT
-void Gpio::setInputValue(bool value) {
+void Gpio::setInputValue(const bool value) const {
     if (!this->isMock) {
         throw std::logic_error("setInputValue is only available for mock GPIO");
     }
     std::dynamic_pointer_cast<GpioMock>(impl)->setInputValue(value);
 }
 
-void Gpio::registerDirectionCallback(const GpioDirectionCallback& callback) {
+void Gpio::registerDirectionCallback(const GpioDirectionCallback& callback) const {
     if (!this->isMock) {
         throw std::logic_error("registerDirectionCallback is only available for mock GPIO");
     }
@@ -95,7 +95,7 @@ void Gpio::registerDirectionCallback(const GpioDirectionCallback& callback) {
 }
 
 
-void Gpio::registerValueCallback(const GpioValueCallback& callback) {
+void Gpio::registerValueCallback(const GpioValueCallback& callback) const {
     if (!this->isMock) {
         throw std::logic_error("registerValueCallback is only available for mock GPIO");
     }

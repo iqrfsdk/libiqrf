@@ -12,7 +12,6 @@
 #include <gtest/gtest.h>
 
 #include <chrono>
-#include <map>
 #include <string>
 #include <vector>
 #include <thread>
@@ -59,13 +58,13 @@ class BusSwitcherTest : public ::testing::Test {
     }
 
     static void expectGpioChange(
-        GpioValueChangeEvent currentEvent,
+        const GpioValueChangeEvent &currentEvent,
         const std::string& gpioName,
-        bool oldValue,
-        bool newValue,
-        std::optional<GpioValueChangeEvent> previousEvent = std::nullopt,
-        std::optional<std::chrono::milliseconds> timeDifference = std::nullopt,
-        int timeTolerance = 5
+        const bool oldValue,
+        const bool newValue,
+        const std::optional<GpioValueChangeEvent> &previousEvent = std::nullopt,
+        const std::optional<std::chrono::milliseconds> timeDifference = std::nullopt,
+        const int timeTolerance = 5
     ) {
         EXPECT_EQ(std::get<1>(currentEvent), gpioName);
         EXPECT_EQ(std::get<2>(currentEvent), oldValue);

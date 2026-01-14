@@ -72,7 +72,7 @@ TEST_F(GpioTest, TestInput_GPIO) {
     EXPECT_EQ(::gpiod::line::DIRECTION_INPUT, line.direction());
     EXPECT_STREQ("libiqrf:test:input", line.consumer().c_str());
 #else
-    auto chip = std::make_unique<::gpiod::chip>(::std::filesystem::path("/dev/gpiochip0"));
+    const auto chip = std::make_unique<::gpiod::chip>(::std::filesystem::path("/dev/gpiochip0"));
     const auto line_info = chip->get_line_info(2);
 
     ASSERT_TRUE(line_info.used());
@@ -96,7 +96,7 @@ TEST_F(GpioTest, TestOutput_GPIO) {
     EXPECT_EQ(::gpiod::line::DIRECTION_OUTPUT, line.direction());
     EXPECT_STREQ("libiqrf:test:output", line.consumer().c_str());
 #else
-    auto chip = std::make_unique<::gpiod::chip>(::std::filesystem::path("/dev/gpiochip0"));
+    const auto chip = std::make_unique<::gpiod::chip>(::std::filesystem::path("/dev/gpiochip0"));
     const auto line_info = chip->get_line_info(0);
 
     ASSERT_TRUE(line_info.used());

@@ -11,8 +11,6 @@
 
 #pragma once
 
-#include <libserialport.h>
-
 #include <cstdint>
 #include <optional>
 #include <string>

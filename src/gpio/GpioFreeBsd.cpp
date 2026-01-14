@@ -22,7 +22,7 @@ GpioFreeBsd::GpioFreeBsd(const iqrf::gpio::GpioConfig &config):  line(config.lin
     if (config.chip.empty()) {
         throw std::invalid_argument("GPIO chip name cannot be empty");
     }
-    std::string path = config.chip.substr(0, 5) == "/dev/" ? config.chip : "/dev/" + config.chip;
+    const std::string path = config.chip.substr(0, 5) == "/dev/" ? config.chip : "/dev/" + config.chip;
     this->fd = open(path.c_str(), O_RDONLY);
     if (this->fd < 0) {
         throw std::system_error(errno, std::generic_category(), "Failed to open GPIO chip");
@@ -42,7 +42,7 @@ void GpioFreeBsd::initInput() {
     this->setDirection(GpioDirection::Input);
 }
 
-void GpioFreeBsd::initOutput(bool initialValue) {
+void GpioFreeBsd::initOutput(const bool initialValue) {
     this->setDirection(GpioDirection::Output);
     this->setValue(initialValue);
 }
@@ -56,7 +56,7 @@ struct gpio_pin GpioFreeBsd::getPinConfig() const {
     return pin;
 }
 
-void GpioFreeBsd::setDirection(iqrf::gpio::GpioDirection direction) {
+void GpioFreeBsd::setDirection(const iqrf::gpio::GpioDirection direction) {
     struct gpio_pin pin = this->getPinConfig();
     pin.gp_flags = direction == GpioDirection::Input ? GPIO_PIN_INPUT : GPIO_PIN_OUTPUT;
 
@@ -70,7 +70,7 @@ iqrf::gpio::GpioDirection GpioFreeBsd::getDirection() {
     return (pin.gp_flags & GPIO_PIN_INPUT) ? GpioDirection::Input : GpioDirection::Output;
 }
 
-void GpioFreeBsd::setValue(bool value) {
+void GpioFreeBsd::setValue(const bool value) {
     struct gpio_req rq;
     rq.gp_pin = this->line;
     rq.gp_value = value ? 1 : 0;

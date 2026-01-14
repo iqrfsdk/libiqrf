@@ -16,7 +16,6 @@
 #endif
 
 #include <cstdint>
-#include <exception>
 #include <stdexcept>
 #include <vector>
 
@@ -51,7 +50,7 @@ class HdlcFrame {
 
     /**
      * Decodes the HDLC frame by one byte
-     * @param data Data to be decoded
+     * @param byte Data byte to be decoded
      * @return Decoded HDLC frame
      */
     void decodeByte(uint8_t byte);

@@ -87,7 +87,7 @@ class BusSwitcher {
     /**
      * Initializes the bus switch GPIOs to their default state.
      */
-    void init() {
+    void init() const {
         if (this->config.busEnableGpio) {
             this->config.busEnableGpio->initOutput(false);
             return;
@@ -109,7 +109,7 @@ class BusSwitcher {
      * @param spi SPI bus enable state
      * @param uart UART bus enable state
      */
-    void toggle(bool i2c, bool spi, bool uart) {
+    void toggle(const bool i2c, const bool spi, const bool uart) const {
         if (this->config.busEnableGpio) {
             this->config.busEnableGpio->setValue(i2c || spi || uart);
         } else {
@@ -129,7 +129,7 @@ class BusSwitcher {
      * Toggles the I2C bus switch GPIO.
      * @param enable true to enable I2C bus, false to disable it
      */
-    void toggleI2c(bool enable) {
+    void toggleI2c(const bool enable) const {
         this->toggle(enable, false, false);
     }
 
@@ -137,7 +137,7 @@ class BusSwitcher {
      * Toggles the SPI bus switch GPIO.
      * @param enable true to enable SPI bus, false to disable it
      */
-    void toggleSpi(bool enable) {
+    void toggleSpi(const bool enable) const {
         this->toggle(false, enable, false);
     }
 
@@ -145,7 +145,7 @@ class BusSwitcher {
      * Toggles the UART bus switch GPIO.
      * @param enable true to enable UART bus, false to disable it
      */
-    void toggleUart(bool enable) {
+    void toggleUart(const bool enable) const {
         this->toggle(false, false, enable);
     }
 

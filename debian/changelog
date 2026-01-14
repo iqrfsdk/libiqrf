@@ -1,3 +1,15 @@
+libiqrf (0.1.4) stable; urgency=medium
+
+  [ Roman Ondráček ]
+  * Update read me
+  * GitLab CI: use CI components
+  * Fix issues reported by linters
+
+  [ Karel Hanák ]
+  * UartConnector: configure conditional TR power disable
+
+ -- Roman Ondráček <mail@romanondracek.cz>  Wed, 14 Jan 2026 01:22:27 +0100
+
 libiqrf (0.1.3) stable; urgency=medium
 
   * GitLab CI: fix Ubuntu debug symbols package renaming

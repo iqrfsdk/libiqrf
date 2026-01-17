@@ -68,7 +68,11 @@ int main(int argc, char *argv[]) {
     bpo::options_description command("Command options");
     command.add_options()
         ("device,d", bpo::value<std::string>(), "UART device name")
-        ("baudrate,b", bpo::value<uint32_t>()->default_value(57600), "UART baud rate (default: 57600)");
+        ("baudrate,b", bpo::value<uint32_t>()->default_value(57600), "UART baud rate (default: 57600)")
+        ("power,p", bpo::value<int64_t>()->default_value(23))
+        ("i2c,i", bpo::value<int64_t>()->default_value(18))
+        ("spi,s", bpo::value<int64_t>()->default_value(7))
+        ("uart,u", bpo::value<int64_t>()->default_value(6));
     bpo::options_description desc("Available options");
     desc.add(general).add(command);
     bpo::variables_map vm;
@@ -92,8 +96,24 @@ int main(int argc, char *argv[]) {
             throw std::logic_error("UART device name is required.");
         }
 
+        iqrf::gpio::Gpio powerPin(iqrf::gpio::GpioConfig(vm["power"].as<int64_t>()));
+        iqrf::gpio::Gpio i2cPin(iqrf::gpio::GpioConfig(vm["i2c"].as<int64_t>()));
+        iqrf::gpio::Gpio spiPin(iqrf::gpio::GpioConfig(vm["spi"].as<int64_t>()));
+        iqrf::gpio::Gpio uartPin(iqrf::gpio::GpioConfig(vm["uart"].as<int64_t>()));
+
         /// IQRF UART connector configuration
-        const iqrf::connector::uart::UartConfig uartConfig(vm["device"].as<std::string>(), vm["baudrate"].as<uint32_t>());
+        const iqrf::connector::uart::UartConfig uartConfig(
+            vm["device"].as<std::string>(),
+            vm["baudrate"].as<uint32_t>(),
+            powerPin,
+            std::nullopt,
+            std::nullopt,
+            spiPin,
+            uartPin,
+            i2cPin,
+            true,
+            false
+        );
         uartConnector = std::make_unique<iqrf::connector::uart::UartConnector>(uartConfig);
         uartConnector->registerResponseHandler(responseHandler, iqrf::connector::AccessType::Normal);
         uartConnector->listen();

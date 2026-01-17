@@ -87,7 +87,9 @@ class UartConfig: public iqrf::connector::BusSwitcherConfig {
         powerEnableGpio(powerEnableGpio),
         pgmSwitchGpio(pgmSwitchGpio),
         trModuleReset(trModuleReset),
-        disablePowerOnShutdown(disablePowerOnShutdown) {
+        disablePowerOnShutdown(disablePowerOnShutdown)
+    {
+        std::cout << "UART CONFIG CONSTRUCTOR" << std::endl;
     }
 };
 

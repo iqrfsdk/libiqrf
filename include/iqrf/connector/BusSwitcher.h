@@ -48,7 +48,14 @@ class BusSwitcherConfig {
     ): busEnableGpio(busEnableGpio),
        i2cEnableGpio(i2cEnableGpio),
        spiEnableGpio(spiEnableGpio),
-       uartEnableGpio(uartEnableGpio) {}
+       uartEnableGpio(uartEnableGpio)
+    {
+        std::cout << "BUS SWITCHER CONFIG CONSTRUCTOR" << std::endl;
+    }
+
+    ~BusSwitcherConfig() {
+        std::cout << "BUS SWITCHER CONFIG DESTRUCTOR" << std::endl;
+    }
 
     /**
      * Returns a copy of the bus switch configuration to avoid slicing.
@@ -75,13 +82,16 @@ class BusSwitcher {
      * @param config Bus switch configuration
      */
     explicit BusSwitcher(BusSwitcherConfig config): config(std::move(config)) {
+        std::cout << "BUS SWITCHER CONSTRUCTOR" << std::endl;
     }
 
     /**
      * Destructor for the bus switcher.
      */
     ~BusSwitcher() {
+        std::cout << "BUS SWITCHER DESTRUCTOR START" << std::endl;
         this->toggle(false, false, false);
+        std::cout << "BUS SWITCHER DESTRUCTOR STOP" << std::endl;
     }
 
     /**

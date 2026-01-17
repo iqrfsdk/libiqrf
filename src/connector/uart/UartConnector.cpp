@@ -14,6 +14,7 @@
 namespace iqrf::connector::uart {
 
 UartConnector::UartConnector(UartConfig config): busSwitcher(config.busSwitch()), config(std::move(config)) {
+    std::cout << "UART CONNECTOR CONSTRUCTOR START" << std::endl;
     this->initGpio();
     IQRF_LOG(log::Level::Debug) << "Opening UART port: " << this->config.device;
     UartConnector::checkSerialResult(sp_get_port_by_name(this->config.device.c_str(), &this->port));
@@ -42,6 +43,7 @@ UartConnector::UartConnector(UartConfig config): busSwitcher(config.busSwitch())
         usbInfo << ", Serial: " << (serial != nullptr ? serial : "N/A");
 
         IQRF_LOG(log::Level::Debug) << usbInfo.str();
+        std::cout << "UART CONNECTOR CONSTRUCTOR END" << std::endl;
     }
 
     // Open the port
@@ -56,6 +58,7 @@ UartConnector::UartConnector(UartConfig config): busSwitcher(config.busSwitch())
 }
 
 UartConnector::~UartConnector() {
+    std::cout << "UART CONNECTOR DESTRUCTOR START" << std::endl;
     this->stopListen();
 
     if (this->config.powerEnableGpio && this->config.disablePowerOnShutdown) {
@@ -72,6 +75,7 @@ UartConnector::~UartConnector() {
         sp_close(this->port);
         sp_free_port(this->port);
     }
+    std::cout << "UART CONNECTOR DESTRUCTOR END" << std::endl;
 }
 
 void UartConnector::initGpio() {

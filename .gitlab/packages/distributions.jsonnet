@@ -1,4 +1,8 @@
 [
+	{ name: 'debian', version: 'forky', arch: 'amd64' },
+	{ name: 'debian', version: 'forky', arch: 'arm64' },
+	{ name: 'debian', version: 'forky', arch: 'armhf' },
+	{ name: 'debian', version: 'forky', arch: 'i386' },
 	{ name: 'debian', version: 'trixie', arch: 'amd64' },
 	{ name: 'debian', version: 'trixie', arch: 'arm64' },
 	{ name: 'debian', version: 'trixie', arch: 'armhf' },
@@ -21,4 +25,7 @@
 	{ name: 'ubuntu', version: 'noble', arch: 'amd64' },
 	{ name: 'ubuntu', version: 'noble', arch: 'arm64' },
 	{ name: 'ubuntu', version: 'noble', arch: 'armhf' },
+	{ name: 'ubuntu', version: 'resolute', arch: 'amd64' },
+	{ name: 'ubuntu', version: 'resolute', arch: 'arm64' },
+	{ name: 'ubuntu', version: 'resolute', arch: 'armhf' },
 ]

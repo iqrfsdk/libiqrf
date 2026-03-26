@@ -11,6 +11,11 @@
 
 #include "iqrf/log/Logging.h"
 
+#include <iostream>
+#include <memory>
+#include <sstream>
+#include <string>
+
 namespace iqrf::log {
 
 std::unique_ptr<ILog> Logger::log = std::make_unique<StderrLog>();
@@ -37,8 +42,7 @@ void ILog::append(const std::string& msg, const Level& severity) {
 }
 
 void StderrLog::append(const std::string& msg) {
-    fprintf(stderr, "%s", msg.c_str());
-    fflush(stderr);
+    std::cerr << msg << std::flush;
 }
 
 }  // namespace iqrf::log

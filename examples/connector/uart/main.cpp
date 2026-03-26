@@ -17,6 +17,7 @@
 #include <chrono>
 #include <csignal>
 #include <iostream>
+#include <memory>
 #include <string>
 #include <vector>
 
@@ -93,7 +94,10 @@ int main(int argc, char *argv[]) {
         }
 
         /// IQRF UART connector configuration
-        const iqrf::connector::uart::UartConfig uartConfig(vm["device"].as<std::string>(), vm["baudrate"].as<uint32_t>());
+        const iqrf::connector::uart::UartConfig uartConfig(
+            vm["device"].as<std::string>(),
+            vm["baudrate"].as<uint32_t>()
+        );
         uartConnector = std::make_unique<iqrf::connector::uart::UartConnector>(uartConfig);
         uartConnector->registerResponseHandler(responseHandler, iqrf::connector::AccessType::Normal);
         uartConnector->listen();

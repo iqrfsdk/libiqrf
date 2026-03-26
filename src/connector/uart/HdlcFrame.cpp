@@ -11,6 +11,8 @@
 
 #include "iqrf/connector/uart/HdlcFrame.h"
 
+#include <vector>
+
 namespace iqrf::connector::uart {
 
 HdlcFrame HdlcFrame::decode(const std::vector<uint8_t> &data) {

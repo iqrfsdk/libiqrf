@@ -11,7 +11,10 @@
 
 #include <gtest/gtest.h>
 
+#include <iostream>
+#include <memory>
 #include <regex>
+#include <string>
 
 #include "iqrf/log/Logging.h"
 
@@ -23,8 +26,7 @@ class LoggingTest : public ::testing::Test {
 class StdoutLog : public ILog {
  public:
     void append(const std::string& msg) override {
-        fprintf(stdout, "%s", msg.c_str());
-        fflush(stdout);
+        std::cout << msg << std::flush;
     }
 };
 

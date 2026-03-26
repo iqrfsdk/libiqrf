@@ -31,11 +31,12 @@
 
 namespace iqrf::gpio {
 
-    typedef std::map<std::size_t, std::pair<std::shared_ptr<std::string>, size_t>> GpioMap;
+typedef std::map<std::size_t, std::pair<std::shared_ptr<std::string>, size_t>> GpioMap;
 
-    /**
-     * Get map of GPIO pins and chips names / line offsets
-     * @return Map of GPIO pins and chips / line offsets
-     */
-    GpioMap getGpioMap();
-}
+/**
+ * Get map of GPIO pins and chips names / line offsets
+ * @return Map of GPIO pins and chips / line offsets
+ */
+GpioMap getGpioMap();
+
+}  // namespace iqrf::gpio

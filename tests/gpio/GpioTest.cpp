@@ -11,6 +11,9 @@
 
 #include <gtest/gtest.h>
 
+#include <memory>
+#include <utility>
+
 #include "iqrf/gpio/Gpio.h"
 #include "iqrf/gpio/Config.h"
 

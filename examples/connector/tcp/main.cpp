@@ -17,6 +17,7 @@
 #include <chrono>
 #include <csignal>
 #include <iostream>
+#include <memory>
 #include <string>
 #include <vector>
 #include <thread>
@@ -95,7 +96,10 @@ int main(int argc, char *argv[]) {
         }
 
         /// IQRF TCP connector configuration
-        const iqrf::connector::tcp::TcpConfig tcpConfig(vm["host"].as<std::string>(), vm["port"].as<uint16_t>());
+        const iqrf::connector::tcp::TcpConfig tcpConfig(
+            vm["host"].as<std::string>(),
+            vm["port"].as<uint16_t>()
+        );
         tcpConnector = std::make_unique<iqrf::connector::tcp::TcpConnector>(tcpConfig);
         tcpConnector->registerResponseHandler(responseHandler, iqrf::connector::AccessType::Normal);
         tcpConnector->listen();

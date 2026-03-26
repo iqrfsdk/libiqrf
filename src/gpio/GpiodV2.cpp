@@ -16,6 +16,8 @@
 
 #include "iqrf/gpio/GpiodV2.h"
 
+#include <memory>
+
 namespace iqrf::gpio {
 
 Gpiod::Gpiod(const GpioConfig& config)

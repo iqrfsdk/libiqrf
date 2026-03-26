@@ -11,6 +11,9 @@
 
 #include "iqrf/gpio/Config.h"
 
+#include <sstream>
+#include <string>
+
 namespace iqrf::gpio {
 
 GpioConfig::GpioConfig(): line(0), pin(-1), consumer_name(default_consumer_name) {

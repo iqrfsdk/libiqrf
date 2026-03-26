@@ -9,12 +9,14 @@
  * LICENSE file in the project root.
  */
 
+#include "iqrf/gpio/GpioMap.h"
+
 #include <algorithm>
 #include <filesystem>
+#include <memory>
 #include <string>
+#include <utility>
 #include <vector>
-
-#include "iqrf/gpio/GpioMap.h"
 
 #if defined(__linux__) or defined(__FreeBSD__)
 #define GPIO_DIRECTORY "/dev"

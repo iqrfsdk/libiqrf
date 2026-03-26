@@ -9,13 +9,21 @@
  * LICENSE file in the project root.
  */
 
-// This class should implement a TCP connector for IQRF communication which transfers only raw data and should using boost::asio.
+// This class should implement a TCP connector for IQRF communication which
+// transfers only raw data and should using boost::asio.
 
 #include "iqrf/connector/tcp/TcpConnector.h"
 
+#include <utility>
+#include <vector>
+
 namespace iqrf::connector::tcp {
 
-TcpConnector::TcpConnector(TcpConfig config): config(std::move(config)), socket(ioContext), resolver(ioContext), timer(ioContext) {
+TcpConnector::TcpConnector(TcpConfig config):
+    config(std::move(config)),
+    socket(ioContext),
+    resolver(ioContext),
+    timer(ioContext) {
     this->connect();
 }
 

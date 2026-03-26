@@ -16,6 +16,9 @@
 
 #include "iqrf/gpio/GpioFreeBsd.h"
 
+#include <stdexcept>
+#include <string>
+
 namespace iqrf::gpio {
 
 GpioFreeBsd::GpioFreeBsd(const iqrf::gpio::GpioConfig &config):  line(config.line) {

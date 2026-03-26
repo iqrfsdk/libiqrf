@@ -9,6 +9,9 @@
  * LICENSE file in the project root.
  */
 #include <iostream>
+#include <memory>
+#include <string>
+
 #include <boost/core/null_deleter.hpp>
 #include <boost/log/core.hpp>
 #include <boost/log/expressions.hpp>
@@ -47,7 +50,7 @@ class BoostLogTrivial : public ILog {
    *
    * @param msg is a message which shall be appended.
    * @param severity is the severity level of the message.
-   * 
+   *
    * @details Boost Trivial Logging uses lvl from BOOST_LOG_TRIVIAL(lvl) to expand
    * ::boost::log::trivial::lvl, so unfortunately no simpler mapping is possible.
    */

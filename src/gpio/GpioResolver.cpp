@@ -9,10 +9,12 @@
  * LICENSE file in the project root.
  */
 
-#include <iostream>
-#include <utility>
-
 #include "iqrf/gpio/GpioResolver.h"
+
+#include <iostream>
+#include <stdexcept>
+#include <string>
+#include <utility>
 
 namespace iqrf::gpio {
 

@@ -15,6 +15,7 @@
 #include <string>
 #include <vector>
 #include <thread>
+#include <tuple>
 
 #include "iqrf/connector/BusSwitcher.h"
 

@@ -16,6 +16,10 @@
 
 #include "iqrf/gpio/Gpio.h"
 
+#include <memory>
+#include <stdexcept>
+#include <utility>
+
 namespace iqrf::gpio {
 
 Gpio::Gpio(const GpioConfig& config) {

@@ -35,7 +35,6 @@ class TcpConfig {
         std::string host,
         const uint16_t port = 10000
     ): host(std::move(host)), port(port) {}
-
 };
 
 }  // namespace iqrf::connector::tcp

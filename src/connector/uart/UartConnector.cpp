@@ -11,6 +11,13 @@
 
 #include "iqrf/connector/uart/UartConnector.h"
 
+#include <stdexcept>
+#include <sstream>
+#include <string>
+#include <vector>
+#include <utility>
+#include <thread>
+
 namespace iqrf::connector::uart {
 
 UartConnector::UartConnector(UartConfig config): busSwitcher(config.busSwitch()), config(std::move(config)) {

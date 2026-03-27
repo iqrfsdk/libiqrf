@@ -1,3 +1,12 @@
+libiqrf (0.1.5) stable; urgency=medium
+
+  * Update .mailmap to fix git authors
+  * GitLab CI: build packages for Debian testing and Ubuntu 26.04
+  * CMake: update boost linking due boost::system is header-only from version 1.69
+  * Fix cpplint issues
+
+ -- Roman Ondráček <mail@romanondracek.cz>  Fri, 27 Mar 2026 12:33:45 +0100
+
 libiqrf (0.1.4) stable; urgency=medium
 
   [ Roman Ondráček ]

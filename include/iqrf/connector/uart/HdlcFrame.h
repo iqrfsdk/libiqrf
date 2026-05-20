@@ -26,6 +26,13 @@ namespace iqrf::connector::uart {
  */
 class HdlcFrame {
  public:
+    /// HDLC frame start/end flag
+    static constexpr uint8_t HDLC_FLAG = 0x7E;
+    /// HDLC escape character
+    static constexpr uint8_t HDLC_ESCAPE = 0x7D;
+    /// HDLC escape bit to XOR with the byte
+    static constexpr uint8_t HDLC_ESCAPE_BIT = 0x20;
+
     /**
      * Constructs an empty HDLC frame
      */
@@ -69,15 +76,17 @@ class HdlcFrame {
 
  private:
 #if BUILD_TESTS
+    FRIEND_TEST(HdlcFrameTest, encodeInsertByte);
     FRIEND_TEST(HdlcFrameTest, calculateCrc);
     FRIEND_TEST(HdlcFrameTest, getData);
 #endif
+
     /**
-     * Encodes a byte for HDLC frame
-     * @param byte Byte to be encoded
-     * @return Encoded byte
+     * Encodes a byte for HDLC frame and inserts it into data
+     * @param encoded Vector of encoded data
+     * @param byte Byte to encode and insert
      */
-    static uint8_t encodeByte(uint8_t byte);
+    static void encodeInsertByte(std::vector<uint8_t> &encoded, uint8_t byte);
 
     /**
      * Calculate 1-Wire CRC8 checksum for the given data.
@@ -94,12 +103,6 @@ class HdlcFrame {
     bool escape = false;
     /// HDLC frame 1-Wire CRC8
     int16_t crc = -1;
-    /// HDLC frame start/end flag
-    static constexpr uint8_t HDLC_FLAG = 0x7E;
-    /// HDLC escape character
-    static constexpr uint8_t HDLC_ESCAPE = 0x7D;
-    /// HDLC escape bit to XOR with the byte
-    static constexpr uint8_t HDLC_ESCAPE_BIT = 0x20;
 };
 
 }  // namespace iqrf::connector::uart

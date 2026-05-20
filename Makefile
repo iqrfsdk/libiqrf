@@ -26,7 +26,7 @@ coverage:
 build:
 	mkdir -p build
 	cmake -Bbuild -H. -DCMAKE_BUILD_TYPE=Debug -DCMAKE_VERBOSE_MAKEFILE:BOOL=ON \
-		-DBUILD_SHARED:BOOL=ON -DBUILD_STATIC:BOOL=ON
+		-DBUILD_SHARED:BOOL=ON -DBUILD_STATIC:BOOL=ON -DCMAKE_EXPORT_COMPILE_COMMANDS:BOOL=ON
 	cmake --build build
 
 lint:
@@ -34,7 +34,7 @@ lint:
 	cppcheck --enable=all --check-level=exhaustive --inconclusive -I include/ --suppress=missingIncludeSystem --inline-suppr --quiet src/ examples/
 
 test:
-	ctest --test-dir build/tests
+	ctest -V --test-dir build/tests
 
 clean:
 	rm -rf build

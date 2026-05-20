@@ -9,6 +9,7 @@
  * LICENSE file in the project root.
  */
 
+#include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
 #include <cstdint>
@@ -16,6 +17,8 @@
 #include <vector>
 
 #include "iqrf/connector/uart/HdlcFrame.h"
+
+using ::testing::ElementsAre;
 
 namespace iqrf::connector::uart {
 
@@ -44,6 +47,14 @@ class HdlcFrameTest : public ::testing::Test {
                 0x7d, 0x5d, 0x7d, 0x5e, 0x48, 0x7e,
             },
         },
+        {
+            { 0x00, 0x00, 0x00, 0x0b, 0xff, 0xff, 0x00 },
+            { 0x7e, 0x00, 0x00, 0x00, 0x0b, 0xff, 0xff, 0x00, 0xc1, 0x7e }
+        },
+        {
+            { 0x00, 0x00, 0x00, 0x0b, 0xff, 0xff, 0x02 },
+            { 0x7e, 0x00, 0x00, 0x00, 0x0b, 0xff, 0xff, 0x02, 0x7d, 0x5d, 0x7e }
+        }
     };
 };
 
@@ -110,6 +121,17 @@ TEST_F(HdlcFrameTest, encode) {
     EXPECT_THROW(frame.encode(), std::logic_error);
     EXPECT_NO_THROW(frame.decodeByte(0x7d));
     EXPECT_THROW(frame.encode(), std::logic_error);
+}
+
+TEST_F(HdlcFrameTest, encodeInsertByte) {
+    std::vector<uint8_t> encoded;
+    EXPECT_TRUE(encoded.empty());
+    HdlcFrame::encodeInsertByte(encoded, 0x01);
+    EXPECT_THAT(encoded, ElementsAre(0x01));
+    HdlcFrame::encodeInsertByte(encoded, HdlcFrame::HDLC_FLAG);
+    EXPECT_THAT(encoded, ElementsAre(0x01, 0x7D, 0x5E));
+    HdlcFrame::encodeInsertByte(encoded, HdlcFrame::HDLC_ESCAPE);
+    EXPECT_THAT(encoded, ElementsAre(0x01, 0x7D, 0x5E, 0x7D, 0x5D));
 }
 
 TEST_F(HdlcFrameTest, getData) {

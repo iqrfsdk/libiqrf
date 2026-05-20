@@ -83,26 +83,23 @@ std::vector<uint8_t> HdlcFrame::encode() {
     encoded.reserve(this->data.size() + 2);
     encoded.push_back(HDLC_FLAG);
     for (const auto byte : this->data) {
-        if (byte == HDLC_FLAG || byte == HDLC_ESCAPE) {
-            encoded.push_back(HDLC_ESCAPE);
-            encoded.push_back(HdlcFrame::encodeByte(byte));
-        } else {
-            encoded.push_back(byte);
-        }
+        HdlcFrame::encodeInsertByte(encoded, byte);
     }
     if (this->crc == -1) {
         this->crc = HdlcFrame::calculateCrc(this->data);
     }
-    encoded.push_back(iqrf::connector::uart::HdlcFrame::encodeByte(this->crc));
+    HdlcFrame::encodeInsertByte(encoded, this->crc);
     encoded.push_back(HDLC_FLAG);
     return encoded;
 }
 
-uint8_t HdlcFrame::encodeByte(const uint8_t byte) {
+void HdlcFrame::encodeInsertByte(std::vector<uint8_t> &encoded, uint8_t byte) {
     if (byte == HDLC_FLAG || byte == HDLC_ESCAPE) {
-        return byte ^ HDLC_ESCAPE_BIT;
+        encoded.push_back(HDLC_ESCAPE);
+        encoded.push_back(byte ^ HDLC_ESCAPE_BIT);
+    } else {
+        encoded.push_back(byte);
     }
-    return byte;
 }
 
 const std::vector<uint8_t> &HdlcFrame::getData() const {

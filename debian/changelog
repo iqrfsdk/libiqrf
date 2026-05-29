@@ -1,3 +1,9 @@
+libiqrf (0.1.6) stable; urgency=medium
+
+  * fixed HDLC frame encoding
+
+ -- Karel Hanák <karel.hanak@iqrf.org>  Fri, 29 May 2026 13:10:08 +0200
+
 libiqrf (0.1.5) stable; urgency=medium
 
   * Update .mailmap to fix git authors

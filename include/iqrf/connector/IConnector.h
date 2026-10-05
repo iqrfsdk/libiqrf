@@ -18,6 +18,8 @@
 #include <thread>
 #include <vector>
 
+#include "iqrf/connector/TrInfo.h"
+
 namespace iqrf::connector {
 
 /**
@@ -54,22 +56,6 @@ enum class ProgrammingTarget {
 };
 
 typedef std::function<int(const std::vector<uint8_t>&)> ResponseHandler;
-
-/**
- * Transceiver information as returned by IQRF OS moduleInfo()
- */
-#pragma pack(push, 1)
-struct TrInfo {
-    uint32_t mid;
-    uint8_t osVersion;
-    uint8_t trType;
-    uint16_t osBuild;
-
-    [[nodiscard]] uint8_t osVersionMajor() const { return osVersion >> 4; }
-
-    [[nodiscard]] uint8_t osVersionMinor() const { return osVersion & 0x0F; }
-};
-#pragma pack(pop)
 
 /**
  * Access Token to guard exclusive access to the connector.

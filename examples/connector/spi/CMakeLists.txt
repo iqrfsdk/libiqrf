@@ -12,16 +12,18 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-set(LIB_INCLUDE_DIR "${libiqrf_SOURCE_DIR}/include/iqrf/connector")
+set(EXAMPLE_NAME iqrf-connector-spi-example)
 
-file(GLOB LIB_HEADERS "${LIB_INCLUDE_DIR}/*.h")
+set(THREADS_PREFER_PTHREAD_FLAG ON)
+find_package(Boost CONFIG REQUIRED COMPONENTS program_options)
+find_package(Threads REQUIRED)
 
-# Common connector headers (header-only), connector specific headers are installed by the connector libraries
-install(
-    FILES ${LIB_HEADERS}
-    DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}/iqrf/connector"
+add_executable(${EXAMPLE_NAME} main.cpp)
+target_include_directories(${EXAMPLE_NAME} PRIVATE
+    ${PROJECT_SOURCE_DIR}/include
+    ${Boost_INCLUDE_DIRS}
 )
+target_link_libraries(${EXAMPLE_NAME} PUBLIC iqrf_connector_spi iqrf_gpio iqrf_log)
+target_link_libraries(${EXAMPLE_NAME} PRIVATE ${Boost_LIBRARIES} Threads::Threads)
 
-add_subdirectory(spi)
-add_subdirectory(tcp)
-add_subdirectory(uart)
+install(TARGETS ${EXAMPLE_NAME} RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})

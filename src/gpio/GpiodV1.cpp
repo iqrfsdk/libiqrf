@@ -58,16 +58,16 @@ void Gpiod::initInput() {
 
 void Gpiod::initOutput(const bool initialValue) {
     // To be safe check whether the line wasn't already initialised
-    if (line.is_requested())
+    if (line.is_requested()) {
         line.release();
+    }
 
     // Request the access to the line
     ::gpiod::line_request req_conf;
     req_conf.consumer = name;
     req_conf.request_type = ::gpiod::line_request::DIRECTION_OUTPUT;
-    line.request(req_conf);
-
-    this->setValue(initialValue);
+    // Set the initial value atomically with the direction to avoid glitches
+    line.request(req_conf, initialValue ? 1 : 0);
 }
 
 void Gpiod::setDirection(const iqrf::gpio::GpioDirection direction) {
@@ -96,11 +96,11 @@ iqrf::gpio::GpioDirection Gpiod::getDirection() {
 }
 
 void Gpiod::setValue(bool value) {
-    line.set_value(value);
+    line.set_value(value ? 1 : 0);
 }
 
 bool Gpiod::getValue() {
-    return line.get_value();
+    return line.get_value() != 0;
 }
 
 }  // namespace iqrf::gpio

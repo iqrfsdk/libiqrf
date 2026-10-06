@@ -16,22 +16,23 @@
 #include <utility>
 #include <string>
 
-#if defined(__linux__)
+#ifdef __linux__
 #include <gpiod.hpp>
 #elif defined(__FreeBSD__)
 #include <fcntl.h>
 #include <stdlib.h>
 #include <unistd.h>
 #include <sys/gpio.h>
+#include <sys/ioctl.h>
 #endif
 
-#if defined(__linux__)
+#ifdef __linux__
 #include "iqrf/gpio/libgpiodVersion.h"
 #endif
 
 namespace iqrf::gpio {
 
-typedef std::map<std::size_t, std::pair<std::shared_ptr<std::string>, size_t>> GpioMap;
+using GpioMap = std::map<std::size_t, std::pair<std::shared_ptr<std::string>, size_t>>;
 
 /**
  * Get map of GPIO pins and chips names / line offsets

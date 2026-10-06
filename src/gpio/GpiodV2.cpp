@@ -17,15 +17,17 @@
 #include "iqrf/gpio/GpiodV2.h"
 
 #include <memory>
+#include <stdexcept>
+#include <string>
 
 namespace iqrf::gpio {
 
 Gpiod::Gpiod(const GpioConfig& config)
-    : chip(std::make_unique<::gpiod::chip>(::std::filesystem::path("/dev/" + config.chip))) {
+    : chip(std::make_unique<::gpiod::chip>(chipPath(config.chip))) {
     if (config.line_name.empty()) {
         line = config.line;
     } else {
-        int offset = chip->get_line_offset_from_name(config.line_name);
+        const int offset = chip->get_line_offset_from_name(config.line_name);
         if (offset >= 0) {
             line = offset;
         } else {
@@ -40,6 +42,8 @@ Gpiod::~Gpiod() {
 }
 
 void Gpiod::initInput() {
+    // Release the previous request, otherwise the line is busy
+    request.reset();
     // Initialize line request
     request = std::make_unique<::gpiod::line_request>(
         chip->prepare_request()
@@ -53,6 +57,8 @@ void Gpiod::initInput() {
 }
 
 void Gpiod::initOutput(const bool initialValue) {
+    // Release the previous request, otherwise the line is busy
+    request.reset();
     const auto val = initialValue ? ::gpiod::line::value::ACTIVE : ::gpiod::line::value::INACTIVE;
 
     // Initialize line request
@@ -74,6 +80,7 @@ void Gpiod::setDirection(const iqrf::gpio::GpioDirection direction) {
         ::gpiod::line::direction::OUTPUT;
 
     // Reconfigure line direction
+    this->checkRequested();
     request->reconfigure_lines(
         ::gpiod::line_config()
             .add_line_settings(
@@ -99,11 +106,25 @@ iqrf::gpio::GpioDirection Gpiod::getDirection() {
 
 void Gpiod::setValue(const bool value) {
     const auto val = value ? ::gpiod::line::value::ACTIVE : ::gpiod::line::value::INACTIVE;
+    this->checkRequested();
     request->set_value(line, val);
 }
 
 bool Gpiod::getValue() {
+    this->checkRequested();
     return request->get_value(line) == ::gpiod::line::value::ACTIVE;
+}
+
+std::filesystem::path Gpiod::chipPath(const std::string &chip) {
+    const std::filesystem::path path(chip);
+    // Accept both chip name (gpiochip0) and path (/dev/gpiochip0)
+    return path.is_absolute() ? path : std::filesystem::path("/dev") / path;
+}
+
+void Gpiod::checkRequested() const {
+    if (!request) {
+        throw std::logic_error("GPIO line is not initialized");
+    }
 }
 
 }  // namespace iqrf::gpio

@@ -48,6 +48,12 @@ class Gpiod: public Base {
      */
     ~Gpiod() override;
 
+    // The driver owns the GPIO line, disable copying and moving
+    Gpiod(const Gpiod&) = delete;
+    Gpiod& operator=(const Gpiod&) = delete;
+    Gpiod(Gpiod&&) = delete;
+    Gpiod& operator=(Gpiod&&) = delete;
+
     /**
      * Initializes GPIO line as an input
      */

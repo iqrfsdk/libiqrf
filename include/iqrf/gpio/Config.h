@@ -23,7 +23,8 @@
 
 namespace iqrf::gpio {
 
-inline const std::string default_consumer_name = "libiqrf";
+/// Default GPIO line consumer name
+inline constexpr const char *default_consumer_name = "libiqrf";
 
 /**
  * GPIO chip config
@@ -39,7 +40,13 @@ class GpioConfig {
     /// GPIO pin number (sysfs compatibility)
     int64_t pin;
 
-    /// Consumer name for better identification
+    /**
+     * Consumer name for better identification
+     *
+     * On FreeBSD, there is no concept of GPIO line consumer, so the pin is renamed system-wide instead
+     * (visible via gpioctl -l) and the original name is restored when the GPIO driver is destroyed.
+     * An empty consumer name keeps the pin name unchanged.
+     */
     ::std::string consumer_name;
 #if IQRF_TESTING_SUPPORT
     /// Flag indicating if the GPIO is a mock

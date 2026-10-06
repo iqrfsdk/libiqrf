@@ -16,6 +16,7 @@
 #include <string>
 #include <utility>
 
+#include "iqrf/gpio/Config.h"
 #include "iqrf/gpio/GpioResolver.h"
 
 namespace iqrf::gpio {
@@ -29,7 +30,7 @@ class GpioResolverTest : public ::testing::Test {
         for (size_t line_num = 0; line_num < chip0_num_lines; ++line_num) {
             map.insert_or_assign(pin_num++, std::make_pair(chip_name, line_num));
         }
-#if defined(__linux__)
+#ifdef __linux__
         chip_name = std::make_shared<std::string>(chip1_name);
         for (size_t line_num = 0; line_num < chip1_num_lines; ++line_num) {
             map.insert_or_assign(pin_num++, std::make_pair(chip_name, line_num));
@@ -40,7 +41,7 @@ class GpioResolverTest : public ::testing::Test {
 
     /// GPIO resolver instance
     GpioResolver *resolver = nullptr;
-#if defined(__linux__)
+#ifdef __linux__
     /// Chip 0 name
     const std::string chip0_name = "gpiochip0";
     /// Chip 0 line count
@@ -71,7 +72,7 @@ TEST_F(GpioResolverTest, ResolveExistingPins) {
     ASSERT_STREQ(chip0_name.c_str(), chip_name.c_str());
     ASSERT_EQ(11, line_offset);
 
-#if defined(__linux__)
+#ifdef __linux__
     // GPIO pin 28
     this->resolver->resolveGpioPin(28, chip_name, line_offset);
     ASSERT_STREQ(chip1_name.c_str(), chip_name.c_str());
@@ -94,6 +95,15 @@ TEST_F(GpioResolverTest, ResolveNonexistentPins) {
     size_t line_offset = 0;
 
     ASSERT_THROW(this->resolver->resolveGpioPin(500, chip_name, line_offset), std::runtime_error);
+}
+
+TEST_F(GpioResolverTest, ConfigFromPinUsesCustomMap) {
+    // GpioConfig constructed from pin number must use the map set via GetResolver(map)
+    const GpioConfig config(11);
+    EXPECT_EQ(config.chip, chip0_name);
+    EXPECT_EQ(config.line, 11);
+    EXPECT_THROW(GpioConfig(500), std::runtime_error);
+    EXPECT_THROW(GpioConfig(-1), std::runtime_error);
 }
 
 }  // namespace iqrf::gpio

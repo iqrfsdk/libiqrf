@@ -18,6 +18,7 @@
 #include <csignal>
 #include <iostream>
 #include <memory>
+#include <optional>
 #include <string>
 #include <vector>
 
@@ -25,10 +26,13 @@
 
 #include "iqrf/connector/uart/UartConnector.h"
 #include "iqrf/connector/ConnectorUtils.h"
+#include "iqrf/gpio/Gpio.h"
 #include "iqrf/log/Logging.h"
 
 namespace bpo = boost::program_options;
 using iqrf::connector::ConnectorUtils;
+using iqrf::gpio::Gpio;
+using iqrf::gpio::GpioConfig;
 
 /// IQRF UART connector instance
 std::unique_ptr<iqrf::connector::uart::UartConnector> uartConnector = nullptr;
@@ -57,6 +61,54 @@ int responseHandler(const std::vector<uint8_t> &response) {
 }
 
 /**
+ * Creates optional GPIO from command line option
+ * @param vm Parsed command line options
+ * @param name Option name
+ * @return GPIO if the option is set
+ */
+std::optional<Gpio> gpioOption(const bpo::variables_map &vm, const std::string &name) {
+    if (vm.count(name) == 0) {
+        return std::nullopt;
+    }
+    return Gpio(GpioConfig(vm[name].as<int64_t>()));
+}
+
+/**
+ * Checks whether the message is DPA startup notification
+ *
+ * DPA coordinator sends asynchronous peripheral enumeration (PNUM 0xFF, PCMD 0x3F without the response bit)
+ * when it is ready after the startup.
+ *
+ * @param message Received message
+ * @return true if the message is DPA startup notification, false otherwise
+ */
+bool isStartupNotification(const std::vector<uint8_t> &message) {
+    // NADR (2 B), PNUM, PCMD, HWPID (2 B), ErrN, DpaValue
+    return message.size() >= 8 && message[2] == 0xFF && message[3] == 0x3F;
+}
+
+/**
+ * Waits for DPA startup notification, other received messages are logged
+ * @param connector IQRF UART connector
+ * @param timeout Maximum time to wait
+ * @return true if the notification has been received, false on timeout
+ */
+bool awaitStartupNotification(iqrf::connector::uart::UartConnector &connector, const std::chrono::seconds timeout) {
+    const auto deadline = std::chrono::steady_clock::now() + timeout;
+    while (std::chrono::steady_clock::now() < deadline) {
+        const std::vector<uint8_t> message = connector.receive();
+        if (message.empty()) {
+            continue;
+        }
+        IQRF_LOG(iqrf::log::Level::Info) << "Received: " << ConnectorUtils::vectorToHexString(message);
+        if (isStartupNotification(message)) {
+            return true;
+        }
+    }
+    return false;
+}
+
+/**
  * Main function
  * @param argc Argument count
  * @param argv Argument vector
@@ -69,7 +121,13 @@ int main(int argc, char *argv[]) {
     bpo::options_description command("Command options");
     command.add_options()
         ("device,d", bpo::value<std::string>(), "UART device name")
-        ("baudrate,b", bpo::value<uint32_t>()->default_value(57600), "UART baud rate (default: 57600)");
+        ("baudrate,b", bpo::value<uint32_t>()->default_value(57600), "UART baud rate (default: 57600)")
+        ("power-gpio", bpo::value<int64_t>(), "TR power enable GPIO pin number")
+        ("bus-gpio", bpo::value<int64_t>(), "bus enable GPIO pin number")
+        ("pgm-gpio", bpo::value<int64_t>(), "PGM switch GPIO pin number")
+        ("spi-gpio", bpo::value<int64_t>(), "SPI enable GPIO pin number")
+        ("uart-gpio", bpo::value<int64_t>(), "UART enable GPIO pin number")
+        ("i2c-gpio", bpo::value<int64_t>(), "I2C enable GPIO pin number");
     bpo::options_description desc("Available options");
     desc.add(general).add(command);
     bpo::variables_map vm;
@@ -96,9 +154,26 @@ int main(int argc, char *argv[]) {
         /// IQRF UART connector configuration
         const iqrf::connector::uart::UartConfig uartConfig(
             vm["device"].as<std::string>(),
-            vm["baudrate"].as<uint32_t>()
+            vm["baudrate"].as<uint32_t>(),
+            gpioOption(vm, "power-gpio"),
+            gpioOption(vm, "bus-gpio"),
+            gpioOption(vm, "pgm-gpio"),
+            gpioOption(vm, "spi-gpio"),
+            gpioOption(vm, "uart-gpio"),
+            gpioOption(vm, "i2c-gpio"),
+            true,
+            true
         );
         uartConnector = std::make_unique<iqrf::connector::uart::UartConnector>(uartConfig);
+        // TR module is reset only if its power can be controlled, DPA is not ready until it sends the notification
+        if (uartConfig.powerEnableGpio.has_value()) {
+            IQRF_LOG(iqrf::log::Level::Info) << "Waiting for DPA startup notification...";
+            if (awaitStartupNotification(*uartConnector, std::chrono::seconds(5))) {
+                IQRF_LOG(iqrf::log::Level::Info) << "DPA is ready.";
+            } else {
+                IQRF_LOG(iqrf::log::Level::Warning) << "DPA startup notification has not been received.";
+            }
+        }
         uartConnector->registerResponseHandler(responseHandler, iqrf::connector::AccessType::Normal);
         uartConnector->listen();
 

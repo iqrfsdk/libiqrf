@@ -14,6 +14,7 @@
 #include <optional>
 #include <utility>
 
+#include "iqrf/connector/ConnectorUtils.h"
 #include "iqrf/gpio/Gpio.h"
 
 namespace iqrf::connector {
@@ -80,8 +81,17 @@ class BusSwitcher {
     /**
      * Destructor for the bus switcher.
      */
+    // Bus switcher restores the buses in the destructor, disable copying and moving
+    BusSwitcher(const BusSwitcher&) = delete;
+    BusSwitcher& operator=(const BusSwitcher&) = delete;
+    BusSwitcher(BusSwitcher&&) = delete;
+    BusSwitcher& operator=(BusSwitcher&&) = delete;
+
     ~BusSwitcher() {
-        this->toggle(false, false, false);
+        // GPIOs may not be initialized (e.g. if the connector constructor failed), destructor must not throw
+        ConnectorUtils::runSafely("disable buses", [this] {
+            this->toggle(false, false, false);
+        });
     }
 
     /**

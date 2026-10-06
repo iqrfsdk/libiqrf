@@ -12,10 +12,13 @@
 #pragma once
 
 #include <cstdint>
+#include <exception>
 #include <iomanip>
 #include <string>
 #include <sstream>
 #include <vector>
+
+#include "iqrf/log/Logging.h"
 
 namespace iqrf::connector {
 
@@ -24,6 +27,26 @@ namespace iqrf::connector {
  */
 class ConnectorUtils {
  public:
+    /**
+     * Runs the function and logs an exception instead of propagating it
+     *
+     * Intended for best-effort cleanup steps (e.g. in destructors), where one failed step must not prevent
+     * the following steps.
+     *
+     * @param action Description of the action for the log message (e.g. "disable TR power")
+     * @param function Function to run
+     */
+    template <typename Function>
+    static void runSafely(const char *action, const Function &function) noexcept {
+        try {
+            function();
+        } catch (const std::exception &e) {
+            IQRF_LOG(iqrf::log::Level::Warning) << "Failed to " << action << ": " << e.what();
+        } catch (...) {
+            IQRF_LOG(iqrf::log::Level::Warning) << "Failed to " << action << ": unknown error";
+        }
+    }
+
     /**
      * Converts a vector of bytes to a hex string representation.
      * @param input Vector of bytes to convert

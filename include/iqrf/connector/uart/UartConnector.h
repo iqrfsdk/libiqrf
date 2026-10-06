@@ -46,6 +46,12 @@ class UartConnector : public IConnector {
      */
     ~UartConnector() override;
 
+    // Disable copying and moving
+    UartConnector(const UartConnector&) = delete;
+    UartConnector& operator=(const UartConnector&) = delete;
+    UartConnector(UartConnector&&) = delete;
+    UartConnector& operator=(UartConnector&&) = delete;
+
     // Basic state
 
     /**
@@ -146,7 +152,24 @@ class UartConnector : public IConnector {
      */
     void initGpio();
 
+    /**
+     * Restores GPIO pins to the inactive state (disables TR power if configured, disables UART bus, releases
+     * PGM switch), failures are logged
+     */
+    void shutdownGpio() noexcept;
+
  private:
+    /**
+     * Opens and configures the UART port
+     * @throws std::runtime_error if the port cannot be opened or configured
+     */
+    void openPort();
+
+    /**
+     * Closes and frees the UART port if it was created
+     */
+    void closePort() noexcept;
+
     /**
      * Check the result of the libserialport functions and throw an exception on error.
      * @param result libserialport return code

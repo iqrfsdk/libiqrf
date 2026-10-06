@@ -21,7 +21,18 @@
 namespace iqrf::connector::uart {
 
 UartConnector::UartConnector(UartConfig config): busSwitcher(config.busSwitch()), config(std::move(config)) {
-    this->initGpio();
+    try {
+        this->initGpio();
+        this->openPort();
+    } catch (...) {
+        // Destructor is not called if the constructor throws, so release the resources here
+        this->closePort();
+        this->shutdownGpio();
+        throw;
+    }
+}
+
+void UartConnector::openPort() {
     IQRF_LOG(log::Level::Debug) << "Opening UART port: " << this->config.device;
     UartConnector::checkSerialResult(sp_get_port_by_name(this->config.device.c_str(), &this->port));
     IQRF_LOG(log::Level::Debug) << "UART port created: " << this->config.device
@@ -29,13 +40,15 @@ UartConnector::UartConnector(UartConfig config): busSwitcher(config.busSwitch())
         << sp_get_port_description(this->port) << ")";
     if (sp_get_port_transport(this->port) == SP_TRANSPORT_USB) {
         std::stringstream usbInfo;
-        int usbBus, usbAddress;
+        int usbBus = 0;
+        int usbAddress = 0;
         if (sp_get_port_usb_bus_address(this->port, &usbBus, &usbAddress) == SP_OK) {
             usbInfo << "USB bus: " << usbBus << ", USB address: " << usbAddress;
         } else {
             usbInfo << "USB bus and address not available";
         }
-        int usbVid, usbPid;
+        int usbVid = 0;
+        int usbPid = 0;
         if (sp_get_port_usb_vid_pid(this->port, &usbVid, &usbPid) == SP_OK) {
             usbInfo << ", USB VID: " << std::hex << usbVid << ", PID: " << usbPid;
         } else {
@@ -64,20 +77,32 @@ UartConnector::UartConnector(UartConfig config): busSwitcher(config.busSwitch())
 
 UartConnector::~UartConnector() {
     this->stopListen();
+    this->shutdownGpio();
+    this->closePort();
+}
 
-    if (this->config.powerEnableGpio && this->config.disablePowerOnShutdown) {
-        this->config.powerEnableGpio->setValue(false);
-    }
-
-    this->busSwitcher.toggleUart(false);
-
-    if (this->config.pgmSwitchGpio) {
-        this->config.pgmSwitchGpio->setValue(false);
-    }
-
-    if (this->port) {
-        sp_close(this->port);
+void UartConnector::closePort() noexcept {
+    if (this->port != nullptr) {
+        // Closing a port which is not open fails, the result is irrelevant here
+        static_cast<void>(sp_close(this->port));
         sp_free_port(this->port);
+        this->port = nullptr;
+    }
+}
+
+void UartConnector::shutdownGpio() noexcept {
+    if (this->config.powerEnableGpio.has_value() && this->config.disablePowerOnShutdown) {
+        ConnectorUtils::runSafely("disable TR power", [this] {
+            this->config.powerEnableGpio->setValue(false);
+        });
+    }
+    ConnectorUtils::runSafely("disable UART bus", [this] {
+        this->busSwitcher.toggleUart(false);
+    });
+    if (this->config.pgmSwitchGpio.has_value()) {
+        ConnectorUtils::runSafely("release PGM switch", [this] {
+            this->config.pgmSwitchGpio->setValue(false);
+        });
     }
 }
 
@@ -92,7 +117,7 @@ void UartConnector::initGpio() {
     std::this_thread::sleep_for(std::chrono::milliseconds(1));
 
     if (this->config.trModuleReset) {
-        this->resetTr();
+        this->resetTr();  // NOLINT(clang-analyzer-optin.cplusplus.VirtualCall)
     }
 
     this->busSwitcher.toggleUart(true);
@@ -128,7 +153,7 @@ int UartConnector::checkSerialResult(const sp_return result) {
 
 std::vector<uint8_t> UartConnector::receive() {
     int bytesRead = 0;
-    uint8_t byte;
+    uint8_t byte = 0;
     HdlcFrame frame;
     while ((bytesRead = sp_blocking_read(this->port, &byte, 1, 100)) > 0) {
         frame.decodeByte(byte);

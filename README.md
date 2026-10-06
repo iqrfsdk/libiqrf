@@ -51,10 +51,12 @@ cmake --build build
 | `BUILD_EXAMPLES`        | boolean | True    | Build examples                   |
 | `BUILD_SHARED`          | boolean | True    | Build shared libraries           |
 | `BUILD_STATIC`          | boolean | False   | Build static libraries           |
-| `BUILD_TESTING_SUPPORT` | boolean | True    | Build testing support files      |
+| `BUILD_TESTING_SUPPORT` | boolean | True    | Build testing support (mocks)¹   |
 | `BUILD_TESTS`           | boolean | True    | Build tests                      |
 | `CODE_COVERAGE`         | boolean | False   | Enable code coverage             |
 | `USE_CCACHE`            | boolean | False   | Use ccache for compilation       |
+
+¹ Always enabled when `BUILD_TESTS` is enabled.
 
 ## Test
 

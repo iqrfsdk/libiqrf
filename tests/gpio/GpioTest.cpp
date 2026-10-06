@@ -11,8 +11,14 @@
 
 #include <gtest/gtest.h>
 
+#include <filesystem>
 #include <memory>
-#include <utility>
+
+#ifdef __linux__
+#include <gpiod.hpp>
+
+#include "iqrf/gpio/libgpiodVersion.h"
+#endif
 
 #include "iqrf/gpio/Gpio.h"
 #include "iqrf/gpio/Config.h"
@@ -20,53 +26,26 @@
 namespace iqrf::gpio {
 
 class GpioTest : public ::testing::Test {
+ protected:
+    void SetUp() override {
+#ifdef __linux__
+        if (!std::filesystem::exists("/dev/gpiochip0")) {
+            GTEST_SKIP() << "GPIO chip /dev/gpiochip0 is not available";
+        }
+#elif defined(__FreeBSD__)
+        if (!std::filesystem::exists("/dev/gpioc0")) {
+            GTEST_SKIP() << "GPIO chip /dev/gpioc0 is not available";
+        }
+#endif
+    }
 };
-
-TEST_F(GpioTest, VerifyCopyConstructor_GPIO) {
-    // Create Gpio instance
-    const GpioConfig config("gpiochip0", 1);
-    auto orig = Gpio(config);
-
-    // Create copy of the Gpio instance
-    auto copy = Gpio(orig);
-
-    EXPECT_NE(&copy, &orig);
-    EXPECT_EQ(orig.impl, copy.impl);
-}
-
-TEST_F(GpioTest, VerifyMoveConstructor_GPIO) {
-    // Create Gpio instance
-    const GpioConfig config("gpiochip0", 1);
-    auto orig = Gpio(config);
-
-    // Store the original pointer for later checking
-    const auto orig_impl = orig.impl;
-
-    // Move the Gpio instance
-    auto other = std::move(orig);
-
-    EXPECT_NE(&other, &orig);
-    EXPECT_EQ(orig_impl, other.impl);
-    EXPECT_EQ(orig.impl, nullptr);
-}
-
-TEST_F(GpioTest, VerifyAssignmentOperator_GPIO) {
-    // Create Gpio instance
-    const GpioConfig config("gpiochip0", 1);
-    const auto orig = Gpio(config);
-
-    // Assign the Gpio instance
-    const auto& other = orig;
-
-    EXPECT_EQ(orig.impl, other.impl);
-}
 
 TEST_F(GpioTest, TestInput_GPIO) {
     const iqrf::gpio::GpioConfig config("gpiochip0", 2, "libiqrf:test:input");
     const auto gpio = std::make_unique<Gpio>(config);
     gpio->initInput();
 
-#if defined(__linux__)
+#ifdef __linux__
 #if libgpiod_VERSION_MAJOR == 1
     auto chip = std::make_unique<::gpiod::chip>("gpiochip0");
     const auto line = chip->get_line(2);
@@ -90,7 +69,7 @@ TEST_F(GpioTest, TestOutput_GPIO) {
     const auto gpio = std::make_unique<Gpio>(config);
     gpio->initOutput(true);
 
-#if defined(__linux__)
+#ifdef __linux__
 #if libgpiod_VERSION_MAJOR == 1
     auto chip = std::make_unique<::gpiod::chip>("gpiochip0");
     const auto line = chip->get_line(0);

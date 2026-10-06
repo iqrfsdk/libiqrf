@@ -11,10 +11,6 @@
 
 #pragma once
 
-#if BUILD_TESTS
-#include <gtest/gtest_prod.h>
-#endif
-
 #include <cstdint>
 #include <stdexcept>
 #include <vector>
@@ -74,26 +70,20 @@ class HdlcFrame {
      */
     [[nodiscard]] const std::vector<uint8_t> &getData() const;
 
- private:
-#if BUILD_TESTS
-    FRIEND_TEST(HdlcFrameTest, encodeInsertByte);
-    FRIEND_TEST(HdlcFrameTest, calculateCrc);
-    FRIEND_TEST(HdlcFrameTest, getData);
-#endif
-
-    /**
-     * Encodes a byte for HDLC frame and inserts it into data
-     * @param encoded Vector of encoded data
-     * @param byte Byte to encode and insert
-     */
-    static void encodeInsertByte(std::vector<uint8_t> &encoded, uint8_t byte);
-
     /**
      * Calculate 1-Wire CRC8 checksum for the given data.
      * @param data Data to calculate the checksum for
      * @return 1-Wire CRC8 checksum
      */
     static uint8_t calculateCrc(const std::vector<uint8_t> &data);
+
+ private:
+    /**
+     * Encodes a byte for HDLC frame and inserts it into data
+     * @param encoded Vector of encoded data
+     * @param byte Byte to encode and insert
+     */
+    static void encodeInsertByte(std::vector<uint8_t> &encoded, uint8_t byte);
 
     /// Data
     std::vector<uint8_t> data;

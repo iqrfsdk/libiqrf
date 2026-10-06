@@ -20,31 +20,33 @@
 #include <stdexcept>
 #include <utility>
 
+#ifdef __linux__
+#include "iqrf/gpio/libgpiodVersion.h"
+#if libgpiod_VERSION_MAJOR == 1
+#include "iqrf/gpio/GpiodV1.h"
+#else
+#include "iqrf/gpio/GpiodV2.h"
+#endif
+#elif defined(__FreeBSD__)
+#include "iqrf/gpio/GpioFreeBsd.h"
+#endif
+
 namespace iqrf::gpio {
 
 Gpio::Gpio(const GpioConfig& config) {
-#if IQRF_TESTING_SUPPORT
-    if (config.use_mock) {
-        this->impl = std::make_shared<iqrf::gpio::GpioMock>(config);
-        this->isMock = true;
-        return;
-    }
-#endif
-#if defined(__linux__)
+#ifdef __linux__
     this->impl = std::make_shared<iqrf::gpio::Gpiod>(config);
 #elif defined(__FreeBSD__)
     this->impl = std::make_shared<iqrf::gpio::GpioFreeBsd>(config);
+#else
+    throw std::runtime_error("GPIO is not supported on this platform: " + config.to_string());
 #endif
 }
 
-Gpio::Gpio(const Gpio& other) noexcept : impl(other.impl), isMock(other.isMock) {
-}
-
-Gpio::Gpio(Gpio&& other) noexcept : impl(std::move(other.impl)), isMock(other.isMock) {
-}
-
-Gpio::~Gpio() {
-    impl.reset();
+Gpio::Gpio(std::shared_ptr<iqrf::gpio::Base> impl): impl(std::move(impl)) {
+    if (!this->impl) {
+        throw std::invalid_argument("GPIO driver cannot be null");
+    }
 }
 
 Gpio& Gpio::operator=(Gpio other) noexcept {
@@ -80,31 +82,6 @@ bool Gpio::getValue() const {
 void swap(Gpio& first, Gpio& second) noexcept {
     using std::swap;  // Enable ADL
     swap(first.impl, second.impl);
-    swap(first.isMock, second.isMock);
 }
-
-#if IQRF_TESTING_SUPPORT
-void Gpio::setInputValue(const bool value) const {
-    if (!this->isMock) {
-        throw std::logic_error("setInputValue is only available for mock GPIO");
-    }
-    std::dynamic_pointer_cast<GpioMock>(impl)->setInputValue(value);
-}
-
-void Gpio::registerDirectionCallback(const GpioDirectionCallback& callback) const {
-    if (!this->isMock) {
-        throw std::logic_error("registerDirectionCallback is only available for mock GPIO");
-    }
-    std::dynamic_pointer_cast<GpioMock>(this->impl)->registerDirectionCallback(callback);
-}
-
-
-void Gpio::registerValueCallback(const GpioValueCallback& callback) const {
-    if (!this->isMock) {
-        throw std::logic_error("registerValueCallback is only available for mock GPIO");
-    }
-    std::dynamic_pointer_cast<GpioMock>(this->impl)->registerValueCallback(callback);
-}
-#endif
 
 }  // namespace iqrf::gpio

@@ -74,37 +74,37 @@ TEST_F(HdlcFrameTest, constructor) {
 
 TEST_F(HdlcFrameTest, decode) {
     for (const auto& [rawData, encodedData] : testData) {
-        HdlcFrame frame = HdlcFrame::decode(encodedData);
+        const HdlcFrame frame = HdlcFrame::decode(encodedData);
         EXPECT_EQ(rawData, frame.getData());
     }
     // Invalid CRC
     {
-        HdlcFrame frame;
-        std::vector<uint8_t> invalidCrc = {0x7e, 0x00, 0x00, 0x06, 0x80, 0x00, 0x00, 0x00, 0x00, 0xa5, 0x7e};
+        const HdlcFrame frame;
+        const std::vector<uint8_t> invalidCrc = {0x7e, 0x00, 0x00, 0x06, 0x80, 0x00, 0x00, 0x00, 0x00, 0xa5, 0x7e};
         EXPECT_THROW(frame.decode(invalidCrc), std::logic_error);
     }
     // Empty frame
     {
-        HdlcFrame frame;
-        std::vector<uint8_t> emptyFrame = {0x7e, 0x7e};
+        const HdlcFrame frame;
+        const std::vector<uint8_t> emptyFrame = {0x7e, 0x7e};
         EXPECT_THROW(frame.decode(emptyFrame), std::logic_error);
     }
     // Short frame
     {
-        HdlcFrame frame;
-        std::vector<uint8_t> emptyFrame = {0x7e, 0x00, 0x7e};
+        const HdlcFrame frame;
+        const std::vector<uint8_t> emptyFrame = {0x7e, 0x00, 0x7e};
         EXPECT_THROW(frame.decode(emptyFrame), std::logic_error);
     }
     // Abort sequence
     {
-        HdlcFrame frame;
-        std::vector<uint8_t> abortSequence = {0x7e, 0x01, 0x02, 0x7d, 0x7e, 0x40, 0x7e};
+        const HdlcFrame frame;
+        const std::vector<uint8_t> abortSequence = {0x7e, 0x01, 0x02, 0x7d, 0x7e, 0x40, 0x7e};
         EXPECT_THROW(frame.decode(abortSequence), std::logic_error);
     }
     // Invalid escape sequence
     {
-        HdlcFrame frame;
-        std::vector<uint8_t> invalidEscape = {0x7e, 0x01, 0x7d, 0x4e, 0x7d};
+        const HdlcFrame frame;
+        const std::vector<uint8_t> invalidEscape = {0x7e, 0x01, 0x7d, 0x4e, 0x7d};
         EXPECT_THROW(frame.decode(invalidEscape), std::logic_error);
     }
 }
@@ -123,24 +123,25 @@ TEST_F(HdlcFrameTest, encode) {
     EXPECT_THROW(frame.encode(), std::logic_error);
 }
 
-TEST_F(HdlcFrameTest, encodeInsertByte) {
-    std::vector<uint8_t> encoded;
-    EXPECT_TRUE(encoded.empty());
-    HdlcFrame::encodeInsertByte(encoded, 0x01);
-    EXPECT_THAT(encoded, ElementsAre(0x01));
-    HdlcFrame::encodeInsertByte(encoded, HdlcFrame::HDLC_FLAG);
-    EXPECT_THAT(encoded, ElementsAre(0x01, 0x7D, 0x5E));
-    HdlcFrame::encodeInsertByte(encoded, HdlcFrame::HDLC_ESCAPE);
-    EXPECT_THAT(encoded, ElementsAre(0x01, 0x7D, 0x5E, 0x7D, 0x5D));
+TEST_F(HdlcFrameTest, encodeEscapedBytes) {
+    // Flag and escape bytes in data must be escaped
+    HdlcFrame frame({0x01, HdlcFrame::HDLC_FLAG, HdlcFrame::HDLC_ESCAPE});
+    const std::vector<uint8_t> encoded = frame.encode();
+    ASSERT_GE(encoded.size(), 8);
+    EXPECT_THAT(
+        std::vector(encoded.begin(), encoded.begin() + 6),
+        ElementsAre(HdlcFrame::HDLC_FLAG, 0x01, 0x7D, 0x5E, 0x7D, 0x5D)
+    );
+    EXPECT_EQ(encoded.back(), HdlcFrame::HDLC_FLAG);
 }
 
 TEST_F(HdlcFrameTest, getData) {
     HdlcFrame frame;
     EXPECT_NO_THROW(frame.decodeByte(0x40));
     EXPECT_NO_THROW(frame.decodeByte(HdlcFrame::HDLC_FLAG));
-    EXPECT_THROW(frame.getData(), std::logic_error);
+    EXPECT_THROW(static_cast<void>(frame.getData()), std::logic_error);
     EXPECT_NO_THROW(frame.decodeByte(HdlcFrame::HDLC_ESCAPE));
-    EXPECT_THROW(frame.getData(), std::logic_error);
+    EXPECT_THROW(static_cast<void>(frame.getData()), std::logic_error);
 }
 
 TEST_F(HdlcFrameTest, calculateCrc) {

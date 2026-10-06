@@ -48,10 +48,6 @@ class GpioConfig {
      * An empty consumer name keeps the pin name unchanged.
      */
     ::std::string consumer_name;
-#if IQRF_TESTING_SUPPORT
-    /// Flag indicating if the GPIO is a mock
-    bool use_mock = false;
-#endif
 
     /**
      * Empty constructor for filling up the data later

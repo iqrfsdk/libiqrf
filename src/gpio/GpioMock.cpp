@@ -14,69 +14,116 @@
  * limitations under the License.
  */
 
-#include <utility>
-
 #include "iqrf/gpio/GpioMock.h"
+
+#include <mutex>
+#include <stdexcept>
+#include <utility>
 
 namespace iqrf::gpio {
 
 GpioMock::GpioMock(iqrf::gpio::GpioConfig config): config(std::move(config)) {
-    // No actual GPIO implementation, just a mock
+}
+
+void GpioMock::checkInitialized() const {
+    if (this->state == GpioMockState::Uninitialized) {
+        throw std::runtime_error("GPIO line is not initialized");
+    }
 }
 
 void GpioMock::initInput() {
+    const std::scoped_lock lock(this->mutex);
     this->direction = GpioDirection::Input;
     this->state = GpioMockState::Initialized;
 }
 
 void GpioMock::initOutput(const bool initialValue) {
+    const std::scoped_lock lock(this->mutex);
     this->direction = GpioDirection::Output;
     this->value = initialValue;
     this->state = GpioMockState::Initialized;
 }
 
 void GpioMock::setDirection(const iqrf::gpio::GpioDirection newDirection) {
-    if (this->state == GpioMockState::Uninitialized) {
-        throw std::runtime_error("GPIO line is not initialized");
+    GpioDirectionCallback callback;
+    GpioDirection oldDirection = GpioDirection::Input;
+    {
+        const std::scoped_lock lock(this->mutex);
+        this->checkInitialized();
+        oldDirection = this->direction;
+        this->direction = newDirection;
+        callback = this->directionCallback;
     }
-    if (this->direction != newDirection && this->directionCallback) {
-        this->directionCallback(this->direction, newDirection);
+    if (oldDirection != newDirection && callback) {
+        callback(oldDirection, newDirection);
     }
-    this->direction = newDirection;
 }
 
 iqrf::gpio::GpioDirection GpioMock::getDirection() {
-    if (this->state == GpioMockState::Uninitialized) {
-        throw std::runtime_error("GPIO line is not initialized");
-    }
+    const std::scoped_lock lock(this->mutex);
+    this->checkInitialized();
     return this->direction;
 }
 
 void GpioMock::setValue(const bool newValue) {
-    if (this->state == GpioMockState::Uninitialized) {
-        throw std::runtime_error("GPIO line is not initialized");
+    GpioValueCallback callback;
+    GpioWriteCallback onWrite;
+    bool oldValue = false;
+    {
+        const std::scoped_lock lock(this->mutex);
+        this->checkInitialized();
+        if (this->direction != GpioDirection::Output) {
+            throw std::runtime_error("Cannot set value on GPIO line that is not an output");
+        }
+        oldValue = this->value;
+        this->value = newValue;
+        callback = this->valueCallback;
+        onWrite = this->writeCallback;
     }
-    if (this->direction != GpioDirection::Output) {
-        throw std::runtime_error("Cannot set value on GPIO line that is not an output");
+    if (onWrite) {
+        onWrite(newValue);
     }
-    if (this->value != newValue && this->valueCallback) {
-        this->valueCallback(this->value, newValue);
+    if (oldValue != newValue && callback) {
+        callback(oldValue, newValue);
     }
-    this->value = newValue;
+}
+
+bool GpioMock::getValue() {
+    const std::scoped_lock lock(this->mutex);
+    this->checkInitialized();
+    return this->value;
 }
 
 void GpioMock::setInputValue(const bool newValue) {
+    const std::scoped_lock lock(this->mutex);
     if (this->direction != GpioDirection::Input) {
         throw std::runtime_error("Cannot set input value on GPIO line that is not an input");
     }
     this->value = newValue;
 }
 
-bool GpioMock::getValue() {
-    if (this->state == GpioMockState::Uninitialized) {
-        throw std::runtime_error("GPIO line is not initialized");
-    }
-    return this->value;
+GpioMockState GpioMock::getState() const {
+    const std::scoped_lock lock(this->mutex);
+    return this->state;
+}
+
+const GpioConfig& GpioMock::getConfig() const {
+    return this->config;
+}
+
+void GpioMock::registerDirectionCallback(const GpioDirectionCallback& callback) {
+    const std::scoped_lock lock(this->mutex);
+    this->directionCallback = callback;
+}
+
+void GpioMock::registerValueCallback(const GpioValueCallback& callback) {
+    const std::scoped_lock lock(this->mutex);
+    this->valueCallback = callback;
+}
+
+void GpioMock::registerWriteCallback(const GpioWriteCallback& callback) {
+    const std::scoped_lock lock(this->mutex);
+    this->writeCallback = callback;
 }
 
 }  // namespace iqrf::gpio

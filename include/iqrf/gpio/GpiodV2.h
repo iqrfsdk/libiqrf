@@ -21,9 +21,6 @@
 #include <string>
 
 #include <gpiod.hpp>
-#if BUILD_TESTS
-#include <gtest/gtest_prod.h>
-#endif
 
 #include "iqrf/gpio/Common.h"
 #include "iqrf/gpio/Base.h"

@@ -19,60 +19,50 @@
 #include <memory>
 #include <utility>
 
-#if defined(__linux__)
-#include <gpiod.hpp>
-#endif
-#if BUILD_TESTS
-#include <gtest/gtest_prod.h>
-#endif
-
 #include "iqrf/gpio/Base.h"
 #include "iqrf/gpio/Common.h"
 #include "iqrf/gpio/Config.h"
-
-#if IQRF_TESTING_SUPPORT
-#include "iqrf/gpio/GpioMock.h"
-#endif
-
-#if defined(__linux__)
-#if libgpiod_VERSION_MAJOR == 1
-#include "iqrf/gpio/GpiodV1.h"
-#else
-#include "iqrf/gpio/GpiodV2.h"
-#endif
-#elif defined(__FreeBSD__)
-#include "iqrf/gpio/GpioFreeBsd.h"
-#endif
 
 namespace iqrf::gpio {
 
 /**
  * GPIO pin
+ *
+ * Copies of the object share the same GPIO driver instance (and thus the same GPIO line).
  */
-class Gpio {
+// The by-value assignment operator (copy-and-swap) handles both copy and move assignment
+class Gpio {  // NOLINT(cppcoreguidelines-special-member-functions)
  public:
     /**
-     * Constructor
+     * Constructs GPIO pin using the GPIO driver for the current platform
      * @param config GPIO pin configuration
+     * @throws std::runtime_error if the platform is not supported
      */
     explicit Gpio(const GpioConfig& config);
+
+    /**
+     * Constructs GPIO pin using the specified GPIO driver (e.g. GpioMock for testing)
+     * @param impl GPIO driver
+     * @throws std::invalid_argument if the GPIO driver is null
+     */
+    explicit Gpio(std::shared_ptr<iqrf::gpio::Base> impl);
 
     /**
      * Copy Constructor
      * @param other Gpio object to copy
      */
-    Gpio(const Gpio& other) noexcept;
+    Gpio(const Gpio& other) noexcept = default;
 
     /**
      * Move Constructor
      * @param other Gpio object to move
      */
-    Gpio(Gpio&& other) noexcept;
+    Gpio(Gpio&& other) noexcept = default;
 
     /**
      * Destructor
      */
-    ~Gpio();
+    ~Gpio() = default;
 
     /**
      * Assignment Operator
@@ -119,42 +109,9 @@ class Gpio {
      */
     friend void swap(Gpio& first, Gpio& second) noexcept;
 
-#if IQRF_TESTING_SUPPORT
-    /**
-     * Sets GPIO line input value for testing purposes
-     * @param value GPIO line input value
-     */
-    void setInputValue(bool value) const;
-
-    /**
-     * Registers a callback for GPIO direction change
-     * @param callback Callback function to be called when the GPIO direction changes
-     */
-    void registerDirectionCallback(const GpioDirectionCallback& callback) const;
-
-    /**
-     * Registers a callback for GPIO value change
-     * @param callback Callback function to be called when the GPIO value changes
-     */
-    void registerValueCallback(const GpioValueCallback& callback) const;
-#endif
-
  private:
     /// GPIO driver instance
     std::shared_ptr<iqrf::gpio::Base> impl;
-    /// Mock flag
-    bool isMock = false;
-
-#if BUILD_TESTS
-    /// Testing friends
-    FRIEND_TEST(GpioTest, VerifyCopyConstructor_GPIO);
-    FRIEND_TEST(GpioTest, VerifyMoveConstructor_GPIO);
-    FRIEND_TEST(GpioTest, VerifyAssignmentOperator_GPIO);
-    FRIEND_TEST(GpioMockTest, copyConstructor);
-    FRIEND_TEST(GpioMockTest, moveConstructor);
-    FRIEND_TEST(GpioMockTest, assignmentOperator);
-    FRIEND_TEST(GpioMockTest, swap);
-#endif
 };
 
 }  // namespace iqrf::gpio

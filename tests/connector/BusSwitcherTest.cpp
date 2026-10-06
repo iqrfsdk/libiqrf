@@ -12,19 +12,21 @@
 #include <gtest/gtest.h>
 
 #include <chrono>
+#include <memory>
 #include <string>
 #include <vector>
 #include <thread>
 #include <tuple>
 
 #include "iqrf/connector/BusSwitcher.h"
+#include "iqrf/gpio/GpioMock.h"
 
 namespace iqrf::connector {
 
 /**
  * GPIO value change event type.
  */
-typedef std::tuple<std::chrono::milliseconds, std::string, bool, bool> GpioValueChangeEvent;
+using GpioValueChangeEvent = std::tuple<std::chrono::milliseconds, std::string, bool, bool>;
 
 class BusSwitcherTest : public ::testing::Test {
  protected:
@@ -40,13 +42,12 @@ class BusSwitcherTest : public ::testing::Test {
      * @param config Configuration for the GPIO pin.
      * @return A mock Gpio instance.
      */
-    iqrf::gpio::Gpio createGpio(iqrf::gpio::GpioConfig config) {
-        config.use_mock = true;
-        iqrf::gpio::Gpio gpio(config);
-        gpio.registerValueCallback([this, config](bool oldValue, bool newValue) {
+    iqrf::gpio::Gpio createGpio(const iqrf::gpio::GpioConfig &config) {
+        auto mock = std::make_shared<iqrf::gpio::GpioMock>(config);
+        mock->registerValueCallback([this, config](bool oldValue, bool newValue) {
             this->history.emplace_back(BusSwitcherTest::epochTime(), config.consumer_name, oldValue, newValue);
         });
-        return gpio;
+        return iqrf::gpio::Gpio(mock);
     }
 
     /**
@@ -84,10 +85,10 @@ class BusSwitcherTest : public ::testing::Test {
 };
 
 TEST_F(BusSwitcherTest, busEnableGpioOnly) {
-    iqrf::gpio::GpioConfig busEnableGpioConfig("gpiochip0", 1, "busEnable");
+    const iqrf::gpio::GpioConfig busEnableGpioConfig("gpiochip0", 1, "busEnable");
     iqrf::gpio::Gpio busEnableGpio = this->createGpio(busEnableGpioConfig);
-    BusSwitcherConfig config(busEnableGpio, std::nullopt, std::nullopt, std::nullopt);
-    BusSwitcher busSwitcher(config);
+    const BusSwitcherConfig config(busEnableGpio, std::nullopt, std::nullopt, std::nullopt);
+    const BusSwitcher busSwitcher(config);
 
     busSwitcher.init();
     EXPECT_EQ(busEnableGpio.getDirection(), iqrf::gpio::GpioDirection::Output);
@@ -105,17 +106,17 @@ TEST_F(BusSwitcherTest, busEnableGpioOnly) {
 }
 
 TEST_F(BusSwitcherTest, enableGpios) {
-    iqrf::gpio::GpioConfig i2cEnableConfig("gpiochip0", 2, "i2cEnable");
+    const iqrf::gpio::GpioConfig i2cEnableConfig("gpiochip0", 2, "i2cEnable");
     iqrf::gpio::Gpio i2cEnableGpio = this->createGpio(i2cEnableConfig);
 
-    iqrf::gpio::GpioConfig spiEnableConfig("gpiochip0", 3, "spiEnable");
+    const iqrf::gpio::GpioConfig spiEnableConfig("gpiochip0", 3, "spiEnable");
     iqrf::gpio::Gpio spiEnableGpio = this->createGpio(spiEnableConfig);
 
-    iqrf::gpio::GpioConfig uartEnableConfig("gpiochip0", 4, "uartEnable");
+    const iqrf::gpio::GpioConfig uartEnableConfig("gpiochip0", 4, "uartEnable");
     iqrf::gpio::Gpio uartEnableGpio = this->createGpio(uartEnableConfig);
 
-    BusSwitcherConfig config(std::nullopt, i2cEnableGpio, spiEnableGpio, uartEnableGpio);
-    BusSwitcher busSwitcher(config);
+    const BusSwitcherConfig config(std::nullopt, i2cEnableGpio, spiEnableGpio, uartEnableGpio);
+    const BusSwitcher busSwitcher(config);
     busSwitcher.init();
 
     EXPECT_EQ(i2cEnableGpio.getDirection(), iqrf::gpio::GpioDirection::Output);

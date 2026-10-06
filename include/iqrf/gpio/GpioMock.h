@@ -16,10 +16,12 @@
 
 #pragma once
 
+#include <cstdint>
 #include <functional>
+#include <mutex>
 
-#include "iqrf/gpio/Common.h"
 #include "iqrf/gpio/Base.h"
+#include "iqrf/gpio/Common.h"
 #include "iqrf/gpio/Config.h"
 
 namespace iqrf::gpio {
@@ -28,23 +30,26 @@ namespace iqrf::gpio {
  * Callback for GPIO direction change
  * @param old Old GPIO direction
  * @param new New GPIO direction
- * @internal
  */
-typedef std::function<void(iqrf::gpio::GpioDirection, iqrf::gpio::GpioDirection)> GpioDirectionCallback;
+using GpioDirectionCallback = std::function<void(iqrf::gpio::GpioDirection, iqrf::gpio::GpioDirection)>;
 
 /**
  * Callback for GPIO value change
  * @param old Old GPIO value
  * @param new New GPIO value
- * @internal
  */
-typedef std::function<void(bool, bool)> GpioValueCallback;
+using GpioValueCallback = std::function<void(bool, bool)>;
+
+/**
+ * Callback for GPIO value write
+ * @param value Written GPIO value
+ */
+using GpioWriteCallback = std::function<void(bool)>;
 
 /**
  * GPIO mock state
- * @internal
  */
-enum class GpioMockState {
+enum class GpioMockState : uint8_t {
     /// GPIO line is not initialized
     Uninitialized,
     /// GPIO line is initialized
@@ -53,22 +58,41 @@ enum class GpioMockState {
 
 /**
  * GPIO driver - mock for testing purposes
- * @internal
+ *
+ * The mock is provided by the iqrf_gpio_mock library (built with BUILD_TESTING_SUPPORT option). It can be injected
+ * into the code under test via Gpio constructor, the test keeps a pointer to the mock to control and observe it:
+ *
+ * @code
+ * auto mock = std::make_shared<iqrf::gpio::GpioMock>(iqrf::gpio::GpioConfig("gpiochip0", 1, "power"));
+ * mock->registerValueCallback([](bool oldValue, bool newValue) { ... });
+ * iqrf::gpio::Gpio gpio(mock);
+ * @endcode
+ *
+ * All methods are thread-safe, callbacks are called outside of the internal lock.
  */
 class GpioMock: public Base {
  public:
     /**
      * Constructor
-     * @param config GPIO configuration
-     * @throws std::system_error for invalid chip name or busy GPIO line
-     * @throws std::out_of_range for line offset out of bands
      */
-    explicit GpioMock(GpioConfig  config);
+    GpioMock() = default;
+
+    /**
+     * Constructor
+     * @param config GPIO configuration (used only for identification of the mock)
+     */
+    explicit GpioMock(GpioConfig config);
 
     /**
      * Destructor
      */
     ~GpioMock() override = default;
+
+    // The mock represents a single GPIO line, disable copying and moving
+    GpioMock(const GpioMock&) = delete;
+    GpioMock& operator=(const GpioMock&) = delete;
+    GpioMock(GpioMock&&) = delete;
+    GpioMock& operator=(GpioMock&&) = delete;
 
     /**
      * Initializes GPIO line as an input
@@ -84,62 +108,96 @@ class GpioMock: public Base {
     /**
      * Sets GPIO line direction
      * @param newDirection GPIO line direction
+     * @throws std::runtime_error if the GPIO line is not initialized
      */
     void setDirection(iqrf::gpio::GpioDirection newDirection) override;
 
     /**
      * Retrieves GPIO line direction
      * @return GPIO line direction
+     * @throws std::runtime_error if the GPIO line is not initialized
      */
     iqrf::gpio::GpioDirection getDirection() override;
 
     /**
      * Sets GPIO line output value
      * @param newValue GPIO line output value
+     * @throws std::runtime_error if the GPIO line is not initialized or is not an output
      */
     void setValue(bool newValue) override;
 
     /**
-     * Sets GPIO line input value for testing purposes
+     * Retrieves GPIO line value
+     * @return GPIO line value
+     * @throws std::runtime_error if the GPIO line is not initialized
+     */
+    bool getValue() override;
+
+    /**
+     * Simulates GPIO line input value
      * @param newValue GPIO line input value
+     * @throws std::runtime_error if the GPIO line is not an input
      */
     void setInputValue(bool newValue);
 
     /**
-     * Retrieves GPIO line input value
-     * @return GPIO line input value
+     * Returns GPIO mock state
+     * @return GPIO mock state
      */
-    bool getValue() override;
+    [[nodiscard]] GpioMockState getState() const;
+
+    /**
+     * Returns GPIO configuration the mock was created with
+     * @return GPIO configuration
+     */
+    [[nodiscard]] const GpioConfig& getConfig() const;
 
     /**
      * Registers a callback for GPIO direction change
      * @param callback Callback function to be called when the GPIO direction changes
      */
-    void registerDirectionCallback(const GpioDirectionCallback& callback) {
-        this->directionCallback = callback;
-    }
+    void registerDirectionCallback(const GpioDirectionCallback& callback);
 
     /**
      * Registers a callback for GPIO value change
-     * @param callback Callback function to be called when the GPIO value changes
+     * @param callback Callback function to be called when the GPIO output value changes
      */
-    void registerValueCallback(const GpioValueCallback& callback) {
-        this->valueCallback = callback;
-    }
+    void registerValueCallback(const GpioValueCallback& callback);
+
+    /**
+     * Registers a callback for every GPIO value write
+     *
+     * Unlike the value change callback, the callback is called for every setValue() call, including writes of
+     * the current value, which is needed to verify bit-banged protocols. The initial value set by initOutput()
+     * is not reported.
+     *
+     * @param callback Callback function to be called when the GPIO output value is written
+     */
+    void registerWriteCallback(const GpioWriteCallback& callback);
 
  private:
+    /**
+     * Checks that the GPIO line is initialized
+     * @throws std::runtime_error if the GPIO line is not initialized
+     */
+    void checkInitialized() const;
+
+    /// Guards the mock state
+    mutable std::mutex mutex;
     /// GPIO configuration
-    GpioConfig config;
+    const GpioConfig config;
     /// GPIO line direction
     iqrf::gpio::GpioDirection direction = iqrf::gpio::GpioDirection::Input;
     /// GPIO line state
     GpioMockState state = GpioMockState::Uninitialized;
     /// GPIO line value
     bool value = false;
-
     /// Callback for GPIO direction change
     GpioDirectionCallback directionCallback = nullptr;
     /// Callback for GPIO value change
     GpioValueCallback valueCallback = nullptr;
+    /// Callback for GPIO value write
+    GpioWriteCallback writeCallback = nullptr;
 };
+
 }  // namespace iqrf::gpio

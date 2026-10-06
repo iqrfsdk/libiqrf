@@ -53,11 +53,6 @@ file(GLOB LIB_SOURCES_BASE
     "GpioResolver.cpp"
 )
 
-if (BUILD_TESTING_SUPPORT)
-    file(GLOB LIB_HEADERS_EXTRA "${LIB_HEADERS_EXTRA}" "${LIB_INCLUDE_DIR}/GpioMock.h")
-    file(GLOB LIB_SOURCES_EXTRA "${LIB_SOURCES_EXTRA}" "GpioMock.cpp")
-endif ()
-
 iqrf_add_library(
     gpio
     HEADERS ${LIB_HEADERS_BASE} ${LIB_HEADERS_EXTRA}
@@ -65,3 +60,15 @@ iqrf_add_library(
     DEPS_STATIC ${GPIO_STATIC_LIBRARIES} iqrf_log_static
     DEPS_SHARED ${GPIO_LIBRARIES} iqrf_log
 )
+
+# GPIO mock for testing of libiqrf and libraries using libiqrf GPIO
+if (BUILD_TESTING_SUPPORT)
+    iqrf_add_library(
+        gpio_mock
+        HEADERS "${LIB_INCLUDE_DIR}/GpioMock.h"
+        SOURCES "GpioMock.cpp"
+        INCLUDE_DIR ${LIB_INCLUDE_DIR}
+        DEPS_STATIC iqrf_gpio_static
+        DEPS_SHARED iqrf_gpio
+    )
+endif ()

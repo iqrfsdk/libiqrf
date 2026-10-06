@@ -69,10 +69,11 @@ if (BUILD_DOCS)
     )
 endif ()
 
-add_compile_definitions(
-    BUILD_TESTS=$<BOOL:${BUILD_TESTS}>
-    IQRF_TESTING_SUPPORT=$<BOOL:${BUILD_TESTING_SUPPORT}>
-)
+# Tests require testing support (mocks)
+if (BUILD_TESTS AND NOT BUILD_TESTING_SUPPORT)
+    message(STATUS "BUILD_TESTS requires testing support, enabling BUILD_TESTING_SUPPORT")
+    set(BUILD_TESTING_SUPPORT ON)
+endif ()
 
 if (CODE_COVERAGE)
     set(COVERAGE_FLAGS "--coverage -fprofile-arcs -ftest-coverage")

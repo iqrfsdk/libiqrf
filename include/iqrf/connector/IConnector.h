@@ -12,12 +12,14 @@
 #pragma once
 
 #include <atomic>
+#include <chrono>
 #include <functional>
 #include <mutex>
 #include <stdexcept>
 #include <thread>
 #include <vector>
 
+#include "iqrf/connector/ConnectorUtils.h"
 #include "iqrf/connector/TrInfo.h"
 
 namespace iqrf::connector {
@@ -368,35 +370,39 @@ class IConnector {
      * TODO: Used in Daemon(IqrfSpi)
      */
     void listeningLoop() {
-        try {
+        while (this->listening) {
             std::vector<uint8_t> recvBuffer;
-
-            while (this->listening) {
+            bool received = false;
+            ConnectorUtils::runSafely("receive data", [this, &recvBuffer, &received] {
                 recvBuffer = this->receive();
+                received = true;
+            });
+            if (!received) {
+                // Receive errors are usually persistent (e.g. disconnected device), avoid flooding the log
+                std::this_thread::sleep_for(std::chrono::seconds(1));
+                continue;
+            }
 
-                if (recvBuffer.empty()) {
-                    // No data received, continue listening
-                    std::this_thread::sleep_for(std::chrono::milliseconds(50));
-                    continue;
-                }
+            if (recvBuffer.empty()) {
+                // No data received, continue listening
+                std::this_thread::sleep_for(std::chrono::milliseconds(50));
+                continue;
+            }
 
+            // Errors of a handler must not stop the listening loop
+            ConnectorUtils::runSafely("handle received data", [this, &recvBuffer] {
                 std::lock_guard<std::recursive_mutex> lock(this->guard);
 
                 if (this->hasExclusiveAccess()) {
                     this->exclusiveResponseHandler(recvBuffer);
-                } else {
-                   this->normalResponseHandler(recvBuffer);
+                } else if (this->normalResponseHandler) {
+                    this->normalResponseHandler(recvBuffer);
                 }
 
                 if (this->snifferResponseHandler) {
-                   this->snifferResponseHandler(recvBuffer);
+                    this->snifferResponseHandler(recvBuffer);
                 }
-
-                std::this_thread::sleep_for(std::chrono::milliseconds(50));
-            }
-        } catch (...) {
-            // TODO: Report error
-            this->listening = false;
+            });
         }
     }
 

@@ -115,6 +115,13 @@ write_basic_package_version_file(
     COMPATIBILITY SameMinorVersion
 )
 
+# libgpiod is used only on Linux, other dependencies are used on all platforms
+if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
+    set(IQRF_DEPENDS_LIBGPIOD TRUE)
+else ()
+    set(IQRF_DEPENDS_LIBGPIOD FALSE)
+endif ()
+
 configure_package_config_file(
     "${libiqrf_SOURCE_DIR}/cmake/iqrfConfig.cmake.in"
     "${CMAKE_CURRENT_BINARY_DIR}/iqrfConfig.cmake"
@@ -126,5 +133,8 @@ install(
     FILES
         "${CMAKE_CURRENT_BINARY_DIR}/iqrfConfig.cmake"
         "${CMAKE_CURRENT_BINARY_DIR}/iqrfConfigVersion.cmake"
+        "${libiqrf_SOURCE_DIR}/cmake/AuxFunctions.cmake"
+        "${libiqrf_SOURCE_DIR}/cmake/Findlibgpiod.cmake"
+        "${libiqrf_SOURCE_DIR}/cmake/Findlibserialport.cmake"
     DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/iqrf
 )

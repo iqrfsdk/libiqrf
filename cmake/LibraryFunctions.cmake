@@ -106,9 +106,9 @@ function(iqrf_add_library LIB_NAME)
         list(APPEND _targets_new ${SHARED_TARGET})
     endif ()
 
+    # Install only headers of the library (e.g. without headers for other platforms)
     file(RELATIVE_PATH REL_INCLUDE_DIR "${libiqrf_SOURCE_DIR}/include" "${ARG_INCLUDE_DIR}")
-    get_filename_component(INSTALL_INCLUDE_DIR "${REL_INCLUDE_DIR}" DIRECTORY)
-    install(DIRECTORY ${ARG_INCLUDE_DIR} DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}/${INSTALL_INCLUDE_DIR}")
+    install(FILES ${ARG_HEADERS} DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}/${REL_INCLUDE_DIR}")
 
     get_property(_targets_existing GLOBAL PROPERTY IQRF_EXPORTABLE_TARGETS)
     if(NOT _targets_existing)

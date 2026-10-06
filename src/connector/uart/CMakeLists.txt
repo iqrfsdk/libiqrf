@@ -13,6 +13,12 @@
 # limitations under the License.
 
 find_package(libserialport REQUIRED)
+if (BUILD_SHARED AND NOT TARGET libserialport::libserialport)
+    message(FATAL_ERROR "Shared libserialport library not found")
+endif ()
+if (BUILD_STATIC AND NOT TARGET libserialport::libserialport_static)
+    message(FATAL_ERROR "Static libserialport library not found")
+endif ()
 
 set(LIB_INCLUDE_DIR "${libiqrf_SOURCE_DIR}/include/iqrf/connector/uart")
 
@@ -24,9 +30,8 @@ iqrf_add_library(
     HEADERS ${LIB_HEADERS}
     SOURCES ${LIB_SOURCES}
     INCLUDE_DIR ${LIB_INCLUDE_DIR}
-    DEPS_INCLUDES ${libserialport_INCLUDE_DIRS}
-    DEPS_STATIC ${libserialport_STATIC_LIBRARIES} iqrf_gpio_static iqrf_log_static
-    DEPS_SHARED ${libserialport_LIBRARIES} iqrf_gpio iqrf_log
+    DEPS_STATIC libserialport::libserialport_static iqrf_gpio_static iqrf_log_static
+    DEPS_SHARED libserialport::libserialport iqrf_gpio iqrf_log
 )
 
 if(${CMAKE_SYSTEM_NAME} STREQUAL "FreeBSD")

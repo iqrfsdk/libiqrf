@@ -13,7 +13,7 @@
 # limitations under the License.
 
 
-set(LIB_INCLUDE_DIR "${libiqrf_SOURCE_DIR}/include/iqrf/connector/uart")
+set(LIB_INCLUDE_DIR "${libiqrf_SOURCE_DIR}/include/iqrf/connector/tcp")
 
 file(GLOB LIB_HEADERS "${LIB_INCLUDE_DIR}/*.h")
 file(GLOB LIB_SOURCES "*.cpp")
@@ -25,7 +25,6 @@ iqrf_add_library(
     HEADERS ${LIB_HEADERS}
     SOURCES ${LIB_SOURCES}
     INCLUDE_DIR ${LIB_INCLUDE_DIR}
-    DEPS_INCLUDES ${Boost_INCLUDE_DIRS}
-    DEPS_STATIC iqrf_log_static
-    DEPS_SHARED iqrf_log
+    DEPS_STATIC Boost::headers iqrf_log_static
+    DEPS_SHARED Boost::headers iqrf_log
 )

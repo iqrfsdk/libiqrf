@@ -16,9 +16,10 @@ set(LIB_INCLUDE_DIR "${libiqrf_SOURCE_DIR}/include/iqrf/connector")
 
 file(GLOB LIB_HEADERS "${LIB_INCLUDE_DIR}/*.h")
 
+# Common connector headers (header-only), connector specific headers are installed by the connector libraries
 install(
-    DIRECTORY ${LIB_INCLUDE_DIR}
-    DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}/iqrf"
+    FILES ${LIB_HEADERS}
+    DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}/iqrf/connector"
 )
 
 add_subdirectory(tcp)

@@ -21,6 +21,12 @@ if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
         ${LIB_INCLUDE_DIR}/libgpiodVersion.h
         @ONLY
     )
+    if (BUILD_SHARED AND NOT TARGET libgpiod::libgpiod)
+        message(FATAL_ERROR "Shared libgpiod libraries not found")
+    endif ()
+    if (BUILD_STATIC AND NOT TARGET libgpiod::libgpiod_static)
+        message(FATAL_ERROR "Static libgpiod libraries not found")
+    endif ()
     if (libgpiod_VERSION_MAJOR EQUAL "2")
         file(GLOB LIB_HEADERS_EXTRA "${LIB_INCLUDE_DIR}/GpiodV2.h")
         file(GLOB LIB_SOURCES_EXTRA "GpiodV2.cpp")
@@ -28,8 +34,9 @@ if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
         file(GLOB LIB_HEADERS_EXTRA "${LIB_INCLUDE_DIR}/GpiodV1.h")
         file(GLOB LIB_SOURCES_EXTRA "GpiodV1.cpp")
     endif()
-    set(GPIO_STATIC_LIBRARIES ${libgpiod_STATIC_LIBRARIES})
-    set(GPIO_LIBRARIES ${libgpiod_LIBRARIES})
+    list(APPEND LIB_HEADERS_EXTRA "${LIB_INCLUDE_DIR}/libgpiodVersion.h")
+    set(GPIO_STATIC_LIBRARIES libgpiod::libgpiod_static)
+    set(GPIO_LIBRARIES libgpiod::libgpiod)
 elseif (CMAKE_SYSTEM_NAME STREQUAL "FreeBSD")
     file(GLOB LIB_HEADERS_EXTRA "${LIB_INCLUDE_DIR}/GpioFreeBsd.h")
     file(GLOB LIB_SOURCES_EXTRA "GpioFreeBsd.cpp")
@@ -44,7 +51,6 @@ file(GLOB LIB_HEADERS_BASE
     "${LIB_INCLUDE_DIR}/Gpio.h"
     "${LIB_INCLUDE_DIR}/GpioMap.h"
     "${LIB_INCLUDE_DIR}/GpioResolver.h"
-    "${LIB_INCLUDE_DIR}/version.h"
 )
 file(GLOB LIB_SOURCES_BASE
     "Config.cpp"

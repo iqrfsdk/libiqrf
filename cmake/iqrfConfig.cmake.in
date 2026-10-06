@@ -15,6 +15,18 @@
 @PACKAGE_INIT@
 
 include(CMakeFindDependencyMacro)
+include(FindPackageHandleStandardArgs)
+
+# Dependencies of the exported targets, find modules are installed next to this file
+set(_iqrf_CMAKE_MODULE_PATH "${CMAKE_MODULE_PATH}")
+list(PREPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}")
+if (@IQRF_DEPENDS_LIBGPIOD@)
+    find_dependency(libgpiod)
+endif ()
+find_dependency(libserialport)
+find_dependency(Boost CONFIG COMPONENTS headers)
+set(CMAKE_MODULE_PATH "${_iqrf_CMAKE_MODULE_PATH}")
+unset(_iqrf_CMAKE_MODULE_PATH)
 
 set(iqrf_INCLUDE_DIRS "@CMAKE_INSTALL_FULL_INCLUDEDIR@")
 set(iqrf_LIBRARIES)

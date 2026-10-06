@@ -23,6 +23,7 @@
 #include <cstdlib>
 #include <cstdint>
 #include <exception>
+#include <optional>
 #include <stdexcept>
 #include <string>
 
@@ -49,6 +50,12 @@ class GpioFreeBsd: public Base {
      * Destructor
      */
     ~GpioFreeBsd() override;
+
+    // The driver owns the GPIO line, disable copying and moving
+    GpioFreeBsd(const GpioFreeBsd&) = delete;
+    GpioFreeBsd& operator=(const GpioFreeBsd&) = delete;
+    GpioFreeBsd(GpioFreeBsd&&) = delete;
+    GpioFreeBsd& operator=(GpioFreeBsd&&) = delete;
 
     /**
      * Initializes GPIO line as an input
@@ -90,18 +97,36 @@ class GpioFreeBsd: public Base {
      * Retrieves the GPIO pin configuration
      * @return GPIO pin configuration
      */
-    struct gpio_pin getPinConfig() const;
+    [[nodiscard]] struct gpio_pin getPinConfig() const;
 
     /**
-     * Sets the consumer name for the GPIO line
-     * @param name Consumer name
-     * @throws std::system_error if setting the consumer name fails
+     * Configures the GPIO pin direction while keeping other pin flags
+     * @param direction GPIO pin direction
+     * @param extraFlags Additional flags for output direction (e.g. GPIO_PIN_PRESET_HIGH)
+     * @throws std::system_error if the configuration fails
      */
-    void setConsumerName(const std::string &name) const;
+    void configureDirection(iqrf::gpio::GpioDirection direction, uint32_t extraFlags);
+
+    /**
+     * Sets the GPIO pin name
+     * @param name Pin name (truncated to GPIOMAXNAME - 1 characters)
+     * @throws std::system_error if setting the pin name fails
+     */
+    void setPinName(const std::string &name) const;
+
+    /**
+     * Calls ioctl on the GPIO chip device
+     * @param request ioctl request
+     * @param argument ioctl argument
+     * @return ioctl result
+     */
+    int ioctl(unsigned long request, void *argument) const;  // NOLINT(runtime/int)
 
     /// File descriptor for the GPIO chip
-    mutable int fd = -1;
+    int fd = -1;
     /// GPIO line
     uint32_t line;
+    /// Original pin name to be restored in the destructor, set if the pin was renamed to the consumer name
+    std::optional<std::string> originalName;
 };
 }  // namespace iqrf::gpio

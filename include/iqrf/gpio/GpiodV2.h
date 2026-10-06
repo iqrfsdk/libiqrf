@@ -49,6 +49,12 @@ class Gpiod: public Base {
      */
     ~Gpiod() override;
 
+    // The driver owns the GPIO line, disable copying and moving
+    Gpiod(const Gpiod&) = delete;
+    Gpiod& operator=(const Gpiod&) = delete;
+    Gpiod(Gpiod&&) = delete;
+    Gpiod& operator=(Gpiod&&) = delete;
+
     /**
      * Initializes GPIO line as an input
      */
@@ -85,6 +91,19 @@ class Gpiod: public Base {
     bool getValue() override;
 
  private:
+    /**
+     * Returns path of the GPIO chip device
+     * @param chip GPIO chip name (e.g. gpiochip0) or path (e.g. /dev/gpiochip0)
+     * @return GPIO chip device path
+     */
+    static std::filesystem::path chipPath(const std::string &chip);
+
+    /**
+     * Checks that the GPIO line is requested (initialized)
+     * @throws std::logic_error if the GPIO line is not initialized
+     */
+    void checkRequested() const;
+
     /// GPIO chip
     std::unique_ptr<::gpiod::chip> chip;
     /// GPIO line

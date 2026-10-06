@@ -11,18 +11,14 @@
 
 #include "iqrf/gpio/GpioResolver.h"
 
+#include <cstddef>
 #include <iostream>
+#include <mutex>
 #include <stdexcept>
 #include <string>
 #include <utility>
 
 namespace iqrf::gpio {
-
-GpioResolver::GpioResolver(): gpioMap(getGpioMap()) {
-}
-
-GpioResolver::GpioResolver(GpioMap map): gpioMap(std::move(map)) {
-}
 
 GpioResolver* GpioResolver::GetResolver() {
     static GpioResolver instance;
@@ -30,27 +26,42 @@ GpioResolver* GpioResolver::GetResolver() {
 }
 
 GpioResolver* GpioResolver::GetResolver(const GpioMap& map) {
-    static GpioResolver instance(map);
-    return &instance;
+    GpioResolver *resolver = GetResolver();
+    resolver->setGpioMap(map);
+    return resolver;
+}
+
+void GpioResolver::setGpioMap(GpioMap map) {
+    const std::scoped_lock lock(this->mutex);
+    this->gpioMap = std::move(map);
+}
+
+const GpioMap& GpioResolver::getMap() const {
+    if (!this->gpioMap.has_value()) {
+        this->gpioMap = getGpioMap();
+    }
+    return *this->gpioMap;
 }
 
 void GpioResolver::resolveGpioPin(const int64_t pin, ::std::string& chip, ::std::size_t& line) {
-    const auto record = gpioMap.find(pin);
-    if (record == gpioMap.end()) {
+    const std::scoped_lock lock(this->mutex);
+    const GpioMap &map = this->getMap();
+    const auto record = pin < 0 ? map.end() : map.find(static_cast<std::size_t>(pin));
+    if (record == map.end()) {
         throw std::runtime_error("No chip and line found for pin no. " + std::to_string(pin));
     }
-    auto pair = record->second;
-    chip = *pair.first;
-    line = pair.second;
+    chip = *record->second.first;
+    line = record->second.second;
 }
 
 void GpioResolver::dump() const {
-    for (const auto& record : gpioMap) {
+    const std::scoped_lock lock(this->mutex);
+    for (const auto& record : this->getMap()) {
         std::cout << *record.second.first
                   << " - line "
                   << record.second.second
                   << " (pin " << record.first << ')'
-                  << std::endl;
+                  << '\n';
     }
 }
 

@@ -11,84 +11,40 @@
 
 #include "iqrf/connector/uart/HdlcFrame.h"
 
+#include <optional>
+#include <utility>
 #include <vector>
+
+#include "iqrf/connector/uart/HdlcDecoder.h"
 
 namespace iqrf::connector::uart {
 
-HdlcFrame HdlcFrame::decode(const std::vector<uint8_t> &data) {
-    HdlcFrame frame;
-    for (const auto byte : data) {
-        frame.decodeByte(byte);
-    }
-    return frame;
-}
-
-void HdlcFrame::decodeByte(uint8_t byte) {
-    if (!this->decoding && byte == HDLC_FLAG) {
-        if (!this->data.empty()) {
-            this->data.clear();
-        }
-        this->crc = -1;
-        this->decoding = true;
-        return;
-    }
-    if (!this->decoding) {
-        return;
-    }
-
-    if (!this->escape && byte == HDLC_FLAG) {
-        this->decoding = false;
-        this->escape = false;
-        if (this->data.empty()) {
-            throw std::logic_error("Received empty frame");
-        }
-        if (this->data.size() < 2) {
-            throw std::logic_error("Received too short frame");
-        }
-        this->crc = this->data.back();
-        this->data.pop_back();
-        if (this->crc != calculateCrc(this->data)) {
-            throw std::logic_error("CRC check failed");
-        }
-        return;
-    }
-    if (!this->escape && byte == HDLC_ESCAPE) {
-        this->escape = true;
-        return;
-    }
-    if (this->escape) {
-        if (byte == HDLC_FLAG) {
-            this->decoding = false;
-            this->escape = false;
-            throw std::logic_error("Received abort sequence");
-        }
-        byte ^= HDLC_ESCAPE_BIT;
-        if (byte != HDLC_ESCAPE && byte != HDLC_FLAG) {
-            this->escape = false;
-            throw std::logic_error("Invalid escape sequence");
-        }
-        this->escape = false;
-    }
-    this->data.push_back(byte);
-}
-
-std::vector<uint8_t> HdlcFrame::encode() {
-    if (this->decoding) {
-        throw std::logic_error("Frame is not fully decoded");
-    }
+HdlcFrame::HdlcFrame(std::vector<uint8_t> data): data(std::move(data)) {
     if (this->data.empty()) {
-        throw std::logic_error("No data to encode");
+        throw std::invalid_argument("Data is empty");
     }
+}
+
+HdlcFrame HdlcFrame::decode(const std::vector<uint8_t> &data) {
+    HdlcDecoder decoder;
+    for (const auto byte : data) {
+        std::optional<HdlcFrame> frame = decoder.decodeByte(byte);
+        if (frame.has_value()) {
+            return std::move(frame.value());
+        }
+    }
+    throw HdlcFrameError("Incomplete frame");
+}
+
+std::vector<uint8_t> HdlcFrame::encode() const {
     std::vector<uint8_t> encoded;
-    encoded.reserve(this->data.size() + 2);
+    // Flags, CRC and possible escaping of a few bytes
+    encoded.reserve(this->data.size() + 8);
     encoded.push_back(HDLC_FLAG);
     for (const auto byte : this->data) {
         HdlcFrame::encodeInsertByte(encoded, byte);
     }
-    if (this->crc == -1) {
-        this->crc = HdlcFrame::calculateCrc(this->data);
-    }
-    HdlcFrame::encodeInsertByte(encoded, this->crc);
+    HdlcFrame::encodeInsertByte(encoded, HdlcFrame::calculateCrc(this->data));
     encoded.push_back(HDLC_FLAG);
     return encoded;
 }
@@ -103,12 +59,6 @@ void HdlcFrame::encodeInsertByte(std::vector<uint8_t> &encoded, uint8_t byte) {
 }
 
 const std::vector<uint8_t> &HdlcFrame::getData() const {
-    if (this->decoding) {
-        throw std::logic_error("Frame is not fully decoded");
-    }
-    if (this->data.empty()) {
-        return this->data;
-    }
     return this->data;
 }
 

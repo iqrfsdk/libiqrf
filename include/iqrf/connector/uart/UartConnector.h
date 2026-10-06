@@ -13,7 +13,11 @@
 
 #include <libserialport.h>
 
+#include <chrono>
+#include <cstddef>
 #include <cstdint>
+#include <deque>
+#include <mutex>
 #include <stdexcept>
 #include <vector>
 
@@ -22,6 +26,7 @@
 #include "iqrf/connector/BusSwitcher.h"
 #include "iqrf/connector/IConnector.h"
 #include "iqrf/connector/ConnectorUtils.h"
+#include "iqrf/connector/uart/HdlcDecoder.h"
 #include "iqrf/connector/uart/HdlcFrame.h"
 #include "iqrf/connector/uart/UartConfig.h"
 #include "iqrf/log/Logging.h"
@@ -68,6 +73,11 @@ class UartConnector : public IConnector {
 
     /**
      * Read the data synchronously from the connector.
+     *
+     * Returns the next received frame, waits up to the receive timeout for its completion.
+     * Invalid frames are logged and discarded.
+     *
+     * @return Data of the received frame, empty if no frame has been received within the receive timeout
      */
     std::vector<uint8_t> receive() override;
 
@@ -177,12 +187,28 @@ class UartConnector : public IConnector {
      */
     static int checkSerialResult(sp_return result);
 
+    /**
+     * Decodes received bytes and queues the completed frames
+     * @param bytes Received bytes
+     * @param count Number of received bytes
+     */
+    void decodeReceived(const uint8_t *bytes, std::size_t count);
+
+    /// Maximum time to wait for a frame in receive()
+    static constexpr std::chrono::milliseconds RECEIVE_TIMEOUT{100};
+
     /// Bus switcher
     iqrf::connector::BusSwitcher busSwitcher;
     /// UART configuration
     UartConfig config;
     /// UART port
     sp_port *port = nullptr;
+    /// Guards receiving state (decoder and received frames)
+    std::mutex receiveMutex;
+    /// HDLC decoder, keeps a partially received frame between receive() calls
+    HdlcDecoder decoder;
+    /// Received frames not yet returned by receive()
+    std::deque<std::vector<uint8_t>> receivedFrames;
 };
 
 }  // namespace iqrf::connector::uart

@@ -17,7 +17,6 @@
 	{ name: 'debian', version: 'bullseye', arch: 'i386' },
 	{ name: 'raspbian', version: 'trixie', arch: 'armhf' },
 	{ name: 'raspbian', version: 'bookworm', arch: 'armhf' },
-	{ name: 'raspbian', version: 'bullseye', arch: 'armhf' },
 	{ name: 'ubuntu', version: 'jammy', arch: 'amd64' },
 	{ name: 'ubuntu', version: 'jammy', arch: 'arm64' },
 	{ name: 'ubuntu', version: 'jammy', arch: 'armhf' },

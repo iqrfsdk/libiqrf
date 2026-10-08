@@ -11,12 +11,11 @@
 
 #pragma once
 
-#include <libserialport.h>
-
 #include <chrono>
 #include <cstddef>
 #include <cstdint>
 #include <deque>
+#include <memory>
 #include <mutex>
 #include <stdexcept>
 #include <vector>
@@ -28,6 +27,7 @@
 #include "iqrf/connector/ConnectorUtils.h"
 #include "iqrf/connector/uart/HdlcDecoder.h"
 #include "iqrf/connector/uart/HdlcFrame.h"
+#include "iqrf/connector/uart/IUartPort.h"
 #include "iqrf/connector/uart/UartConfig.h"
 #include "iqrf/log/Logging.h"
 
@@ -45,6 +45,13 @@ class UartConnector : public IConnector {
      * @param config UART connector configuration
      */
     explicit UartConnector(UartConfig config);
+
+    /**
+     * Constructs the IQRF UART connector with the specified UART port (e.g. for testing)
+     * @param config UART connector configuration
+     * @param port UART port, the port is opened according to the configuration if null
+     */
+    UartConnector(UartConfig config, std::unique_ptr<IUartPort> port);
 
     /**
      * Destructs the IQRF UART connector
@@ -185,32 +192,15 @@ class UartConnector : public IConnector {
     void enableUart();
 
     /**
-     * Opens and configures the UART port
-     * @throws std::runtime_error if the port cannot be opened or configured
-     */
-    void openPort();
-
-    /**
-     * Closes and frees the UART port if it was created
-     */
-    void closePort() noexcept;
-
-    /**
-     * Check the result of the libserialport functions and throw an exception on error.
-     * @param result libserialport return code
-     * @return libserialport return code
-     */
-    static int checkSerialResult(sp_return result);
-
-    /**
      * Decodes received bytes and queues the completed frames
      * @param bytes Received bytes
-     * @param count Number of received bytes
      */
-    void decodeReceived(const uint8_t *bytes, std::size_t count);
+    void decodeReceived(const std::vector<uint8_t> &bytes);
 
     /// Maximum time to wait for a frame in receive()
     static constexpr std::chrono::milliseconds RECEIVE_TIMEOUT{100};
+    /// Maximum number of bytes read from the UART port at once
+    static constexpr std::size_t READ_SIZE = 64;
     /// Maximum time to write a frame in send()
     static constexpr std::chrono::milliseconds WRITE_TIMEOUT{1000};
 
@@ -219,7 +209,7 @@ class UartConnector : public IConnector {
     /// UART configuration
     UartConfig config;
     /// UART port
-    sp_port *port = nullptr;
+    std::unique_ptr<IUartPort> port;
     /// Guards receiving state (decoder and received frames)
     std::mutex receiveMutex;
     /// HDLC decoder, keeps a partially received frame between receive() calls

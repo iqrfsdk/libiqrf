@@ -11,94 +11,38 @@
 
 #include "iqrf/connector/uart/UartConnector.h"
 
-#include <array>
 #include <chrono>
+#include <memory>
 #include <optional>
 #include <stdexcept>
-#include <sstream>
-#include <string>
 #include <vector>
 #include <utility>
 #include <thread>
 
 namespace iqrf::connector::uart {
 
-UartConnector::UartConnector(UartConfig config): busSwitcher(config.busSwitch()), config(std::move(config)) {
-    // Destructor is not called if the constructor throws, so release the resources here
+UartConnector::UartConnector(UartConfig config): UartConnector(std::move(config), nullptr) {}
+
+UartConnector::UartConnector(UartConfig config, std::unique_ptr<IUartPort> port):
+    busSwitcher(config.busSwitch()),
+    config(std::move(config)),
+    port(std::move(port)) {
     // Open UART port first to fail before touching GPIOs
-    try {
-        this->openPort();
-    } catch (...) {
-        this->closePort();
-        throw;
+    if (!this->port) {
+        this->port = createUartPort(UartPortConfig{this->config.device, this->config.baudRate});
     }
     try {
         this->initGpio();
     } catch (...) {
+        // Destructor is not called if the constructor throws, so restore the GPIOs here
         this->shutdownGpio();
-        this->closePort();
         throw;
     }
-}
-
-void UartConnector::openPort() {
-    IQRF_LOG(log::Level::Debug) << "Opening UART port: " << this->config.device;
-    UartConnector::checkSerialResult(sp_get_port_by_name(this->config.device.c_str(), &this->port));
-    const char *name = sp_get_port_name(this->port);
-    const char *description = sp_get_port_description(this->port);
-    IQRF_LOG(log::Level::Debug) << "UART port created: " << this->config.device
-        << " (name: " << (name != nullptr ? name : "N/A")
-        << ", description: " << (description != nullptr ? description : "N/A") << ")";
-    if (sp_get_port_transport(this->port) == SP_TRANSPORT_USB) {
-        std::stringstream usbInfo;
-        int usbBus = 0;
-        int usbAddress = 0;
-        if (sp_get_port_usb_bus_address(this->port, &usbBus, &usbAddress) == SP_OK) {
-            usbInfo << "USB bus: " << usbBus << ", USB address: " << usbAddress;
-        } else {
-            usbInfo << "USB bus and address not available";
-        }
-        int usbVid = 0;
-        int usbPid = 0;
-        if (sp_get_port_usb_vid_pid(this->port, &usbVid, &usbPid) == SP_OK) {
-            usbInfo << ", USB VID: " << std::hex << usbVid << ", PID: " << usbPid;
-        } else {
-            usbInfo << ", USB VID and PID not available";
-        }
-        const char *manufacturer = sp_get_port_usb_manufacturer(this->port);
-        usbInfo << ", Manufacturer: " << (manufacturer != nullptr ? manufacturer : "N/A");
-        const char *product = sp_get_port_usb_product(this->port);
-        usbInfo << ", Product: " << (product != nullptr ? product : "N/A");
-        const char *serial = sp_get_port_usb_serial(this->port);
-        usbInfo << ", Serial: " << (serial != nullptr ? serial : "N/A");
-
-        IQRF_LOG(log::Level::Debug) << usbInfo.str();
-    }
-
-    // Open the port
-    UartConnector::checkSerialResult(sp_open(this->port, SP_MODE_READ_WRITE));
-
-    // Set up the port
-    UartConnector::checkSerialResult(sp_set_baudrate(this->port, static_cast<int>(this->config.baudRate)));
-    UartConnector::checkSerialResult(sp_set_bits(this->port, 8));
-    UartConnector::checkSerialResult(sp_set_parity(this->port, SP_PARITY_NONE));
-    UartConnector::checkSerialResult(sp_set_stopbits(this->port, 1));
-    UartConnector::checkSerialResult(sp_set_flowcontrol(this->port, SP_FLOWCONTROL_NONE));
 }
 
 UartConnector::~UartConnector() {
     this->stopListen();
     this->shutdownGpio();
-    this->closePort();
-}
-
-void UartConnector::closePort() noexcept {
-    if (this->port != nullptr) {
-        // Closing a port which is not open fails, the result is irrelevant here
-        static_cast<void>(sp_close(this->port));
-        sp_free_port(this->port);
-        this->port = nullptr;
-    }
 }
 
 void UartConnector::shutdownGpio() noexcept {
@@ -150,7 +94,7 @@ void UartConnector::enableUart() {
     this->busSwitcher.toggleUart(true);
     // Discard data received before the UART was connected to TR module (including a partially received frame)
     const std::scoped_lock lock(this->receiveMutex);
-    UartConnector::checkSerialResult(sp_flush(this->port, SP_BUF_INPUT));
+    this->port->flushInput();
     this->decoder.reset();
     this->receivedFrames.clear();
 }
@@ -164,25 +108,6 @@ void UartConnector::resetTr() {
     this->enableUart();
 }
 
-int UartConnector::checkSerialResult(const sp_return result) {
-    switch (result) {
-        case SP_ERR_ARG:
-            throw std::runtime_error("Invalid argument");
-        case SP_ERR_FAIL: {
-            char *message = sp_last_error_message();
-            const std::string errorMessage = message != nullptr ? message : "unknown error";
-            sp_free_error_message(message);
-            throw std::runtime_error("Failed: " + errorMessage);
-        }
-        case SP_ERR_MEM:
-            throw std::runtime_error("Memory allocation error");
-        case SP_ERR_SUPP:
-            throw std::runtime_error("Operation not supported");
-        default:
-            return result;
-    }
-}
-
 std::vector<uint8_t> UartConnector::receive() {
     const std::scoped_lock lock(this->receiveMutex);
     const auto deadline = std::chrono::steady_clock::now() + RECEIVE_TIMEOUT;
@@ -192,14 +117,11 @@ std::vector<uint8_t> UartConnector::receive() {
         if (remaining.count() <= 0) {
             break;
         }
-        std::array<uint8_t, 64> buffer{};
-        // Returns as soon as any data is available
-        const int count = UartConnector::checkSerialResult(sp_blocking_read_next(
-            this->port, buffer.data(), buffer.size(), static_cast<unsigned int>(remaining.count())));
-        if (count == 0) {
+        const std::vector<uint8_t> bytes = this->port->read(READ_SIZE, remaining);
+        if (bytes.empty()) {
             break;
         }
-        this->decodeReceived(buffer.data(), static_cast<std::size_t>(count));
+        this->decodeReceived(bytes);
     }
 
     if (this->receivedFrames.empty()) {
@@ -210,10 +132,10 @@ std::vector<uint8_t> UartConnector::receive() {
     return frame;
 }
 
-void UartConnector::decodeReceived(const uint8_t *bytes, const std::size_t count) {
-    for (std::size_t i = 0; i < count; ++i) {
+void UartConnector::decodeReceived(const std::vector<uint8_t> &bytes) {
+    for (const uint8_t byte : bytes) {
         try {
-            std::optional<HdlcFrame> frame = this->decoder.decodeByte(bytes[i]);
+            std::optional<HdlcFrame> frame = this->decoder.decodeByte(byte);
             if (frame.has_value()) {
                 this->receivedFrames.push_back(frame->getData());
             }
@@ -227,12 +149,7 @@ void UartConnector::send(const std::vector<uint8_t> &data) {
     if (data.empty()) {
         throw std::runtime_error("No data to send");
     }
-    const std::vector<uint8_t> frame = HdlcFrame(data).encode();
-    const int written = UartConnector::checkSerialResult(sp_blocking_write(
-        this->port, frame.data(), frame.size(), static_cast<unsigned int>(WRITE_TIMEOUT.count())));
-    if (static_cast<std::size_t>(written) != frame.size()) {
-        throw std::runtime_error("Timeout while writing to UART port");
-    }
+    this->port->write(HdlcFrame(data).encode(), WRITE_TIMEOUT);
 }
 
 }  // namespace iqrf::connector::uart

@@ -38,9 +38,11 @@ UartConnector::UartConnector(UartConfig config): busSwitcher(config.busSwitch())
 void UartConnector::openPort() {
     IQRF_LOG(log::Level::Debug) << "Opening UART port: " << this->config.device;
     UartConnector::checkSerialResult(sp_get_port_by_name(this->config.device.c_str(), &this->port));
+    const char *name = sp_get_port_name(this->port);
+    const char *description = sp_get_port_description(this->port);
     IQRF_LOG(log::Level::Debug) << "UART port created: " << this->config.device
-        << " (name: " << sp_get_port_name(this->port) << ", description: "
-        << sp_get_port_description(this->port) << ")";
+        << " (name: " << (name != nullptr ? name : "N/A")
+        << ", description: " << (description != nullptr ? description : "N/A") << ")";
     if (sp_get_port_transport(this->port) == SP_TRANSPORT_USB) {
         std::stringstream usbInfo;
         int usbBus = 0;
@@ -142,7 +144,9 @@ int UartConnector::checkSerialResult(const sp_return result) {
         case SP_ERR_ARG:
             throw std::runtime_error("Invalid argument");
         case SP_ERR_FAIL: {
-            const std::string errorMessage = sp_last_error_message();
+            char *message = sp_last_error_message();
+            const std::string errorMessage = message != nullptr ? message : "unknown error";
+            sp_free_error_message(message);
             throw std::runtime_error("Failed: " + errorMessage);
         }
         case SP_ERR_MEM:

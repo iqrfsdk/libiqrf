@@ -18,7 +18,18 @@
 namespace iqrf::connector::uart {
 
 /**
+ * Error of a received HDLC frame (e.g. CRC mismatch, invalid escape sequence)
+ */
+class HdlcFrameError : public std::runtime_error {
+ public:
+    using std::runtime_error::runtime_error;
+};
+
+/**
  * HDLC-like (High-Level Data Link Control) frame
+ *
+ * Frame format: flag (0x7E), escaped data, escaped 1-Wire CRC8 of data, flag (0x7E).
+ * Flag and escape bytes inside the frame are escaped by the escape byte (0x7D) followed by the byte XORed with 0x20.
  */
 class HdlcFrame {
  public:
@@ -30,39 +41,25 @@ class HdlcFrame {
     static constexpr uint8_t HDLC_ESCAPE_BIT = 0x20;
 
     /**
-     * Constructs an empty HDLC frame
-     */
-    HdlcFrame() = default;
-
-    /**
      * Constructs an HDLC frame with the given data
      * @param data Data to be set in the frame
+     * @throws std::invalid_argument if the data is empty
      */
-    explicit HdlcFrame(const std::vector<uint8_t> &data): data(data) {
-        if (this->data.empty()) {
-            throw std::logic_error("Data is empty");
-        }
-        this->crc = HdlcFrame::calculateCrc(this->data);
-    }
+    explicit HdlcFrame(std::vector<uint8_t> data);
 
     /**
-     * Constructs an HDLC frame object from encoded data
+     * Decodes the first HDLC frame from encoded data
      * @param data Encoded HDLC frame data
+     * @return Decoded HDLC frame
+     * @throws HdlcFrameError if the frame is invalid or the data does not contain a complete frame
      */
     static HdlcFrame decode(const std::vector<uint8_t> &data);
-
-    /**
-     * Decodes the HDLC frame by one byte
-     * @param byte Data byte to be decoded
-     * @return Decoded HDLC frame
-     */
-    void decodeByte(uint8_t byte);
 
     /**
      * Encodes the HDLC frame
      * @return Encoded HDLC frame
      */
-    std::vector<uint8_t> encode();
+    [[nodiscard]] std::vector<uint8_t> encode() const;
 
     /**
      * Returns the data of the HDLC frame
@@ -87,12 +84,6 @@ class HdlcFrame {
 
     /// Data
     std::vector<uint8_t> data;
-    /// HDLC frame decoding in progress
-    bool decoding = false;
-    /// HDLC escape flag has been seen
-    bool escape = false;
-    /// HDLC frame 1-Wire CRC8
-    int16_t crc = -1;
 };
 
 }  // namespace iqrf::connector::uart

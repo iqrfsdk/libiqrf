@@ -11,6 +11,9 @@
 
 #include "iqrf/connector/uart/UartConnector.h"
 
+#include <array>
+#include <chrono>
+#include <optional>
 #include <stdexcept>
 #include <sstream>
 #include <string>
@@ -152,26 +155,50 @@ int UartConnector::checkSerialResult(const sp_return result) {
 }
 
 std::vector<uint8_t> UartConnector::receive() {
-    int bytesRead = 0;
-    uint8_t byte = 0;
-    HdlcFrame frame;
-    while ((bytesRead = sp_blocking_read(this->port, &byte, 1, 100)) > 0) {
-        frame.decodeByte(byte);
+    const std::scoped_lock lock(this->receiveMutex);
+    const auto deadline = std::chrono::steady_clock::now() + RECEIVE_TIMEOUT;
+    while (this->receivedFrames.empty()) {
+        const auto remaining = std::chrono::duration_cast<std::chrono::milliseconds>(
+            deadline - std::chrono::steady_clock::now());
+        if (remaining.count() <= 0) {
+            break;
+        }
+        std::array<uint8_t, 64> buffer{};
+        // Returns as soon as any data is available
+        const int count = UartConnector::checkSerialResult(sp_blocking_read_next(
+            this->port, buffer.data(), buffer.size(), static_cast<unsigned int>(remaining.count())));
+        if (count == 0) {
+            break;
+        }
+        this->decodeReceived(buffer.data(), static_cast<std::size_t>(count));
     }
 
-    if (bytesRead < 0) {
-        throw std::runtime_error("Failed to read from UART port");
+    if (this->receivedFrames.empty()) {
+        return {};
     }
+    std::vector<uint8_t> frame = std::move(this->receivedFrames.front());
+    this->receivedFrames.pop_front();
+    return frame;
+}
 
-    return frame.getData();
+void UartConnector::decodeReceived(const uint8_t *bytes, const std::size_t count) {
+    for (std::size_t i = 0; i < count; ++i) {
+        try {
+            std::optional<HdlcFrame> frame = this->decoder.decodeByte(bytes[i]);
+            if (frame.has_value()) {
+                this->receivedFrames.push_back(frame->getData());
+            }
+        } catch (const HdlcFrameError &e) {
+            IQRF_LOG(log::Level::Warning) << "Discarding invalid UART frame: " << e.what();
+        }
+    }
 }
 
 void UartConnector::send(const std::vector<uint8_t> &data) {
     if (data.empty()) {
         throw std::runtime_error("No data to send");
     }
-    HdlcFrame hdlcFrame(data);
-    const std::vector<uint8_t> frame = hdlcFrame.encode();
+    const std::vector<uint8_t> frame = HdlcFrame(data).encode();
     UartConnector::checkSerialResult(sp_blocking_write(this->port, frame.data(), frame.size(), 1000));
 }
 

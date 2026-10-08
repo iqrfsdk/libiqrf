@@ -24,13 +24,19 @@
 namespace iqrf::connector::uart {
 
 UartConnector::UartConnector(UartConfig config): busSwitcher(config.busSwitch()), config(std::move(config)) {
+    // Destructor is not called if the constructor throws, so release the resources here
+    // Open UART port first to fail before touching GPIOs
     try {
-        this->initGpio();
         this->openPort();
     } catch (...) {
-        // Destructor is not called if the constructor throws, so release the resources here
         this->closePort();
+        throw;
+    }
+    try {
+        this->initGpio();
+    } catch (...) {
         this->shutdownGpio();
+        this->closePort();
         throw;
     }
 }
@@ -121,22 +127,41 @@ void UartConnector::initGpio() {
     this->busSwitcher.init();
     std::this_thread::sleep_for(std::chrono::milliseconds(1));
 
-    if (this->config.trModuleReset) {
-        this->resetTr();  // NOLINT(clang-analyzer-optin.cplusplus.VirtualCall)
+    if (this->config.trModuleReset && this->config.powerEnableGpio.has_value()) {
+        this->powerCycleTr();
     }
 
-    this->busSwitcher.toggleUart(true);
+    this->enableUart();
     std::this_thread::sleep_for(std::chrono::milliseconds(500));
 }
 
-void UartConnector::resetTr() {
-    if (!this->config.powerEnableGpio.has_value()) {
-        return;
-    }
+void UartConnector::powerCycleTr() {
+    // Disconnect UART from TR module, otherwise TR module could be powered via UART lines
+    this->busSwitcher.toggleUart(false);
+    std::this_thread::sleep_for(std::chrono::milliseconds(1));
+
     this->config.powerEnableGpio->setValue(false);
     std::this_thread::sleep_for(std::chrono::milliseconds(300));
     this->config.powerEnableGpio->setValue(true);
     std::this_thread::sleep_for(std::chrono::milliseconds(1));
+}
+
+void UartConnector::enableUart() {
+    this->busSwitcher.toggleUart(true);
+    // Discard data received before the UART was connected to TR module (including a partially received frame)
+    const std::scoped_lock lock(this->receiveMutex);
+    UartConnector::checkSerialResult(sp_flush(this->port, SP_BUF_INPUT));
+    this->decoder.reset();
+    this->receivedFrames.clear();
+}
+
+void UartConnector::resetTr() {
+    if (!this->config.powerEnableGpio.has_value()) {
+        IQRF_LOG(log::Level::Warning) << "Unable to reset TR module: power enable GPIO is not configured";
+        return;
+    }
+    this->powerCycleTr();
+    this->enableUart();
 }
 
 int UartConnector::checkSerialResult(const sp_return result) {
@@ -203,7 +228,11 @@ void UartConnector::send(const std::vector<uint8_t> &data) {
         throw std::runtime_error("No data to send");
     }
     const std::vector<uint8_t> frame = HdlcFrame(data).encode();
-    UartConnector::checkSerialResult(sp_blocking_write(this->port, frame.data(), frame.size(), 1000));
+    const int written = UartConnector::checkSerialResult(sp_blocking_write(
+        this->port, frame.data(), frame.size(), static_cast<unsigned int>(WRITE_TIMEOUT.count())));
+    if (static_cast<std::size_t>(written) != frame.size()) {
+        throw std::runtime_error("Timeout while writing to UART port");
+    }
 }
 
 }  // namespace iqrf::connector::uart

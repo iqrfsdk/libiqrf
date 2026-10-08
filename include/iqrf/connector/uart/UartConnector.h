@@ -92,6 +92,9 @@ class UartConnector : public IConnector {
 
     /**
      * Reset the TR module.
+     *
+     * TR module is power cycled, UART is disconnected from TR module during the power cycle.
+     * Data received before the reset are discarded.
      */
     void resetTr() override;
 
@@ -170,6 +173,18 @@ class UartConnector : public IConnector {
 
  private:
     /**
+     * Power cycles TR module, UART is disconnected from TR module and stays disconnected
+     *
+     * Power enable GPIO must be configured.
+     */
+    void powerCycleTr();
+
+    /**
+     * Connects UART to TR module and discards received data
+     */
+    void enableUart();
+
+    /**
      * Opens and configures the UART port
      * @throws std::runtime_error if the port cannot be opened or configured
      */
@@ -196,6 +211,8 @@ class UartConnector : public IConnector {
 
     /// Maximum time to wait for a frame in receive()
     static constexpr std::chrono::milliseconds RECEIVE_TIMEOUT{100};
+    /// Maximum time to write a frame in send()
+    static constexpr std::chrono::milliseconds WRITE_TIMEOUT{1000};
 
     /// Bus switcher
     iqrf::connector::BusSwitcher busSwitcher;

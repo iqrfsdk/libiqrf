@@ -49,6 +49,12 @@ Gpio::Gpio(std::shared_ptr<iqrf::gpio::Base> impl): impl(std::move(impl)) {
     }
 }
 
+Gpio::Gpio(const Gpio& other) noexcept = default;
+
+Gpio::Gpio(Gpio&& other) noexcept = default;
+
+Gpio::~Gpio() = default;
+
 Gpio& Gpio::operator=(Gpio other) noexcept {
     // copy-and-swap idiom
     swap(*this, other);

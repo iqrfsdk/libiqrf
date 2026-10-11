@@ -51,18 +51,18 @@ class Gpio {  // NOLINT(cppcoreguidelines-special-member-functions)
      * Copy Constructor
      * @param other Gpio object to copy
      */
-    Gpio(const Gpio& other) noexcept = default;
+    Gpio(const Gpio& other) noexcept;
 
     /**
      * Move Constructor
      * @param other Gpio object to move
      */
-    Gpio(Gpio&& other) noexcept = default;
+    Gpio(Gpio&& other) noexcept;
 
     /**
      * Destructor
      */
-    ~Gpio() = default;
+    ~Gpio();
 
     /**
      * Assignment Operator

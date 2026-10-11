@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+add_subdirectory(cdc)
 add_subdirectory(spi)
 add_subdirectory(tcp)
 add_subdirectory(uart)

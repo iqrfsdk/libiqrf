@@ -22,6 +22,7 @@ install(
     DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}/iqrf/connector"
 )
 
+add_subdirectory(cdc)
 add_subdirectory(spi)
 add_subdirectory(tcp)
 add_subdirectory(uart)

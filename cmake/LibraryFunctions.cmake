@@ -27,6 +27,14 @@ function(iqrf_add_library LIB_NAME)
     cmake_parse_arguments(ARG "${_flags}" "${_oneValueArgs}" "${_multiValueArgs}" "" ${ARGN})
 
     set(_targets_new)
+
+    # ABI may change in every minor release before 1.0, so the minor version is a part of the soname
+    if (PROJECT_VERSION_MAJOR EQUAL 0)
+        set(_soversion "${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}")
+    else ()
+        set(_soversion "${PROJECT_VERSION_MAJOR}")
+    endif ()
+
     set(PUBLIC_INCLUDE_DIRS
         $<BUILD_INTERFACE:${libiqrf_SOURCE_DIR}/include>
         $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
@@ -50,8 +58,8 @@ function(iqrf_add_library LIB_NAME)
         set(STATIC_TARGET iqrf_${LIB_NAME}_static)
         add_library(${STATIC_TARGET} STATIC ${ARG_SOURCES} ${ARG_HEADERS})
         set_target_properties(${STATIC_TARGET} PROPERTIES
-            VERSION "${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}"
-            SOVERSION "${PROJECT_VERSION_MAJOR}"
+            VERSION "${PROJECT_VERSION}"
+            SOVERSION "${_soversion}"
             OUTPUT_NAME iqrf_${LIB_NAME}
             PREFIX "lib"
         )
@@ -81,8 +89,8 @@ function(iqrf_add_library LIB_NAME)
         set(SHARED_TARGET iqrf_${LIB_NAME})
         add_library(${SHARED_TARGET} SHARED ${ARG_SOURCES} ${ARG_HEADERS})
         set_target_properties(${SHARED_TARGET} PROPERTIES
-            VERSION "${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}"
-            SOVERSION "${PROJECT_VERSION_MAJOR}"
+            VERSION "${PROJECT_VERSION}"
+            SOVERSION "${_soversion}"
         )
         target_include_directories(${SHARED_TARGET} PUBLIC ${PUBLIC_INCLUDE_DIRS})
         if (ARG_DEPS_INCLUDES)

@@ -13,6 +13,7 @@ This repository contains the IQRF libraries for C/C++.
 
 ### Libraries
 
+- [`libiqrf-connector-cdc`](src/connector/cdc) - CDC connector library
 - [`libiqrf-connector-spi`](src/connector/spi) - SPI connector library (Linux spidev)
 - [`libiqrf-connector-uart`](src/connector/uart) - UART connector library
 - [`libiqrf-gpio`](src/gpio) - GPIO library

@@ -1,3 +1,4 @@
 usr/include/iqrf/gpio/
 usr/lib/*/libiqrf_gpio.a
 usr/lib/*/libiqrf_gpio.so
+usr/lib/*/pkgconfig/iqrf_gpio.pc

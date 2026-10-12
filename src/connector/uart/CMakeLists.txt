@@ -20,6 +20,15 @@ if (BUILD_STATIC AND NOT TARGET libserialport::libserialport_static)
     message(FATAL_ERROR "Static libserialport library not found")
 endif ()
 
+# libserialport depends on libusb on FreeBSD
+if (CMAKE_SYSTEM_NAME STREQUAL "FreeBSD")
+    set(UART_PLATFORM_LIBRARIES usb)
+    set(UART_PKGCONFIG_LIBS_PRIVATE -lusb)
+else ()
+    set(UART_PLATFORM_LIBRARIES "")
+    set(UART_PKGCONFIG_LIBS_PRIVATE "")
+endif ()
+
 set(LIB_INCLUDE_DIR "${libiqrf_SOURCE_DIR}/include/iqrf/connector/uart")
 
 file(GLOB LIB_HEADERS "${LIB_INCLUDE_DIR}/*.h")
@@ -30,15 +39,8 @@ iqrf_add_library(
     HEADERS ${LIB_HEADERS}
     SOURCES ${LIB_SOURCES}
     INCLUDE_DIR ${LIB_INCLUDE_DIR}
-    DEPS_STATIC libserialport::libserialport_static iqrf_gpio_static iqrf_log_static
-    DEPS_SHARED libserialport::libserialport iqrf_gpio iqrf_log
+    DEPS_STATIC libserialport::libserialport_static ${UART_PLATFORM_LIBRARIES} iqrf_gpio_static iqrf_log_static
+    DEPS_SHARED libserialport::libserialport ${UART_PLATFORM_LIBRARIES} iqrf_gpio iqrf_log
+    PKGCONFIG_REQUIRES libserialport
+    PKGCONFIG_LIBS_PRIVATE ${UART_PKGCONFIG_LIBS_PRIVATE}
 )
-
-if(${CMAKE_SYSTEM_NAME} STREQUAL "FreeBSD")
-    if (BUILD_STATIC)
-        target_link_libraries(iqrf_${LIB_NAME}_static usb)
-    endif ()
-    if (BUILD_SHARED)
-        target_link_libraries(iqrf_${LIB_NAME} usb)
-    endif ()
-endif ()

@@ -1,2 +1,3 @@
 usr/lib/*/libiqrf_gpio_mock.a
 usr/lib/*/libiqrf_gpio_mock.so
+usr/lib/*/pkgconfig/iqrf_gpio_mock.pc

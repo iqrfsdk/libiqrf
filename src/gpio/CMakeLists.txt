@@ -37,11 +37,13 @@ if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
     list(APPEND LIB_HEADERS_EXTRA "${LIB_INCLUDE_DIR}/libgpiodVersion.h")
     set(GPIO_STATIC_LIBRARIES libgpiod::libgpiod_static)
     set(GPIO_LIBRARIES libgpiod::libgpiod)
+    set(GPIO_PKGCONFIG_REQUIRES libgpiodcxx)
 elseif (CMAKE_SYSTEM_NAME STREQUAL "FreeBSD")
     file(GLOB LIB_HEADERS_EXTRA "${LIB_INCLUDE_DIR}/GpioFreeBsd.h")
     file(GLOB LIB_SOURCES_EXTRA "GpioFreeBsd.cpp")
     set(GPIO_STATIC_LIBRARIES "")
     set(GPIO_LIBRARIES "")
+    set(GPIO_PKGCONFIG_REQUIRES "")
 endif()
 
 file(GLOB LIB_HEADERS_BASE
@@ -65,6 +67,7 @@ iqrf_add_library(
     SOURCES ${LIB_SOURCES_BASE} ${LIB_SOURCES_EXTRA}
     DEPS_STATIC ${GPIO_STATIC_LIBRARIES} iqrf_log_static
     DEPS_SHARED ${GPIO_LIBRARIES} iqrf_log
+    PKGCONFIG_REQUIRES ${GPIO_PKGCONFIG_REQUIRES}
 )
 
 # GPIO mock for testing of libiqrf and libraries using libiqrf GPIO

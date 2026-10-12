@@ -22,6 +22,8 @@ function(iqrf_add_library LIB_NAME)
         DEPS_STATIC
         DEPS_SHARED
         HEADERS
+        PKGCONFIG_LIBS_PRIVATE
+        PKGCONFIG_REQUIRES
         SOURCES
     )
     cmake_parse_arguments(ARG "${_flags}" "${_oneValueArgs}" "${_multiValueArgs}" "" ${ARGN})
@@ -117,6 +119,36 @@ function(iqrf_add_library LIB_NAME)
     # Install only headers of the library (e.g. without headers for other platforms)
     file(RELATIVE_PATH REL_INCLUDE_DIR "${libiqrf_SOURCE_DIR}/include" "${ARG_INCLUDE_DIR}")
     install(FILES ${ARG_HEADERS} DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}/${REL_INCLUDE_DIR}")
+
+    # pkg-config file, static linking is covered by the same file as both variants share the library name
+    set(_pc_name iqrf_${LIB_NAME})
+    set(_pc_requires ${ARG_PKGCONFIG_REQUIRES})
+    foreach (_dep IN LISTS ARG_DEPS_SHARED)
+        if (_dep MATCHES "^iqrf_")
+            list(APPEND _pc_requires "${_dep} = ${PROJECT_VERSION}")
+        endif ()
+    endforeach ()
+    list(JOIN _pc_requires ", " _pc_requires)
+    list(JOIN ARG_PKGCONFIG_LIBS_PRIVATE " " _pc_libs_private)
+    if (IS_ABSOLUTE "${CMAKE_INSTALL_LIBDIR}")
+        set(_pc_libdir "${CMAKE_INSTALL_LIBDIR}")
+    else ()
+        set(_pc_libdir "\${exec_prefix}/${CMAKE_INSTALL_LIBDIR}")
+    endif ()
+    if (IS_ABSOLUTE "${CMAKE_INSTALL_INCLUDEDIR}")
+        set(_pc_includedir "${CMAKE_INSTALL_INCLUDEDIR}")
+    else ()
+        set(_pc_includedir "\${prefix}/${CMAKE_INSTALL_INCLUDEDIR}")
+    endif ()
+    configure_file(
+        "${libiqrf_SOURCE_DIR}/cmake/iqrf.pc.in"
+        "${CMAKE_BINARY_DIR}/pkgconfig/${_pc_name}.pc"
+        @ONLY
+    )
+    install(
+        FILES "${CMAKE_BINARY_DIR}/pkgconfig/${_pc_name}.pc"
+        DESTINATION "${CMAKE_INSTALL_LIBDIR}/pkgconfig"
+    )
 
     get_property(_targets_existing GLOBAL PROPERTY IQRF_EXPORTABLE_TARGETS)
     if(NOT _targets_existing)

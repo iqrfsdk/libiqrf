@@ -1,3 +1,28 @@
+libiqrf (0.2.0) stable; urgency=medium
+
+  * Connector: restore GPIOs when constructor fails
+  * GPIO: fix driver issues
+  * GPIO: make mock usable by external libraries
+  * Debian packaging: fix dependencies of -dev binary packages
+  * CMake: export dependencies as imported targets
+  * Examples[UART]: add GPIO options
+  * Connector[UART]: fix HDLC frame decoding
+  * GitLab CI: drop package builds for armel
+  * Connector[UART]: fix memory leak and potential null pointer dereference
+  * Connector[SPI]: add implementation
+  * Connector: keep listening loop running after errors
+  * Debian packaging: remove package build for Raspbian bullseye due to GoogleMock linkage problem
+  * GPIO: fix ABI compability of Gpio copy and move constructors and destructor
+  * Connector[UART]: fix port handling and TR module reset
+  * Connector[UART]: add UART port abstraction and connector tests
+  * GitLab CI: check ABI of shared libraries against the last release tag
+  * CMake: include minor version in soname before 1.0, bump version to 0.2.0
+  * CMake: generate and install pkg-config files
+  * Connector[CDC]: add IQRF USB CDC connector
+  * Read me: add missing libiqrf-connector-cdc library
+
+ -- Roman Ondráček <mail@romanondracek.cz>  Tue, 13 Oct 2026 01:40:51 +0200
+
 libiqrf (0.1.6) stable; urgency=medium
 
   * fixed HDLC frame encoding

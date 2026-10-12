@@ -13,5 +13,6 @@
 # limitations under the License.
 
 add_subdirectory(connector)
+add_subdirectory(dpa)
 add_subdirectory(log)
 add_subdirectory(gpio)

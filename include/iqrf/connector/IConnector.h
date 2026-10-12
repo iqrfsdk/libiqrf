@@ -132,7 +132,7 @@ class IConnector {
      *
      * TODO: Used in Daemon(IqrfCdc, IqrfSpi, IqrfUart), clibspi, clibuart
      */
-    void send(const std::vector<uint8_t>& data, const AccessToken token) {
+    void send(const std::vector<uint8_t>& data, const AccessToken& token) {
       std::lock_guard<std::recursive_mutex> lock(this->guard);
 
       switch (token.getAccessType()) {
@@ -199,7 +199,7 @@ class IConnector {
     /**
      * Unregister the previously registered responseHandler.
      */
-    void unregisterResponseHandler(const AccessToken token) {
+    void unregisterResponseHandler(const AccessToken& token) {
       std::lock_guard<std::recursive_mutex> lock(this->guard);
 
       switch (token.getAccessType()) {

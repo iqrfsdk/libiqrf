@@ -18,3 +18,4 @@ ctest.xml
 # Doxygen generated files
 docs/doxygen
 !docs/doxygen/Doxyfile.in
+abi-report/

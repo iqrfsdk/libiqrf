@@ -1,0 +1,6 @@
+# libabigail suppression specifications for the ABI check (.gitlab/ci/abi-check.sh)
+# See https://sourceware.org/libabigail/manual/libabigail-concepts.html#suppression-specifications
+#
+# Example:
+# [suppress_type]
+#   name_regexp = ^iqrf::detail::

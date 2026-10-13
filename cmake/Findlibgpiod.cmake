@@ -48,6 +48,16 @@ find_library(libgpiod_CXX_STATIC_LIBRARY
 
 set(libgpiod_VERSION ${PC_libgpiod_VERSION})
 
+# libgpiod headers do not provide version macros, so the version is available only from pkg-config
+set(_libgpiod_REASON_FAILURE_MESSAGE "")
+if (NOT PKG_CONFIG_FOUND)
+    set(_libgpiod_REASON_FAILURE_MESSAGE
+        "pkg-config was not found, it is required to determine libgpiod version (install pkgconf or pkg-config)"
+    )
+elseif (NOT PC_libgpiod_FOUND)
+    set(_libgpiod_REASON_FAILURE_MESSAGE "libgpiod pkg-config module was not found")
+endif ()
+
 set(_libgpiod_SHARED_FOUND FALSE)
 if (libgpiod_LIBRARY AND libgpiod_CXX_LIBRARY)
     set(_libgpiod_SHARED_FOUND TRUE)
@@ -64,6 +74,7 @@ endif ()
 find_package_handle_standard_args(libgpiod
     REQUIRED_VARS libgpiod_INCLUDE_DIR libgpiod_VERSION _libgpiod_LIBRARIES_FOUND
     VERSION_VAR libgpiod_VERSION
+    REASON_FAILURE_MESSAGE "${_libgpiod_REASON_FAILURE_MESSAGE}"
 )
 
 if (libgpiod_FOUND)

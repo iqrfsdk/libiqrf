@@ -12,7 +12,8 @@ Build-Depends:
  libboost-system-dev | libboost-dev (>= 1.90),
  libgpiod-dev,
  libgtest-dev,
- libserialport-dev
+ libserialport-dev,
+ pkgconf | pkg-config
 Standards-Version: 4.5.1
 Homepage: https://gitlab.iqrf.org/open-source/iqrf-sdk/libiqrf
 Vcs-Git: https://gitlab.iqrf.org/open-source/iqrf-sdk/libiqrf.git
@@ -65,6 +66,7 @@ Depends:
  libiqrf-gpio0.2 (= ${binary:Version}),
  libiqrf-log-dev (= ${binary:Version}),
  libgpiod-dev [linux-any],
+ pkgconf [linux-any] | pkg-config [linux-any],
  ${misc:Depends}
 Description: IQRF C++ GPIO library - development files
  IQRF GPIO library for C++.

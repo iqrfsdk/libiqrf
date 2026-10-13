@@ -5,13 +5,13 @@ Maintainer: Roman Ondráček <roman.ondracek@iqrf.com>
 Build-Depends:
  debhelper (>= 12),
  debhelper-compat (= 12),
- cmake (>= 3.8),
+ cmake (>= 3.18),
  libboost-dev,
  libboost-log-dev,
  libboost-program-options-dev,
  libboost-system-dev | libboost-dev (>= 1.90),
  libgpiod-dev,
- libgtest-dev,
+ libgtest-dev <!nocheck>,
  libserialport-dev,
  pkgconf | pkg-config
 Standards-Version: 4.5.1

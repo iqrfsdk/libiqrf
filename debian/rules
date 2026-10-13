@@ -1,7 +1,13 @@
 #!/usr/bin/make -f
 
+# Tests (and GTest) are not needed with nocheck build option or profile
+CMAKE_EXTRA_FLAGS =
+ifneq (,$(filter nocheck,$(DEB_BUILD_OPTIONS) $(DEB_BUILD_PROFILES)))
+CMAKE_EXTRA_FLAGS += -DBUILD_TESTS=OFF
+endif
+
 %:
 	dh $@  --buildsystem=cmake
 
 override_dh_auto_configure:
-	dh_auto_configure -- -DCMAKE_BUILD_TYPE=Debug -DBUILD_STATIC=TRUE -DUSE_CCACHE=TRUE
+	dh_auto_configure -- -DCMAKE_BUILD_TYPE=Debug -DBUILD_STATIC=TRUE -DUSE_CCACHE=TRUE $(CMAKE_EXTRA_FLAGS)

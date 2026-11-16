@@ -9,185 +9,133 @@
  * LICENSE file in the project root.
  */
 
-// This class should implement a TCP connector for IQRF communication which
-// transfers only raw data and should using boost::asio.
-
 #include "iqrf/connector/tcp/TcpConnector.h"
 
+#include <algorithm>
+#include <chrono>
+#include <cstdint>
+#include <exception>
+#include <memory>
+#include <mutex>
+#include <shared_mutex>
+#include <stdexcept>
+#include <string>
+#include <thread>
 #include <utility>
 #include <vector>
 
+#include "iqrf/connector/IConnector.h"
+#include "iqrf/connector/tcp/ITcpSocket.h"
+#include "iqrf/connector/tcp/TcpConfig.h"
+#include "iqrf/log/Logging.h"
+
 namespace iqrf::connector::tcp {
 
-TcpConnector::TcpConnector(TcpConfig config):
+namespace log = ::iqrf::log;
+
+using Clock = std::chrono::steady_clock;
+
+TcpConnector::TcpConnector(TcpConfig config, SocketFactory socketFactory):
     config(std::move(config)),
-    socket(ioContext),
-    resolver(ioContext),
-    timer(ioContext) {
-    this->connect();
+    socketFactory(std::move(socketFactory)),
+    nextConnectAttempt(Clock::now()),
+    reconnectDelay(this->config.reconnectDelay) {
+    if (!this->socketFactory) {
+        this->socketFactory = [](const TcpConfig &cfg) {
+            return createTcpSocket(cfg.host, cfg.port, cfg.connectTimeout);
+        };
+    }
+    this->ensureConnected();
 }
 
 TcpConnector::~TcpConnector() {
     this->stopListen();
-    this->disconnect();
 }
 
 State TcpConnector::getState() const {
-    return this->socket.is_open() ? State::Ready : State::NotReady;
-}
-
-std::vector<uint8_t> TcpConnector::receive() {
-    if (!this->socket.is_open()) {
-        throw std::runtime_error("Socket is not open");
-    }
-
-    std::vector<uint8_t> buffer(1024);
-    boost::system::error_code ec;
-    std::size_t bytesRead = 0;
-    bool timeout = false;
-
-    boost::asio::steady_timer deadline(this->ioContext);
-    deadline.expires_after(std::chrono::seconds(1));
-
-    deadline.async_wait([&](const boost::system::error_code& error) {
-        if (!error) {
-            timeout = true;
-            this->socket.cancel();
-        }
-    });
-
-    this->socket.async_read_some(
-        boost::asio::buffer(buffer),
-        [&](const boost::system::error_code& error, const std::size_t length) {
-            ec = error;
-            bytesRead = length;
-            deadline.cancel();
-        }
-    );
-
-    this->ioContext.restart();
-    this->ioContext.run();
-
-    if (timeout) {
-        return {};  // timeout
-    }
-
-    if (ec == boost::asio::error::eof || ec == boost::asio::error::connection_reset) {
-        IQRF_LOG(log::Level::Warning) << "Connection closed by the peer, retrying...";
-        this->reconnect();
-        return {};
-    }
-
-    if (ec) {
-        IQRF_LOG(log::Level::Error) << "Error receiving data: " << ec.message();
-        this->reconnect();
-        return {};
-    }
-
-    buffer.resize(bytesRead);
-    return buffer;
+    return this->connected ? State::Ready : State::NotReady;
 }
 
 void TcpConnector::send(const std::vector<uint8_t> &data) {
-    if (this->getState() != State::Ready) {
-        throw std::runtime_error("TCP connector is not ready");
-    }
     if (data.empty()) {
         throw std::runtime_error("No data to send");
     }
+    if (!this->ensureConnected()) {
+        throw std::runtime_error("TCP connector is not connected to " + this->config.host + ":"
+            + std::to_string(this->config.port));
+    }
+    std::shared_lock lock(this->socketMutex);
+    if (!this->socket) {
+        throw std::runtime_error("TCP connection has been lost");
+    }
+    const uint64_t generation = this->connectionGeneration;
     try {
-        boost::asio::write(this->socket, boost::asio::buffer(data), boost::asio::transfer_all());
-    } catch (const boost::system::system_error& e) {
-        IQRF_LOG(log::Level::Error) << "Failed to send data: " << e.what();
-        this->reconnect();
+        this->socket->write(data, WRITE_TIMEOUT);
+    } catch (const std::exception &e) {
+        lock.unlock();
+        this->disconnect(generation, e.what());
+        throw std::runtime_error(std::string("Failed to send data: ") + e.what());
     }
 }
 
-void TcpConnector::connect() {
-    if (this->connecting) {
-        return;
+std::vector<uint8_t> TcpConnector::receive() {
+    if (!this->ensureConnected()) {
+        std::this_thread::sleep_for(RECEIVE_TIMEOUT);
+        return {};
+    }
+    std::shared_lock lock(this->socketMutex);
+    if (!this->socket) {
+        return {};
+    }
+    const uint64_t generation = this->connectionGeneration;
+    try {
+        return this->socket->read(READ_SIZE, RECEIVE_TIMEOUT);
+    } catch (const std::exception &e) {
+        lock.unlock();
+        this->disconnect(generation, e.what());
+        return {};
+    }
+}
+
+bool TcpConnector::ensureConnected() {
+    std::unique_lock lock(this->socketMutex);
+    if (this->socket) {
+        return true;
+    }
+    if (Clock::now() < this->nextConnectAttempt) {
+        return false;
     }
     IQRF_LOG(log::Level::Debug) << "Opening TCP connection to: " << this->config.host << ":" << this->config.port;
-
-    std::chrono::seconds currentTimeout(2);
-    const std::chrono::seconds maxTimeout(64);
-
-    while (true) {
-        try {
-            this->connecting = true;
-            auto endpoints = this->resolver.resolve(config.host, std::to_string(config.port));
-
-            boost::system::error_code ec;
-            bool connected = false;
-            bool timedOut = false;
-
-            this->timer.expires_after(currentTimeout);
-            this->timer.async_wait([&](const boost::system::error_code &ec) {
-                if (!ec && !connected) {
-                    timedOut = true;
-                    this->socket.close();
-                }
-            });
-
-            boost::asio::async_connect(
-                this->socket,
-                endpoints,
-                [&](const boost::system::error_code &error, const boost::asio::ip::tcp::endpoint &) {
-                    ec = error;
-                    connected = !error;
-                    this->timer.cancel();
-                }
-            );
-
-            this->ioContext.restart();
-            this->ioContext.run();
-
-            if (timedOut) {
-                throw std::runtime_error("Connection timed out");
-            }
-            if (ec) {
-                throw std::runtime_error("Connection failed: " + ec.message());
-            }
-
-            IQRF_LOG(log::Level::Info) << "TCP connection established to: "
-                << this->config.host << ":" << this->config.port;
-            this->connecting = false;
-            return;
-        } catch (const std::exception &e) {
-            IQRF_LOG(log::Level::Warning) << "Connection attempt failed: " << e.what()
-                << ". Retrying in " << currentTimeout.count() << " seconds.";
-
-            boost::asio::steady_timer delay(ioContext);
-            delay.expires_after(currentTimeout);
-            delay.wait();
-
-            // exponential backoff
-            if (currentTimeout < maxTimeout) {
-                currentTimeout *= 2;
-            } else {
-                currentTimeout = maxTimeout;
-            }
-        }
+    try {
+        this->socket = this->socketFactory(this->config);
+    } catch (const std::exception &e) {
+        IQRF_LOG(log::Level::Warning) << "Connection attempt failed: " << e.what() << ". Retrying in "
+            << this->reconnectDelay.count() << " ms.";
+        this->nextConnectAttempt = Clock::now() + this->reconnectDelay;
+        this->reconnectDelay = std::min(this->reconnectDelay * 2, this->config.maxReconnectDelay);
+        return false;
     }
+    if (!this->socket) {
+        throw std::logic_error("TCP socket factory returned null socket");
+    }
+    IQRF_LOG(log::Level::Info) << "TCP connection established to: " << this->config.host << ":" << this->config.port;
+    this->reconnectDelay = this->config.reconnectDelay;
+    ++this->connectionGeneration;
+    this->connected = true;
+    return true;
 }
 
-void TcpConnector::disconnect() {
-    if (this->socket.is_open()) {
-        IQRF_LOG(log::Level::Debug) << "Closing TCP connection to: "
-            << this->config.host << ":" << this->config.port;
-        boost::system::error_code ec;
-        this->socket.close(ec);
-        if (ec) {
-            IQRF_LOG(log::Level::Error) << "Failed to close TCP socket: " << ec.message();
-        } else {
-            IQRF_LOG(log::Level::Debug) << "TCP connection closed successfully.";
-        }
+void TcpConnector::disconnect(const uint64_t generation, const char *reason) {
+    std::unique_lock lock(this->socketMutex);
+    if (!this->socket || this->connectionGeneration != generation) {
+        // Already handled by another thread
+        return;
     }
-}
-
-void TcpConnector::reconnect() {
-    this->disconnect();
-    this->connect();
+    IQRF_LOG(log::Level::Warning) << "TCP connection to " << this->config.host << ":" << this->config.port
+        << " lost: " << reason << ". Reconnecting in " << this->reconnectDelay.count() << " ms.";
+    this->socket.reset();
+    this->connected = false;
+    this->nextConnectAttempt = Clock::now() + this->reconnectDelay;
 }
 
 }  // namespace iqrf::connector::tcp

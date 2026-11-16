@@ -45,7 +45,7 @@ void signalHandler(const int signal) {
 }
 
 /**
- * Response handler for the IQRF UART connector
+ * Response handler for the IQRF TCP connector
  * @param response Response received from the IQRF module
  * @return 0 on success, -1 on error
  */
@@ -89,7 +89,7 @@ int main(int argc, char *argv[]) {
 
         iqrf::log::Logger::logLevel = iqrf::log::Level::Trace;
         iqrf::log::Logger logger;
-        IQRF_LOG(iqrf::log::Level::Info) << "IQRF UART Connector Example";
+        IQRF_LOG(iqrf::log::Level::Info) << "IQRF TCP Connector Example";
 
         if (!vm.count("host")) {
             throw std::logic_error("TCP host name is required.");

@@ -11,42 +11,59 @@
 
 #pragma once
 
+#include <atomic>
+#include <chrono>
+#include <cstddef>
 #include <cstdint>
+#include <functional>
+#include <memory>
+#include <shared_mutex>
 #include <stdexcept>
 #include <vector>
 
-#include <boost/asio.hpp>
-#include <boost/core/ignore_unused.hpp>
-
 #include "iqrf/connector/IConnector.h"
-#include "iqrf/connector/ConnectorUtils.h"
+#include "iqrf/connector/tcp/ITcpSocket.h"
 #include "iqrf/connector/tcp/TcpConfig.h"
-#include "iqrf/log/Logging.h"
 
 namespace iqrf::connector::tcp {
 
-namespace log = ::iqrf::log;
-
 /**
  * IQRF TCP connector
+ *
+ * Transfers raw data (e.g. DPA messages) to and from the TCP server. The connection is (re)established
+ * on demand by send() and receive() with an exponential backoff between failed attempts.
  */
 class TcpConnector : public IConnector {
  public:
+    /// Creates the connected TCP socket according to the configuration
+    using SocketFactory = std::function<std::unique_ptr<ITcpSocket>(const TcpConfig &config)>;
+
     /**
-     * Constructs the IQRF TCP connector
+     * Constructs the IQRF TCP connector and attempts to connect to the TCP server
+     *
+     * The constructor does not fail if the server is not reachable, the connection is retried later.
+     *
      * @param config TCP connector configuration
+     * @param socketFactory Creates the TCP socket (e.g. for testing), the platform socket is used if null
      */
-    explicit TcpConnector(TcpConfig config);
+    explicit TcpConnector(TcpConfig config, SocketFactory socketFactory = nullptr);
 
     /**
      * Destructs the IQRF TCP connector
      */
     ~TcpConnector() override;
 
+    // Disable copying and moving
+    TcpConnector(const TcpConnector&) = delete;
+    TcpConnector& operator=(const TcpConnector&) = delete;
+    TcpConnector(TcpConnector&&) = delete;
+    TcpConnector& operator=(TcpConnector&&) = delete;
+
     // Basic state
 
     /**
      * Get the current state of the connector.
+     * @return Ready if connected to the TCP server, NotReady otherwise
      */
     State getState() const override;
 
@@ -54,11 +71,16 @@ class TcpConnector : public IConnector {
 
     /**
      * Send the data message via the connector.
+     * @throws std::runtime_error if the connector is not connected or the data cannot be sent
      */
     void send(const std::vector<uint8_t> &data) override;
 
     /**
      * Read the data synchronously from the connector.
+     *
+     * Waits up to the receive timeout for the data. The connection is reestablished if it has been lost.
+     *
+     * @return Received data, empty if no data has been received within the receive timeout
      */
     std::vector<uint8_t> receive() override;
 
@@ -107,8 +129,10 @@ class TcpConnector : public IConnector {
      * @param target specifies what the uploaded data contain.
      * @param data is the actual data to be uploaded.
      */
-    void upload(const ProgrammingTarget target, const std::vector<uint8_t> &data) override {
-        boost::ignore_unused(target, data);
+    void upload(
+        [[maybe_unused]] const ProgrammingTarget target,
+        [[maybe_unused]] const std::vector<uint8_t> &data
+    ) override {
         throw std::runtime_error("Not implemented");
     }
 
@@ -117,8 +141,7 @@ class TcpConnector : public IConnector {
      *
      * @param target specifies which data shall be downloaded.
      */
-    std::vector<uint8_t> download(const ProgrammingTarget target) override {
-        boost::ignore_unused(target);
+    std::vector<uint8_t> download([[maybe_unused]] const ProgrammingTarget target) override {
         throw std::runtime_error("Not implemented");
     }
 
@@ -128,42 +151,50 @@ class TcpConnector : public IConnector {
      * @param target specifies which data shall be downloaded.
      * @param address specifies the Flash or EEPROM address from which the data will be downloaded.
      */
-    std::vector<uint8_t> download(const ProgrammingTarget target, const uint16_t address) override {
-        boost::ignore_unused(target, address);
+    std::vector<uint8_t> download(
+        [[maybe_unused]] const ProgrammingTarget target,
+        [[maybe_unused]] const uint16_t address
+    ) override {
         throw std::runtime_error("Not implemented");
     }
 
- protected:
-    /**
-     * Connects to the TCP server.
-     * @throws std::runtime_error if connection fails
-     */
-    void connect();
-
-    /**
-     * Disconnects from the TCP server.
-     */
-    void disconnect();
-
-    /**
-     * Reconnects to the TCP server.
-     * This method will attempt to reconnect if the connection is lost.
-     */
-    void reconnect();
-
  private:
+    /**
+     * Connects to the TCP server if not connected and the reconnection delay has elapsed
+     * @return true if connected
+     */
+    bool ensureConnected();
+
+    /**
+     * Closes the broken connection and schedules the reconnection
+     * @param generation Generation of the broken connection, nothing is done if it has already been replaced
+     * @param reason Reason of the disconnection
+     */
+    void disconnect(uint64_t generation, const char *reason);
+
+    /// Maximum time to wait for data in receive()
+    static constexpr std::chrono::milliseconds RECEIVE_TIMEOUT{100};
+    /// Maximum time to write the data
+    static constexpr std::chrono::milliseconds WRITE_TIMEOUT{1000};
+    /// Maximum number of bytes read from the socket at once
+    static constexpr std::size_t READ_SIZE = 1024;
+
     /// TCP configuration
     TcpConfig config;
-    /// Boost ASIO IO context
-    boost::asio::io_context ioContext;
-    /// TCP socket for communication
-    boost::asio::ip::tcp::socket socket;
-    /// TCP resolver for resolving hostnames
-    boost::asio::ip::tcp::resolver resolver;
-    /// Timer for asynchronous operations
-    boost::asio::steady_timer timer;
-    /// Flag indicating whether the connector is connecting
-    std::atomic_bool connecting = false;
+    /// Creates the TCP socket
+    SocketFactory socketFactory;
+    /// Socket of the current connection, null if disconnected
+    std::unique_ptr<ITcpSocket> socket;
+    /// Guards the socket: shared for reading and writing, exclusive for (re)connecting and disconnecting
+    std::shared_mutex socketMutex;
+    /// Generation of the current connection, incremented on each established connection
+    uint64_t connectionGeneration = 0;
+    /// Whether the connector is connected (readable without locking)
+    std::atomic_bool connected = false;
+    /// Time point of the next connection attempt
+    std::chrono::steady_clock::time_point nextConnectAttempt;
+    /// Delay after the next failed connection attempt
+    std::chrono::milliseconds reconnectDelay;
 };
 
 }  // namespace iqrf::connector::tcp

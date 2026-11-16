@@ -11,8 +11,8 @@
 
 #pragma once
 
+#include <chrono>
 #include <cstdint>
-#include <optional>
 #include <string>
 #include <utility>
 
@@ -27,6 +27,12 @@ class TcpConfig {
     std::string host;
     /// TCP port number
     uint16_t port = 10000;
+    /// Maximum time to establish the connection to a single resolved address
+    std::chrono::milliseconds connectTimeout{5000};
+    /// Delay before the first reconnection attempt, doubled after each failed attempt
+    std::chrono::milliseconds reconnectDelay{1000};
+    /// Maximum delay between reconnection attempts
+    std::chrono::milliseconds maxReconnectDelay{64000};
 
     /**
      * Constructs the TCP connector configuration

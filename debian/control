@@ -31,7 +31,7 @@ Depends:
 Description: IQRF C++ libraries - development files
  Metapackage for IQRF libraries for C++.
 
-Package: libiqrf-log0.2
+Package: libiqrf-log0.3
 Section: libs
 Architecture: any
 Multi-Arch: same
@@ -43,7 +43,7 @@ Package: libiqrf-log-dev
 Section: libdevel
 Architecture: any
 Multi-Arch: same
-Depends: libiqrf-log0.2 (= ${binary:Version}), ${misc:Depends}
+Depends: libiqrf-log0.3 (= ${binary:Version}), ${misc:Depends}
 Description: IQRF C++ logging library - development files
  IQRF logging library for C++.
  .
@@ -52,7 +52,7 @@ Description: IQRF C++ logging library - development files
 Package: libiqrf-log-examples
 Section: misc
 Architecture: any
-Depends: libiqrf-log0.2 (= ${binary:Version}), ${shlibs:Depends}, ${misc:Depends}
+Depends: libiqrf-log0.3 (= ${binary:Version}), ${shlibs:Depends}, ${misc:Depends}
 Description: IQRF C++ logging library - example files
  IQRF logging library for C++.
  .
@@ -63,7 +63,7 @@ Section: libdevel
 Architecture: any
 Multi-Arch: same
 Depends:
- libiqrf-gpio0.2 (= ${binary:Version}),
+ libiqrf-gpio0.3 (= ${binary:Version}),
  libiqrf-log-dev (= ${binary:Version}),
  libgpiod-dev [linux-any],
  pkgconf [linux-any] | pkg-config [linux-any],
@@ -76,13 +76,13 @@ Description: IQRF C++ GPIO library - development files
 Package: libiqrf-gpio-examples
 Section: misc
 Architecture: any
-Depends: libiqrf-gpio0.2 (= ${binary:Version}), ${shlibs:Depends}, ${misc:Depends}
+Depends: libiqrf-gpio0.3 (= ${binary:Version}), ${shlibs:Depends}, ${misc:Depends}
 Description: IQRF C++ GPIO library - example files
  IQRF GPIO library for C++.
  .
  This package contains example files and demonstration programs.
 
-Package: libiqrf-gpio0.2
+Package: libiqrf-gpio0.3
 Section: libs
 Architecture: any
 Multi-Arch: same
@@ -96,7 +96,7 @@ Architecture: any
 Multi-Arch: same
 Depends:
  libiqrf-gpio-dev (= ${binary:Version}),
- libiqrf-gpio-mock0.2 (= ${binary:Version}),
+ libiqrf-gpio-mock0.3 (= ${binary:Version}),
  ${misc:Depends}
 Description: IQRF C++ GPIO mock library - development files
  GPIO mock for testing of software using IQRF GPIO library for C++.
@@ -104,7 +104,7 @@ Description: IQRF C++ GPIO mock library - development files
  This package contains files for development and static libraries.
  The GpioMock.h header is provided by libiqrf-gpio-dev package.
 
-Package: libiqrf-gpio-mock0.2
+Package: libiqrf-gpio-mock0.3
 Section: libs
 Architecture: any
 Multi-Arch: same
@@ -117,7 +117,7 @@ Section: libdevel
 Architecture: any
 Multi-Arch: same
 Depends:
- libiqrf-connector0.2 (= ${binary:Version}),
+ libiqrf-connector0.3 (= ${binary:Version}),
  libiqrf-gpio-dev (= ${binary:Version}),
  libiqrf-log-dev (= ${binary:Version}),
  libboost-dev,
@@ -131,13 +131,13 @@ Description: IQRF C++ TR connector library - development files
 Package: libiqrf-connector-examples
 Section: misc
 Architecture: any
-Depends: libiqrf-connector0.2 (= ${binary:Version}), ${shlibs:Depends}, ${misc:Depends}
+Depends: libiqrf-connector0.3 (= ${binary:Version}), ${shlibs:Depends}, ${misc:Depends}
 Description: IQRF C++ TR connector library - example files
  IQRF TR connector library for C++ for SPI, TCP, UART and USB CDC.
  .
  This package contains example files and demonstration programs.
 
-Package: libiqrf-connector0.2
+Package: libiqrf-connector0.3
 Section: libs
 Architecture: any
 Multi-Arch: same

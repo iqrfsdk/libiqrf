@@ -15,7 +15,7 @@
 cmake_minimum_required(VERSION 3.18)
 
 project(libiqrf
-    VERSION 0.2.0
+    VERSION 0.3.0
     DESCRIPTION "IQRF C/C++ library"
     HOMEPAGE_URL "https://gitlab.iqrf.org/open-source/iqrf-sdk/libiqrf"
     LANGUAGES C CXX

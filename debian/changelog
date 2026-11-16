@@ -1,3 +1,12 @@
+libiqrf (0.3.0) stable; urgency=medium
+
+  * Debian packaging: require pkg-config for libgpiod version detection
+  * Debian packaging: bump CMake build dependency, do not require GTest with nocheck
+  * Connector[TCP]: replace Boost.Asio with platform sockets
+  * CMake: bump version to 0.3.0
+
+ -- Roman Ondráček <mail@romanondracek.cz>  Mon, 16 Nov 2026 07:56:17 +0100
+
 libiqrf (0.2.0) stable; urgency=medium
 
   * Connector: restore GPIOs when constructor fails

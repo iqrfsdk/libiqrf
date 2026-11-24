@@ -55,6 +55,8 @@ option(BUILD_EXAMPLES "Build examples" ON)
 option(BUILD_STATIC "Build static library" OFF)
 option(BUILD_SHARED "Build shared library" ON)
 option(CODE_COVERAGE "Enable coverage reporting" OFF)
+option(BUILD_FUZZERS "Build libFuzzer fuzz targets (requires Clang)" OFF)
+set(FUZZ_SANITIZERS "address,undefined" CACHE STRING "Sanitizers used for the fuzz targets and the instrumented libraries")
 
 if (NOT BUILD_STATIC AND NOT BUILD_SHARED)
     message(FATAL_ERROR "At least one of BUILD_STATIC or BUILD_SHARED must be ON")
@@ -87,6 +89,24 @@ if (CODE_COVERAGE)
     set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${COVERAGE_FLAGS}")
 endif()
 
+if (BUILD_FUZZERS)
+    if (NOT CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+        message(FATAL_ERROR "BUILD_FUZZERS requires Clang (e.g. -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++)")
+    endif ()
+    # Libraries are instrumented for coverage feedback, the fuzzer runtime is linked to the fuzz targets only
+    add_compile_options(
+        -fsanitize=fuzzer-no-link,${FUZZ_SANITIZERS}
+        -fno-sanitize-recover=all
+        -fno-omit-frame-pointer
+        -U_FORTIFY_SOURCE
+    )
+    add_link_options(-fsanitize=${FUZZ_SANITIZERS})
+    if (FUZZ_SANITIZERS MATCHES "address")
+        # Detection of stack use after return halves the speed, the fake stack is collected on every thrown exception
+        add_compile_options(-fsanitize-address-use-after-return=never)
+    endif ()
+endif ()
+
 add_subdirectory(src)
 
 if (BUILD_TESTS)
@@ -96,6 +116,10 @@ endif()
 if (BUILD_EXAMPLES)
 	add_subdirectory(examples)
 endif()
+
+if (BUILD_FUZZERS)
+    add_subdirectory(fuzz)
+endif ()
 
 get_property(IQRF_EXPORTABLE_TARGETS GLOBAL PROPERTY IQRF_EXPORTABLE_TARGETS)
 

@@ -44,6 +44,30 @@ abi-check:
     - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
     - if: $CI_COMMIT_TAG =~ /^v\d+\.\d+\.\d+$/
 
+fuzz:
+  stage: test
+  variables:
+    FUZZ_TIME: 60
+  before_script:
+    - apt-get update
+    - apt-get install -y --no-install-recommends clang libclang-rt-dev
+  script:
+    - make fuzz
+    - ctest --test-dir build-fuzz/fuzz --output-on-failure
+    - |
+      for target in CdcProtocol Hdlc SpiProtocol TrInfo; do
+        mkdir -p "fuzz-artifacts/${target}" "fuzz-corpus/${target}"
+        build-fuzz/bin/fuzz_${target} -max_total_time="${FUZZ_TIME}" -print_final_stats=1 \
+          -artifact_prefix="fuzz-artifacts/${target}/" "fuzz-corpus/${target}" "fuzz/corpus/${target}"
+      done
+  artifacts:
+    when: on_failure
+    paths:
+      - fuzz-artifacts/
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+
 deploy-docs:
   stage: deploy-docs
   environment:

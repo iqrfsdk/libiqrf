@@ -13,7 +13,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-.PHONY: build clean coverage deb-package lint test
+.PHONY: build clean coverage deb-package fuzz lint test
+
+FUZZ_CC ?= clang
+FUZZ_CXX ?= clang++
 
 coverage:
 	rm -rf coverage
@@ -29,6 +32,11 @@ build:
 		-DBUILD_SHARED:BOOL=ON -DBUILD_STATIC:BOOL=ON -DCMAKE_EXPORT_COMPILE_COMMANDS:BOOL=ON
 	cmake --build build
 
+fuzz:
+	cmake -Bbuild-fuzz -H. -DCMAKE_BUILD_TYPE=RelWithDebInfo -DCMAKE_C_COMPILER=$(FUZZ_CC) -DCMAKE_CXX_COMPILER=$(FUZZ_CXX) \
+		-DBUILD_FUZZERS:BOOL=ON -DBUILD_TESTS:BOOL=OFF -DBUILD_EXAMPLES:BOOL=OFF
+	cmake --build build-fuzz
+
 lint:
 	cpplint --quiet --recursive include/ src/ examples/ tests/ || true
 	cppcheck --enable=all --check-level=exhaustive --inconclusive -I include/ --suppress=missingIncludeSystem --inline-suppr --quiet src/ examples/
@@ -37,4 +45,4 @@ test:
 	ctest -V --test-dir build/tests
 
 clean:
-	rm -rf build
+	rm -rf build build-fuzz

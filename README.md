@@ -35,6 +35,7 @@ This repository contains the IQRF libraries for C/C++.
 
 ### Testing
 - [GTest](https://google.github.io/googletest/)
+- [Clang](https://clang.llvm.org/) with [libFuzzer](https://llvm.org/docs/LibFuzzer.html) (fuzzing only)
 
 ## Build
 
@@ -52,14 +53,18 @@ cmake --build build
 |-------------------------|---------|---------|----------------------------------|
 | `BUILD_DOCS`            | boolean | False   | Build documentation with Doxygen |
 | `BUILD_EXAMPLES`        | boolean | True    | Build examples                   |
+| `BUILD_FUZZERS`         | boolean | False   | Build libFuzzer fuzz targets²    |
 | `BUILD_SHARED`          | boolean | True    | Build shared libraries           |
 | `BUILD_STATIC`          | boolean | False   | Build static libraries           |
 | `BUILD_TESTING_SUPPORT` | boolean | True    | Build testing support (mocks)¹   |
 | `BUILD_TESTS`           | boolean | True    | Build tests                      |
 | `CODE_COVERAGE`         | boolean | False   | Enable code coverage             |
+| `FUZZ_SANITIZERS`       | string  | `address,undefined` | Sanitizers used for fuzzing |
 | `USE_CCACHE`            | boolean | False   | Use ccache for compilation       |
 
 ¹ Always enabled when `BUILD_TESTS` is enabled.
+
+² Requires Clang, all libraries are instrumented with the sanitizers.
 
 ## Test
 
@@ -68,3 +73,16 @@ cd build/test/
 ctest
 ```
 
+## Fuzzing
+
+Fuzz targets in `fuzz/` exercise the parsers of the data received from the devices (HDLC frames, USB CDC frames,
+SPI responses and the TR module information).
+
+```bash
+make fuzz  # or e.g. make fuzz FUZZ_CC=clang-21 FUZZ_CXX=clang++-21
+# Replay the seed corpora
+ctest --test-dir build-fuzz/fuzz
+# Fuzz the target, new inputs are stored in the working corpus directory
+mkdir -p corpus/CdcProtocol
+build-fuzz/bin/fuzz_CdcProtocol corpus/CdcProtocol fuzz/corpus/CdcProtocol
+```
